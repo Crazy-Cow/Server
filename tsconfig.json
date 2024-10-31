@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "ES6", // ES6로 컴파일
+        "module": "CommonJS", // CommonJS 모듈로 설정
+        "baseUrl": "src", // 모듈 경로의 기준
+        "outDir": "build", // 컴파일된 파일의 출력 경로
+        "sourceMap": true, // 소스 맵 생성
+        "esModuleInterop": true, // ES 모듈과 CommonJS 간의 호환성 제공
+        "allowSyntheticDefaultImports": true, // 기본 가져오기를 허용
+        "moduleResolution": "node", // Node.js 모듈 해석 방식 사용,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "typeRoots": ["src/@types", "./node_modules/@types"]
+    },
+    "exclude": ["node_modules", "**/*.spec.ts"] // 제외할 파일 및 디렉토리
+}
