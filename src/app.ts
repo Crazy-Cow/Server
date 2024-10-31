@@ -18,14 +18,13 @@ app.get('/', async (req: Request, res: Response) => {
     res.send('Typescript + Node.js + Express Server + MongoDB')
 })
 
-app.listen(port, async () => {
-    await AppDataSource.initialize()
-        .then(() => {
-            console.log('[1] (mysql) DB Connected')
+AppDataSource.initialize()
+    .then(() => {
+        console.log('[1] (mysql) DB Connected')
+        app.listen(port, () => {
+            console.log(`[2] Server runs at <https://localhost>:${port}`)
         })
-        .catch((err) => {
-            console.error('[Error] (mysql) DB Connected', err)
-        })
-
-    console.log(`[2] Server runs at <https://localhost>:${port}`)
-})
+    })
+    .catch((err) => {
+        console.error('[Error] (mysql) DB Connection Failed:', err)
+    })
