@@ -1,3 +1,6 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import { Post, User } from '../models'
@@ -12,7 +15,7 @@ export const AppDataSource = new DataSource({
     // synchronize: true,
     // logging: false,
     entities: [Post, User],
-    migrations: [__dirname + '/../db/migrations/*.{js,ts}'],
+    migrations: [__dirname + '/migrations/*.{js,ts}'],
 })
 
 const userRepository = AppDataSource.getRepository(User)
