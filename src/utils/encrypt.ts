@@ -4,7 +4,8 @@ const SALT_ROUNDS = Number(process.env.ENCRYPT_SALT_ROUNDS)
 
 export const encryptPassword = async (password) => {
     try {
-        return await bcrypt.hash(password, SALT_ROUNDS)
+        const result = await bcrypt.hash(password, SALT_ROUNDS)
+        return result
     } catch (error) {
         throw new Error('[Error] encryptPassword')
     }
@@ -12,7 +13,8 @@ export const encryptPassword = async (password) => {
 
 export const comparePasswords = async (password, hashedPassword) => {
     try {
-        return await bcrypt.compare(password, hashedPassword)
+        const result = await bcrypt.compare(password, hashedPassword)
+        return result
     } catch (error) {
         throw new Error('[Error] comparePasswords')
     }

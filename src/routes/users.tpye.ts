@@ -1,7 +1,7 @@
 export interface UserSignUpBody {
     nickname: string
     password: string
-    password_confirm: string
+    passwordConfirm: string
 }
 
 export interface UserSignInBody {

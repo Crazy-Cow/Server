@@ -11,11 +11,11 @@ const createValidators =
 const nicknameValidators = createValidators<string>([
     {
         condition: (val) => val.length >= 3,
-        msg: `'nickname' 3글자 이상 입력하세요`,
+        msg: "'nickname' 3글자 이상 입력하세요",
     },
     {
         condition: (val) => /^[a-zA-Z0-9]+$/.test(val),
-        msg: `'nickname' (a-z, A-Z, 0-9)만 포함하세요`,
+        msg: "'nickname' (a-z, A-Z, 0-9)만 포함하세요",
     },
 ])
 
@@ -25,11 +25,11 @@ const passwordValidators = createValidators<{
 }>([
     {
         condition: ({ password }) => password.length >= 4,
-        msg: `'password' 4글자 이상 입력하세요`,
+        msg: "'password' 4글자 이상 입력하세요",
     },
     {
         condition: ({ password, nickname }) => !password.includes(nickname),
-        msg: `'password' 닉네임이 포함되면 안돼요`,
+        msg: "'password' 닉네임이 포함되면 안돼요",
     },
 ])
 

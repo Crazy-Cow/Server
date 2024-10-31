@@ -8,30 +8,30 @@ const router = Router()
 
 router.get('/list', async (_, res: Response) => {
     const result = await repository.post.find({
-        select: ['title', 'created_at'],
+        select: ['title', 'createdAt'],
         relations: ['user'],
-        order: { created_at: 'DESC' },
+        order: { createdAt: 'DESC' },
     })
 
     const formatted = result.map((post) => ({
         title: post.title,
         nickname: post.user.name,
-        created_at: post.created_at,
+        createdAt: post.createdAt,
     }))
 
     res.json({ data: formatted })
 })
 
-router.get('/:post_id', async (req: Request, res: Response): Promise<void> => {
-    const { post_id } = req.params
-    const postId = Number(post_id)
-    if (!postId) {
-        res.status(404).json(createError({ msg: '유효하지 않는 post_id 에요' }))
+router.get('/:postId', async (req: Request, res: Response): Promise<void> => {
+    const { postId } = req.params
+    const postID = Number(postId)
+    if (!postID) {
+        res.status(404).json(createError({ msg: '유효하지 않는 postId 에요' }))
         return
     }
 
     const post = await repository.post.findOne({
-        where: { id: postId },
+        where: { id: postID },
         relations: ['user'],
     })
 
@@ -44,7 +44,7 @@ router.get('/:post_id', async (req: Request, res: Response): Promise<void> => {
         title: post.title,
         content: post.content,
         nickname: post.user?.name ?? '탈퇴 유저',
-        created_at: post.created_at,
+        createdAt: post.createdAt,
     })
 })
 
@@ -56,10 +56,10 @@ router.post(
         res: Response
     ): Promise<void> => {
         const { title, content } = req.body
-        const user_id = req.user_id
+        const userId = req.user_id
 
         const existingUser = await repository.user.findOne({
-            where: { id: user_id },
+            where: { id: userId },
         })
 
         if (!existingUser) {
@@ -79,7 +79,7 @@ router.post(
                 id: newPost.id,
                 title,
                 content,
-                user_name: existingUser.name,
+                userName: existingUser.name,
             })
         } catch (error) {
             console.error(error)
@@ -89,37 +89,40 @@ router.post(
 )
 
 router.delete(
-    '/:post_id',
+    '/:postId',
     validateAuth,
-    async (req: Request, res: Response): Promise<any> => {
-        const { post_id } = req.params
-        const postId = Number(post_id)
-        if (!postId) {
+    async (req: Request, res: Response): Promise<void> => {
+        const { postId } = req.params
+        const postID = Number(postId)
+        if (!postID) {
             res.status(404).json(
-                createError({ msg: '유효하지 않는 post_id 에요' })
+                createError({ msg: '유효하지 않는 postId 에요' })
             )
             return
         }
 
         const post = await repository.post.findOne({
-            where: { id: postId },
+            where: { id: postID },
             relations: ['user'],
         })
 
         if (!post) {
-            return res
-                .status(404)
-                .json(createError({ msg: '게시글을 찾을 수 없어요' }))
+            res.status(404).json(
+                createError({ msg: '게시글을 찾을 수 없어요' })
+            )
+            return
         } else if (!post.user) {
-            return res.status(404).json(createError({ msg: '미가입 유저에요' }))
+            res.status(404).json(createError({ msg: '미가입 유저에요' }))
+            return
         }
 
         const userId = req.user_id
 
         if (post.user.id !== userId) {
-            return res
-                .status(403)
-                .json(createError({ msg: '게시글 삭제 권한이 없습니다' }))
+            res.status(403).json(
+                createError({ msg: '게시글 삭제 권한이 없습니다' })
+            )
+            return
         }
 
         await repository.post.delete(post.id)
@@ -128,41 +131,44 @@ router.delete(
 )
 
 router.put(
-    '/:post_id',
+    '/:postId',
     validateAuth,
     async (
-        req: Request<{ post_id: string }, object, PostUpdateBody>,
+        req: Request<{ postId: string }, object, PostUpdateBody>,
         res: Response
-    ): Promise<any> => {
-        const { post_id } = req.params
-        const postId = Number(post_id)
-        if (!postId) {
+    ): Promise<void> => {
+        const { postId } = req.params
+        const postID = Number(postId)
+        if (!postID) {
             res.status(404).json(
-                createError({ msg: '유효하지 않는 post_id 에요' })
+                createError({ msg: '유효하지 않는 postId 에요' })
             )
             return
         }
 
         const { title, content } = req.body
-        const user_id = req.user_id
+        const userId = req.user_id
 
         const post = await repository.post.findOne({
-            where: { id: postId },
+            where: { id: postID },
             relations: ['user'],
         })
 
         if (!post) {
-            return res
-                .status(404)
-                .json(createError({ msg: '게시글을 찾을 수 없어요' }))
+            res.status(404).json(
+                createError({ msg: '게시글을 찾을 수 없어요' })
+            )
+            return
         } else if (!post.user) {
-            return res.status(404).json(createError({ msg: '미가입 유저에요' }))
+            res.status(404).json(createError({ msg: '미가입 유저에요' }))
+            return
         }
 
-        if (post.user.id !== user_id) {
-            return res
-                .status(403)
-                .json(createError({ msg: '게시글 수정 권한이 없습니다' }))
+        if (post.user.id !== userId) {
+            res.status(403).json(
+                createError({ msg: '게시글 수정 권한이 없습니다' })
+            )
+            return
         }
 
         post.title = title

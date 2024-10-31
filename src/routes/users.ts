@@ -24,8 +24,8 @@ router.post(
             return
         }
 
-        const valid = await comparePasswords(password, user.hashed_pw)
-        if (!valid) {
+        const isValidPassword = await comparePasswords(password, user.hashedPw)
+        if (!isValidPassword) {
             res.status(400).json(
                 createError({ msg: '닉네임 또는 패스워드를 확인해주세요.' })
             )
@@ -52,23 +52,23 @@ router.post(
         req: Request<object, object, UserSignUpBody>,
         res: Response
     ): Promise<void> => {
-        const { nickname, password, password_confirm } = req.body
+        const { nickname, password, passwordConfirm } = req.body
 
-        if (password !== password_confirm) {
+        if (password !== passwordConfirm) {
             res.status(400).json(createError({ msg: '비밀번호/확인 불일치' }))
             return
         }
 
-        const encrypted = await encryptPassword(password)
+        const encryptedPassword = await encryptPassword(password)
 
         const newUser = repository.user.create({
             name: nickname,
-            hashed_pw: encrypted,
+            hashedPw: encryptedPassword,
         })
 
         const nicknameValid = validateField('nickname', nickname)
         const passwordValid = validateField('password', {
-            password: encrypted,
+            password: encryptedPassword,
             nickname,
         })
 
@@ -95,8 +95,8 @@ router.post(
 
             await repository.user.save(newUser)
             res.status(201).send({})
-        } catch (e) {
-            console.error(e)
+        } catch (error) {
+            console.error(error)
             res.status(500).json(createError({ msg: '서버 오류' }))
         }
     }

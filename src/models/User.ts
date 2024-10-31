@@ -10,7 +10,7 @@ export class User {
     name: string
 
     @Column({ type: 'varchar', length: 255 })
-    hashed_pw: string
+    hashedPw: string
 
     @OneToMany(() => Post, (post) => post.user)
     posts: Post[]

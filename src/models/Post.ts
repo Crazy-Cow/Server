@@ -23,8 +23,8 @@ export class Post {
     user: User
 
     @CreateDateColumn({ type: 'timestamp' })
-    created_at: Date
+    createdAt: Date
 
     @UpdateDateColumn({ type: 'timestamp' })
-    modified_at: Date
+    modifiedAt: Date
 }
