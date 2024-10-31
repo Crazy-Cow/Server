@@ -1,0 +1,67 @@
+{
+    "name": "express-server",
+    "version": "1.0.0",
+    "description": "",
+    "main": "src/app.ts",
+    "scripts": {
+        "generate-swagger": "ts-node ./src/docs/generate.ts",
+        "lint": "eslint -c ./.eslintrc \"./src/**/*.ts\"",
+        "test": "npm run lint && echo \"No tests specified\" && exit 0",
+        "dev": "nodemon",
+        "build": "rimraf ./build && tsc",
+        "prd": "npm run build && pm2 start pm2.config.json",
+        "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --dataSource ./src/db/index.ts",
+        "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create ./src/db/migrations/Migration",
+        "migration:generate": "npm run typeorm migration:generate ./src/db/migrations/Migration",
+        "migration:run": "npm run typeorm migration:run",
+        "migration:revert": "npm run typeorm migration:revert",
+        "prepare": "husky install .husky"
+    },
+    "lint-staged": {
+        "*.{ts,tsx}": [
+            "eslint --fix"
+        ]
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt": "^5.1.1",
+        "class-validator": "^0.14.1",
+        "cookie-parser": "^1.4.7",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.21.1",
+        "jsonwebtoken": "^9.0.2",
+        "mongoose": "^8.7.3",
+        "mysql": "^2.18.1",
+        "reflect-metadata": "^0.2.2",
+        "swagger-autogen": "^2.23.7",
+        "swagger-jsdoc": "^6.2.8",
+        "swagger-ui-express": "^5.0.1",
+        "tsconfig-paths": "^4.2.0",
+        "typeorm": "^0.3.20"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.17",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.8.2",
+        "@types/swagger-jsdoc": "^6.0.4",
+        "@types/swagger-ui-express": "^4.1.6",
+        "@typescript-eslint/parser": "^7.18.0",
+        "concurrently": "^9.0.1",
+        "eslint": "^8.57.1",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-config-airbnb-typescript": "^18.0.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-import": "^2.31.0",
+        "eslint-plugin-prettier": "^5.2.1",
+        "globals": "^15.11.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^15.2.10",
+        "nodemon": "^3.1.7",
+        "prettier": "^3.3.3",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.3"
+    }
+}

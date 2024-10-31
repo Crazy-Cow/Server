@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "CommonJS",
+        "baseUrl": "src",
+        "outDir": "build",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "typeRoots": ["src/@types", "./node_modules/@types"],
+        "resolveJsonModule": true
+    },
+    "exclude": ["node_modules", "**/*.spec.ts"]
+}
