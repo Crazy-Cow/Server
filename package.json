@@ -6,6 +6,7 @@
     "scripts": {
         "generate-swagger": "ts-node ./src/docs/generate.ts",
         "lint": "eslint -c ./.eslintrc \"./src/**/*.ts\"",
+        "test": "npm run lint && echo \"No tests specified\" && exit 0",
         "dev": "nodemon",
         "build": "rimraf ./build && tsc",
         "prd": "npm run build && pm2 start pm2.config.json",
@@ -13,7 +14,13 @@
         "migration:create": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:create ./src/db/migrations/Migration",
         "migration:generate": "npm run typeorm migration:generate ./src/db/migrations/Migration",
         "migration:run": "npm run typeorm migration:run",
-        "migration:revert": "npm run typeorm migration:revert"
+        "migration:revert": "npm run typeorm migration:revert",
+        "prepare": "husky install .husky"
+    },
+    "lint-staged": {
+        "*.{ts,tsx}": [
+            "eslint --fix"
+        ]
     },
     "keywords": [],
     "author": "",
@@ -41,7 +48,7 @@
         "@types/node": "^22.8.2",
         "@types/swagger-jsdoc": "^6.0.4",
         "@types/swagger-ui-express": "^4.1.6",
-        "@typescript-eslint/parser": "^8.12.2",
+        "@typescript-eslint/parser": "^7.18.0",
         "concurrently": "^9.0.1",
         "eslint": "^8.57.1",
         "eslint-config-airbnb-base": "^15.0.0",
@@ -50,6 +57,8 @@
         "eslint-plugin-import": "^2.31.0",
         "eslint-plugin-prettier": "^5.2.1",
         "globals": "^15.11.0",
+        "husky": "^8.0.0",
+        "lint-staged": "^15.2.10",
         "nodemon": "^3.1.7",
         "prettier": "^3.3.3",
         "ts-node": "^10.9.2",
