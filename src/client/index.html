@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Multiplayer Snake Game</title>
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <div id="gameContainer">
+            <div id="menu">
+                <button id="createRoom">Create Room</button>
+                <input
+                    type="text"
+                    id="roomCodeInput"
+                    placeholder="Enter Room Code"
+                />
+                <button id="joinRoom">Join Room</button>
+                <button id="startGame" style="display: none">Start Game</button>
+                <!-- 추가된 버튼 -->
+            </div>
+            <div id="roomCodeDisplay"></div>
+            <div id="gameCanvas"></div>
+            <!-- <div id="playerInfo"></div> -->
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+        <script src="game.js"></script>
+        <!-- 분리된 game.js 파일 추가 -->
+    </body>
+</html>

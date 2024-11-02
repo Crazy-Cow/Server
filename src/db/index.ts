@@ -16,6 +16,7 @@ export const AppDataSource = new DataSource({
     // logging: false,
     entities: [Post, User],
     migrations: [__dirname + '/migrations/*.{js,ts}'],
+    driver: require('mysql2'),
 })
 
 const userRepository = AppDataSource.getRepository(User)
