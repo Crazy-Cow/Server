@@ -1,5 +1,5 @@
-// import postRouter from './posts'
+import exampleRouter from './example'
 
 export default {
-    // post: postRouter,
+    example: exampleRouter,
 }

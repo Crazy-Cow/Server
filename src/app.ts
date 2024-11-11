@@ -5,7 +5,7 @@ import cors from 'cors'
 import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import routes from './routes'
-import { AppDataSource } from './db'
+import { connectDB } from './schemas'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
 
@@ -15,10 +15,10 @@ const port = process.env.PORT
 app.use(cors())
 app.use(cookieParser())
 app.use(express.json())
-app.use('/', routes)
+app.use('/example', routes.example)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-AppDataSource.initialize()
+connectDB()
     .then(() => {
         console.log('[1] (mysql) DB Connected')
         app.listen(port, () => {
