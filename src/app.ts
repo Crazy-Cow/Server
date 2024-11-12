@@ -20,9 +20,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 connectDB()
     .then(() => {
-        console.log('[1] (mysql) DB Connected')
+        console.log('[1] (mongoDB) DB Connected')
         app.listen(port, () => {
-            console.log(`[2] Server runs at <https://localhost>:${port}`)
+            console.log(`[2] Server runs at http://43.202.248.28/:${port}`)
         })
     })
     .catch((err) => {
