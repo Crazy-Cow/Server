@@ -1,5 +1,5 @@
 import { Response } from 'express'
-import StatusCode from 'constants/statusCode'
+import StatusCode from '../constants/statusCode'
 
 export interface ErrorResponse {
     msg: string

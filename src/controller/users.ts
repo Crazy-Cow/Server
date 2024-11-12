@@ -1,12 +1,12 @@
 import { Request, Response } from 'express'
 import { CreateUserRequest, CreateUserResponse } from './users.type'
-import userService from 'service/users'
-import StatusCode from 'constants/statusCode'
+import userService from '../service/users'
+import StatusCode from '../constants/statusCode'
 import {
     createError as createErrorRes,
     ErrorResponse,
     handleToCatchInternalServerError,
-} from 'utils/error'
+} from '../utils/error'
 
 export const createUserController = (
     req: Request<object, object, CreateUserRequest>,
