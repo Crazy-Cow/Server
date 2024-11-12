@@ -1,10 +1,5 @@
-import express from 'express'
-import postRouter from './posts'
-import userRouter from './users'
+import exampleRouter from './example'
 
-const router = express.Router()
-
-router.use('/posts', postRouter)
-router.use('/users', userRouter)
-
-export default router
+export default {
+    example: exampleRouter,
+}
