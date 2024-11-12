@@ -19,5 +19,6 @@
     "rules": {
         "prettier/prettier": ["error"],
         "no-param-reassign": ["error", { "props": false }],
+        "@typescript-eslint/lines-between-class-members": ["off"],
     },
 }
