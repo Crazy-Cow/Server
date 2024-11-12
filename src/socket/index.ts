@@ -13,7 +13,7 @@ class SocketImplement {
     private register = () => {
         this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_ENTER, this.handleRoomEnter)
         this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_LEAVE, this.handleRoomLeave)
-        this.logger('complete register')
+        this.logger('event handler register')
     }
 
     private handleRoomEnter = (args: SocketOnEvtData['room.enter']) => {
@@ -36,6 +36,6 @@ export function initSocket(io: Server): void {
 
     root.on('connection', (socket: Socket) => {
         const instance = new SocketImplement(socket)
-        instance.logger('connection')
+        instance.logger('complete connection')
     })
 }
