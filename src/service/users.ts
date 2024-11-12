@@ -1,4 +1,14 @@
-import { generateGuestNickName } from './users.util'
+import util from './users.util'
+
+export class User {
+    userId: string
+    nickName: string
+
+    constructor(userId: string, nickName: string) {
+        this.userId = userId
+        this.nickName = nickName
+    }
+}
 
 class UserPool {
     users: User[] = []
@@ -20,42 +30,44 @@ class UserPool {
     }
 }
 
-class User {
-    userId: string
-    nickName: string
+class UserService {
+    private userPool: UserPool
 
-    constructor(userId: string, nickName: string) {
-        this.userId = userId
-        this.nickName = nickName
+    private constructor() {
+        this.userPool = new UserPool()
     }
-}
 
-const userPool = new UserPool()
+    private static instance: UserService
 
-const createUser = (userId: string, nickName: string) => {
-    let updatedNickName = nickName
-    if (updatedNickName == '') {
-        updatedNickName = generateGuestNickName()
-
-        while (!userPool.checkDuplicatedNickName(updatedNickName)) {
-            // TODO: 9999명 이상 접속 시 무한 루프 위험
-            updatedNickName = generateGuestNickName()
+    public static getInstance(): UserService {
+        if (!this.instance) {
+            this.instance = new UserService()
         }
+        return this.instance
     }
 
-    const user = new User(userId, updatedNickName)
-    userPool.addUser(user)
+    createUser(userId: string, nickName: string) {
+        let updatedNickName = nickName
+        if (updatedNickName == '') {
+            updatedNickName = util.generateGuestNickName()
 
-    return user
+            while (this.userPool.checkDuplicatedNickName(updatedNickName)) {
+                // TODO: 9999명 이상 접속 시 무한 루프
+                updatedNickName = util.generateGuestNickName()
+            }
+        }
+
+        const user = new User(userId, updatedNickName)
+        this.userPool.addUser(user)
+
+        return user
+    }
+
+    checkDuplicatedNickName(nickName: string) {
+        return this.userPool.checkDuplicatedNickName(nickName)
+    }
 }
 
-const checkDuplicatedNickName = (nickName: string) => {
-    return userPool.checkDuplicatedNickName(nickName)
-}
-
-const userService = {
-    createUser,
-    checkDuplicatedNickName,
-}
+const userService = UserService.getInstance()
 
 export default userService
