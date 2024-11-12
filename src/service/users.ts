@@ -2,6 +2,7 @@ import util from './users.util'
 
 export class User {
     userId: string
+
     nickName: string
 
     constructor(userId: string, nickName: string) {
@@ -19,6 +20,10 @@ class UserPool {
 
     checkDuplicatedNickName(nickName: string) {
         return this.users.some((user) => user.nickName === nickName)
+    }
+
+    findUserById(userId: string): User | undefined {
+        return this.users.find((user) => user.userId === userId)
     }
 
     addUser(user: User) {
@@ -44,6 +49,10 @@ class UserService {
             this.instance = new UserService()
         }
         return this.instance
+    }
+
+    findUserById(userId: string) {
+        return this.userPool.findUserById(userId)
     }
 
     createUser(userId: string, nickName: string) {

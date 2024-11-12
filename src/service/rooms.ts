@@ -6,11 +6,17 @@ type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 // 대기실
 class Room {
     roomId: string
+
     players: User[] = []
+
     createdAt: Date
+
     state: RoomState = 'initial'
+
     maxPlayerCnt = 20
+
     minPlayerCnt = 10
+
     maxWaitingTime = 30
 
     constructor() {
