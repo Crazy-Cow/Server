@@ -16,6 +16,7 @@ app.use(cors())
 app.use(cookieParser())
 app.use(express.json())
 app.use('/example', routes.example)
+app.use('/user', routes.user)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 connectDB()
