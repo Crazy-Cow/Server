@@ -2,7 +2,7 @@
 
 import { Server, Socket } from 'socket.io'
 import * as CANNON from 'cannon-es'
-
+console.log('cannon_server start')
 const io = new Server({ cors: { origin: 'http://localhost:5173' } })
 
 type Position = [number, number, number]
