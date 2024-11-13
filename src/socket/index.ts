@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io'
 import { SOCKET_ON_EVT_TYPE } from './constant'
 import { SocketOnEvtData } from './type'
 import roomService from '../service/rooms'
-import userService from 'service/users'
+import userService from '../service/users'
 
 class SocketImplement {
     socket: Socket
@@ -19,14 +19,14 @@ class SocketImplement {
     }
 
     private handleRoomEnter = (args: SocketOnEvtData['room.enter']) => {
-        this.logger('room.enter', args)
+        this.logger(SOCKET_ON_EVT_TYPE.ROOM_ENTER, args)
         const userId = this.socket.id
         const player = userService.findUserById(userId)
         roomService.joinRoom(player)
     }
 
     private handleRoomLeave = (args: SocketOnEvtData['room.leave']) => {
-        this.logger('room.leave', args)
+        this.logger(SOCKET_ON_EVT_TYPE.ROOM_LEAVE, args)
         const userId = this.socket.id
         roomService.leaveRoom(userId)
     }
