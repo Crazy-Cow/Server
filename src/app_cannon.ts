@@ -45,14 +45,14 @@ const CHARACTER_SIZE = 2
 const TAIL_STEAL_DISTANCE = 4
 const MAX_SPEED = 10
 // 캐릭터 위치 생성 함수
-const generateRandomPosition = (minSize: number): Position => {
+const generateRandomPosition = (): Position => {
     return [Math.random() * 10, 0, Math.random() * 10]
 }
 
-const generateRandomHexColor = (): string => {
-    const color = Math.floor(Math.random() * 16777215).toString(16)
-    return '#' + color.padStart(6, '0')
-}
+// const generateRandomHexColor = (): string => {
+//     const color = Math.floor(Math.random() * 16777215).toString(16)
+//     return '#' + color.padStart(6, '0')
+// }
 
 const handleCatch = (character: Character) => {
     characters.forEach((otherCharacter) => {
@@ -73,8 +73,8 @@ const handleCatch = (character: Character) => {
 }
 
 // 필요한 데이터를 캐릭터 목록으로 변환하는 함수
-function getSerializableCharacters(characters: Character[]) {
-    return characters.map((char) => ({
+function getSerializableCharacters(raw_characters: Character[]) {
+    return raw_characters.map((char) => ({
         id: char.id,
         position: char.position,
         bodyColor: char.bodyColor,
@@ -91,7 +91,7 @@ io.listen(8000)
 io.on('connection', (socket: Socket) => {
     console.log('user connected')
 
-    const newPosition = generateRandomPosition(CHARACTER_SIZE)
+    const newPosition = generateRandomPosition()
     const characterBody = new CANNON.Body({
         mass: 1, // 질량 설정
         position: new CANNON.Vec3(
