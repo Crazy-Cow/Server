@@ -33,8 +33,8 @@ connectDB()
     .then(() => console.log('[1] DB Connected'))
     .then(() => {
         console.log('[1] (mongoDB) DB Connected')
-        const server = app.listen(port, () => {
-            console.log(`[2] Server runs at http://43.202.248.28/:${port}`)
+        app.listen(port, () => {
+            console.log(`[2] Server runs at <http://localhost>:${port}`)
         })
 
         const io = new Server(server, socketCorsOption)
