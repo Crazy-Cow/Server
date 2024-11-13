@@ -24,4 +24,4 @@ jobs:
                       git pull origin dev
                       pm2 kill
                       npm i --force
-                      npm run prd
+                      npm run dev
