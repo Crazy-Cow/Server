@@ -21,11 +21,11 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 connectDB()
     .then(() => {
-        console.log('[1] (mysql) DB Connected')
+        console.log('[1] (mongoDB) DB Connected')
         app.listen(port, () => {
-            console.log(`[2] Server runs at <https://localhost>:${port}`)
+            console.log(`[2] Server runs at <http://localhost>:${port}`)
         })
     })
     .catch((err) => {
-        console.error('[Error] (mysql) DB Connection Failed:', err)
+        console.error('[Error] (mongoDB) DB Connection Failed:', err)
     })
