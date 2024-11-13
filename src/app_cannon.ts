@@ -86,7 +86,7 @@ function getSerializableCharacters(characters: Character[]) {
     }))
 }
 
-io.listen(3001)
+io.listen(8000)
 
 io.on('connection', (socket: Socket) => {
     console.log('user connected')
