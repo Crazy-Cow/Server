@@ -3,26 +3,32 @@ import util from './rooms.util'
 
 type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
-// 대기실
+// 그룹 (대기실 | 게임중)
 class Room {
     roomId: string
-
     players: User[] = []
-
     createdAt: Date
-
     state: RoomState = 'initial'
+    maxPlayerCnt: number
+    minPlayerCnt: number
+    maxWaitingTime: number
 
-    maxPlayerCnt = 20
-
-    minPlayerCnt = 10
-
-    maxWaitingTime = 30
-
-    constructor() {
+    constructor({
+        maxPlayerCnt = 20,
+        minPlayerCnt = 10,
+        maxWaitingTime = 30,
+    }: {
+        maxPlayerCnt?: number
+        minPlayerCnt?: number
+        maxWaitingTime?: number
+    }) {
         this.roomId = util.generateRoomId()
         this.createdAt = new Date()
         this.state = 'waiting'
+
+        this.maxPlayerCnt = maxPlayerCnt
+        this.minPlayerCnt = minPlayerCnt
+        this.maxWaitingTime = maxWaitingTime
     }
 
     getPlayerCnt = () => {
@@ -59,8 +65,8 @@ class Room {
 }
 
 class RoomPool {
-    // gameRooms: Room[] = []
-    waitingRoom = new Room()
+    gameRooms: Room[] = [] // TODO: migrate gameService
+    waitingRoom = new Room({})
 
     isWaitingRoomFull(): boolean {
         return this.waitingRoom.isFull()
@@ -69,10 +75,10 @@ class RoomPool {
     joinRoom(user: User) {
         this.waitingRoom.addPlayer(user)
 
-        if (this.isWaitingRoomFull()) {
+        if (this.waitingRoom.canStartGame()) {
             this.waitingRoom.state = 'playing'
-            // this.gameRooms.push(this.waitingRoom) // TODO: call gameService
-            this.waitingRoom = new Room()
+            this.gameRooms.push(this.waitingRoom)
+            this.waitingRoom = new Room({})
         }
     }
 
@@ -82,7 +88,7 @@ class RoomPool {
 }
 
 class RoomService {
-    private roomPool: RoomPool
+    roomPool: RoomPool
 
     private constructor() {
         this.roomPool = new RoomPool()
