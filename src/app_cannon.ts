@@ -5,7 +5,7 @@ import * as CANNON from 'cannon-es'
 console.log('cannon_server start')
 const io = new Server({ cors: { origin: '*' } })
 
-type Position = [number, number, number]
+type Position = { x: number; y: number; z: number }
 type Directions = {
     up?: boolean
     down?: boolean
@@ -59,13 +59,13 @@ const TAIL_STEAL_DISTANCE = 5
 const MAX_SPEED = 10
 // 캐릭터 위치 생성 함수
 const generateRandomPosition = (): Position => {
-    return [Math.random() * 10, 2, Math.random() * 10]
+    return { x: Math.random() * 10, y: 2, z: Math.random() * 10 }
 }
 
-// const generateRandomHexColor = (): string => {
-//     const color = Math.floor(Math.random() * 16777215).toString(16)
-//     return '#' + color.padStart(6, '0')
-// }
+const generateRandomHexColor = (): string => {
+    const color = Math.floor(Math.random() * 16777215).toString(16)
+    return '#' + color.padStart(6, '0')
+}
 
 const handleCatch = (character: Character) => {
     // 이미 꼬리를 가지고 있다면 훔치지 않음
@@ -77,8 +77,8 @@ const handleCatch = (character: Character) => {
             otherCharacter.hasTail &&
             !otherCharacter.isBeingStolen // 다른 캐릭터가 훔쳐지는 중인지 확인
         ) {
-            const dx = character.position[0] - otherCharacter.position[0]
-            const dz = character.position[2] - otherCharacter.position[2]
+            const dx = character.position.x - otherCharacter.position.x
+            const dz = character.position.z - otherCharacter.position.z
             const distance = Math.sqrt(dx * dx + dz * dz)
 
             if (distance <= TAIL_STEAL_DISTANCE) {
@@ -137,11 +137,11 @@ io.on('connection', (socket: Socket) => {
     const newCharacter: Character = {
         id: socket.id,
         position: newPosition,
-        bodyColor: '#FFFFFF',
-        hairColor: '#FFFFFF',
-        bellyColor: '#FFFFFF',
-        velocity: [0, 0, 0],
-        acceleration: [0, 0, 0],
+        bodyColor: generateRandomHexColor(),
+        hairColor: generateRandomHexColor(),
+        bellyColor: generateRandomHexColor(),
+        velocity: { x: 0, y: 0, z: 0 },
+        acceleration: { x: 0, y: 0, z: 0 },
         isOnGround: true,
         directions: { up: false, down: false, left: false, right: false },
         hasTail: characters.length % 2 === 0,
@@ -259,26 +259,18 @@ setInterval(() => {
 
     characters.forEach((character) => {
         if (character.cannonBody) {
-            const { x, y, z } = character.cannonBody.position
-            character.position = [x, y, z]
-            character.velocity = [
-                character.cannonBody.velocity.x,
-                character.cannonBody.velocity.y,
-                character.cannonBody.velocity.z,
-            ]
+            character.position = {
+                x: character.cannonBody.position.x,
+                y: character.cannonBody.position.y,
+                z: character.cannonBody.position.z,
+            }
+            character.velocity = {
+                x: character.cannonBody.velocity.x,
+                y: character.cannonBody.velocity.y,
+                z: character.cannonBody.velocity.z,
+            }
 
             if (character.shift) handleCatch(character)
-
-            // 꼬리가 있을 때 색상 변경
-            if (character.hasTail) {
-                character.bodyColor = '#888888'
-                character.hairColor = '#888888'
-                character.bellyColor = '#888888'
-            } else {
-                character.bodyColor = '#FFFFFF'
-                character.hairColor = '#FFFFFF'
-                character.bellyColor = '#FFFFFF'
-            }
         }
     })
 
