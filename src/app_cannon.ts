@@ -190,6 +190,13 @@ io.on('connection', (socket: Socket) => {
             character.cannonBody.velocity.x = targetVelocityX
             character.cannonBody.velocity.z = targetVelocityZ
 
+            // 키가 떼어진 상태라면 속도를 완전히 0으로 설정
+            if (targetVelocityX === 0 && targetVelocityZ === 0) {
+                character.cannonBody.velocity.x = 0
+                character.cannonBody.velocity.z = 0
+                character.cannonBody.angularVelocity.set(0, 0, 0) // 각속도도 0으로 설정
+            }
+
             const facingAngleRad = Math.atan2(
                 character.cannonBody.velocity.x,
                 character.cannonBody.velocity.z
