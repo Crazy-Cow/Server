@@ -59,7 +59,7 @@ const TAIL_STEAL_DISTANCE = 5
 const MAX_SPEED = 10
 // 캐릭터 위치 생성 함수
 const generateRandomPosition = (): Position => {
-    return { x: Math.random() * 10, y: 2, z: Math.random() * 10 }
+    return { x: Math.random() * 10, y: 1, z: Math.random() * 10 }
 }
 
 const generateRandomHexColor = (): string => {
@@ -123,11 +123,7 @@ io.on('connection', (socket: Socket) => {
     const newPosition = generateRandomPosition()
     const characterBody = new CANNON.Body({
         mass: 1, // 질량 설정
-        position: new CANNON.Vec3(
-            newPosition[0],
-            newPosition[1],
-            newPosition[2]
-        ),
+        position: new CANNON.Vec3(newPosition.x, newPosition.y, newPosition.z),
         material: characterMaterial,
     })
     const shape = new CANNON.Sphere(CHARACTER_SIZE / 2)
@@ -254,7 +250,7 @@ setInterval(() => {
 
     characters.forEach((character) => {
         character.isBeingStolen = false
-        // console.log(character.id, character.position)
+        console.log(character.id, character.position)
     })
 
     characters.forEach((character) => {
