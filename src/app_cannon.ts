@@ -3,7 +3,7 @@
 import { Server, Socket } from 'socket.io'
 import * as CANNON from 'cannon-es'
 console.log('cannon_server start')
-const io = new Server({ cors: { origin: 'http://localhost:5173' } })
+const io = new Server({ cors: { origin: '*' } })
 
 type Position = [number, number, number]
 type Directions = {
@@ -27,6 +27,7 @@ type Character = {
     angleRad?: number // 라디안 값의 각도 저장
     shift?: boolean
     cannonBody?: CANNON.Body
+    facingAngleRad?: number
 }
 // Cannon.js 물리 세계 설정
 const world = new CANNON.World()
@@ -40,13 +41,26 @@ const defaultContactMaterial = new CANNON.ContactMaterial(
 )
 world.addContactMaterial(defaultContactMaterial)
 
+const groundMaterial = new CANNON.Material('groundMaterial')
+const groundSize = 50 // 바닥의 너비 및 길이 설정
+const groundBody = new CANNON.Body({
+    mass: 0, // 바닥은 움직이지 않도록 질량을 0으로 설정
+    material: groundMaterial,
+})
+const groundShape = new CANNON.Box(
+    new CANNON.Vec3(groundSize / 2, 1, groundSize / 2)
+)
+groundBody.addShape(groundShape)
+groundBody.position.set(0, -1, 0) // y축에서 바닥이 약간 아래로 설정됩니다.
+world.addBody(groundBody)
+
 const characters: Character[] = []
 const CHARACTER_SIZE = 2
 const TAIL_STEAL_DISTANCE = 4
 const MAX_SPEED = 10
 // 캐릭터 위치 생성 함수
 const generateRandomPosition = (): Position => {
-    return [Math.random() * 10, 0, Math.random() * 10]
+    return [Math.random() * 10, 2, Math.random() * 10]
 }
 
 // const generateRandomHexColor = (): string => {
@@ -83,6 +97,7 @@ function getSerializableCharacters(raw_characters: Character[]) {
         velocity: char.velocity,
         isOnGround: char.isOnGround,
         hasTail: char.hasTail,
+        facingAngleRad: char.facingAngleRad,
     }))
 }
 
@@ -160,6 +175,12 @@ io.on('connection', (socket: Socket) => {
             // 현재 속도와 목표 속도 간의 차이를 줄여 이동이 부드럽게 되도록 설정
             character.cannonBody.velocity.x = targetVelocityX
             character.cannonBody.velocity.z = targetVelocityZ
+
+            const facingAngleRad = Math.atan2(
+                character.cannonBody.velocity.x,
+                character.cannonBody.velocity.z
+            )
+            character.facingAngleRad = facingAngleRad
         }
     })
 
