@@ -72,6 +72,10 @@ class UserService {
         return user
     }
 
+    removeUser(userId: string) {
+        this.userPool.removeUser(userId)
+    }
+
     checkDuplicatedNickName(nickName: string) {
         return this.userPool.checkDuplicatedNickName(nickName)
     }

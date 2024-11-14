@@ -1,10 +1,10 @@
 import { User } from './users'
 import util from './rooms.util'
 
-type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
+export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
 // 그룹 (대기실 | 게임중)
-class Room {
+export class Room {
     roomId: string
     players: User[] = []
     createdAt: Date
@@ -73,6 +73,7 @@ class RoomPool {
     }
 
     joinRoom(user: User) {
+        const roomUserIn = this.waitingRoom
         this.waitingRoom.addPlayer(user)
 
         if (this.waitingRoom.canStartGame()) {
@@ -80,10 +81,13 @@ class RoomPool {
             this.gameRooms.push(this.waitingRoom)
             this.waitingRoom = new Room({})
         }
+
+        return roomUserIn
     }
 
     leaveRoom(userId: string) {
         this.waitingRoom.removePlayer(userId)
+        return this.waitingRoom
     }
 }
 
@@ -103,12 +107,12 @@ class RoomService {
         return this.instance
     }
 
-    joinRoom(player: User) {
-        this.roomPool.joinRoom(player)
+    joinRoom(player: User): Room {
+        return this.roomPool.joinRoom(player)
     }
 
     leaveRoom(userId: string) {
-        this.roomPool.leaveRoom(userId)
+        return this.roomPool.leaveRoom(userId)
     }
 }
 
