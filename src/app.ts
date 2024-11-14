@@ -10,6 +10,7 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
 import { initSocket } from './socket'
 import { Server, ServerOptions } from 'socket.io'
+import { initInGmaeSocket } from './game/server'
 
 const port = process.env.PORT
 const socketClientUrl = process.env.SOCKET_CLIENT_URL
@@ -40,6 +41,7 @@ connectDB()
 
         const io = new Server(server, socketCorsOption)
         initSocket(io)
+        initInGmaeSocket(io)
     })
     .catch((err) => {
         console.error('[Error] DB Connection Failed:', err)
