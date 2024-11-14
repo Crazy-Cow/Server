@@ -28,19 +28,13 @@ type Character = {
     shift?: boolean
     cannonBody?: CANNON.Body
     facingAngleRad?: number
+    isBeingStolen?: boolean
 }
 // Cannon.js 물리 세계 설정
 const world = new CANNON.World()
 world.gravity.set(0, -9.82, 0) // 중력 설정 (y축 방향으로 -9.82)
 // 물리적 캐릭터 재질 설정
 const characterMaterial = new CANNON.Material('characterMaterial')
-const defaultContactMaterial = new CANNON.ContactMaterial(
-    characterMaterial,
-    characterMaterial,
-    { friction: 0.7, restitution: 0.1 }
-)
-world.addContactMaterial(defaultContactMaterial)
-
 const groundMaterial = new CANNON.Material('groundMaterial')
 const groundSize = 50 // 바닥의 너비 및 길이 설정
 const groundBody = new CANNON.Body({
@@ -53,10 +47,15 @@ const groundShape = new CANNON.Box(
 groundBody.addShape(groundShape)
 groundBody.position.set(0, -1, 0) // y축에서 바닥이 약간 아래로 설정됩니다.
 world.addBody(groundBody)
-
+const defaultContactMaterial = new CANNON.ContactMaterial(
+    characterMaterial,
+    groundMaterial,
+    { friction: 0.9, restitution: 0.0 }
+)
+world.addContactMaterial(defaultContactMaterial)
 const characters: Character[] = []
 const CHARACTER_SIZE = 2
-const TAIL_STEAL_DISTANCE = 4
+const TAIL_STEAL_DISTANCE = 5
 const MAX_SPEED = 10
 // 캐릭터 위치 생성 함수
 const generateRandomPosition = (): Position => {
@@ -69,21 +68,36 @@ const generateRandomPosition = (): Position => {
 // }
 
 const handleCatch = (character: Character) => {
-    characters.forEach((otherCharacter) => {
-        if (character.id !== otherCharacter.id && otherCharacter.hasTail) {
+    // 이미 꼬리를 가지고 있다면 훔치지 않음
+    if (character.hasTail) return
+
+    for (const otherCharacter of characters) {
+        if (
+            character.id !== otherCharacter.id &&
+            otherCharacter.hasTail &&
+            !otherCharacter.isBeingStolen // 다른 캐릭터가 훔쳐지는 중인지 확인
+        ) {
             const dx = character.position[0] - otherCharacter.position[0]
             const dz = character.position[2] - otherCharacter.position[2]
             const distance = Math.sqrt(dx * dx + dz * dz)
 
             if (distance <= TAIL_STEAL_DISTANCE) {
+                // 다른 캐릭터를 훔쳐지고 있는 상태로 설정
+                otherCharacter.isBeingStolen = true
+
+                // 꼬리를 훔치는 로직
                 character.hasTail = true
                 otherCharacter.hasTail = false
+
                 console.log(
                     `${character.id} has stolen the tail from ${otherCharacter.id}`
                 )
+
+                // 꼬리 훔치기 후 반복 종료
+                break
             }
         }
-    })
+    }
 }
 
 // 필요한 데이터를 캐릭터 목록으로 변환하는 함수
@@ -230,6 +244,11 @@ io.on('connection', (socket: Socket) => {
 const UPDATE_INTERVAL = 1 / 60 // 60 FPS
 setInterval(() => {
     world.step(UPDATE_INTERVAL)
+
+    characters.forEach((character) => {
+        character.isBeingStolen = false
+        // console.log(character.id, character.position)
+    })
 
     characters.forEach((character) => {
         if (character.cannonBody) {
