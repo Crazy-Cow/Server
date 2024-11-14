@@ -5,28 +5,67 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Socket.IO Client</title>
         <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </head>
     <body>
         <h1>Socket.IO Client</h1>
+        <label>별명</label>
+        <input id="nickname" />
+        <button id="checkNicknameButton">별명 등록</button>
+        <span id="nicknameStatus"></span>
+        <br />
+        <br />
         <button id="joinRoomButton">Join Room</button>
         <button id="leaveRoomButton">Leave Room</button>
-
+        <br />
+        <div id="roomState"></div>
         <script>
-            const socket = io('http://localhost:8000') // Default namespace
+            let socketId = ''
+            const socket = io.connect('http://localhost:8000')
+            socket.on('connect', () => {
+                socketId = socket.id
+            })
 
-            document
-                .getElementById('joinRoomButton')
-                .addEventListener('click', function () {
-                    socket.emit('room.enter')
-                    console.log('emit (room.enter)')
+            $('#checkNicknameButton').click(function () {
+                const nickname = document.getElementById('nickname').value
+                fetch('http://localhost:8000/user/enter', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: socketId,
+                        nickName: nickname,
+                    }),
                 })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(
+                                `HTTP error! status: ${response.status}`
+                            )
+                        }
+                        return response.json()
+                    })
+                    .then((data) => {
+                        $('#nicknameStatus').text(`등록 성공: ${data.nickName}`)
+                    })
+                    .catch((error) => {
+                        $('#nicknameStatus').text('오류 발생')
+                    })
+            })
 
-            document
-                .getElementById('leaveRoomButton')
-                .addEventListener('click', function () {
-                    socket.emit('room.leave')
-                    console.log('emit (room.leave)')
-                })
+            $('#joinRoomButton').click(function () {
+                socket.emit('room.enter')
+                console.log('emit (room.enter)')
+            })
+
+            $('#leaveRoomButton').click(function () {
+                socket.emit('room.leave')
+                console.log('emit (room.leave)')
+            })
+
+            socket.on('room.changeState', (data) => {
+                console.log('Received room.changeState:', data)
+                $('#roomState').text(`Room State: ${JSON.stringify(data)}`)
+            })
         </script>
     </body>
 </html>
