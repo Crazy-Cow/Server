@@ -62,10 +62,10 @@ const generateRandomPosition = (): Position => {
     return [Math.random() * 10, 2, Math.random() * 10]
 }
 
-// const generateRandomHexColor = (): string => {
-//     const color = Math.floor(Math.random() * 16777215).toString(16)
-//     return '#' + color.padStart(6, '0')
-// }
+const generateRandomHexColor = (): string => {
+    const color = Math.floor(Math.random() * 16777215).toString(16)
+    return '#' + color.padStart(6, '0')
+}
 
 const handleCatch = (character: Character) => {
     // 이미 꼬리를 가지고 있다면 훔치지 않음
@@ -137,9 +137,9 @@ io.on('connection', (socket: Socket) => {
     const newCharacter: Character = {
         id: socket.id,
         position: newPosition,
-        bodyColor: '#FFFFFF',
-        hairColor: '#FFFFFF',
-        bellyColor: '#FFFFFF',
+        bodyColor: generateRandomHexColor(),
+        hairColor: generateRandomHexColor(),
+        bellyColor: generateRandomHexColor(),
         velocity: [0, 0, 0],
         acceleration: [0, 0, 0],
         isOnGround: true,
@@ -268,17 +268,6 @@ setInterval(() => {
             ]
 
             if (character.shift) handleCatch(character)
-
-            // 꼬리가 있을 때 색상 변경
-            if (character.hasTail) {
-                character.bodyColor = '#888888'
-                character.hairColor = '#888888'
-                character.bellyColor = '#888888'
-            } else {
-                character.bodyColor = '#FFFFFF'
-                character.hairColor = '#FFFFFF'
-                character.bellyColor = '#FFFFFF'
-            }
         }
     })
 
