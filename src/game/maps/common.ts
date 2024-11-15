@@ -66,6 +66,35 @@ export class CommonMap {
         }
     }
 
+    private resetPosition(character: Character) {
+        const newPosition = this.generateRandomPosition()
+        if (character.cannonBody) {
+            character.cannonBody.position.set(
+                newPosition.x,
+                newPosition.y,
+                newPosition.z
+            )
+            character.cannonBody.velocity.set(0, 0, 0) // 속도도 초기화
+            character.cannonBody.angularVelocity.set(0, 0, 0) // 각속도 초기화
+        }
+        character.position = newPosition
+        character.velocity = { x: 0, y: 0, z: 0 }
+        character.isOnGround = true
+        console.log(`Character ${character.id} reset to initial position.`)
+    }
+
+    private checkAndUpdatePosition(character: Character) {
+        if (
+            Math.abs(character.position.x) > GROUND_SIZE.x + 5 ||
+            Math.abs(character.position.y) > GROUND_SIZE.y + 5 ||
+            Math.abs(character.position.z) > GROUND_SIZE.z + 5
+        ) {
+            this.resetPosition(character)
+        } else {
+            character.updatePosition()
+        }
+    }
+
     findCharacter(id: string) {
         return this.characters.find((char) => char.id === id)
     }
@@ -102,5 +131,8 @@ export class CommonMap {
 
     updateGameState() {
         this.world.step(this.updateInterval)
+        this.characters.forEach((character) => {
+            this.checkAndUpdatePosition(character)
+        })
     }
 }

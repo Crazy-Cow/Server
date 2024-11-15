@@ -47,7 +47,6 @@ export class TailTagMap extends CommonMap {
 
         this.characters.forEach((character) => {
             character.isBeingStolen = false
-            character.updatePosition()
 
             if (character.shift) this.handleCatch(character)
 
