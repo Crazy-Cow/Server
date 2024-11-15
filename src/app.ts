@@ -26,7 +26,21 @@ const server = app.listen(port, () => {
     console.log(`[2] Server runs at <http://localhost>:${port}`)
 })
 
-const io = new Server(server, { cors: { origin: '*' } })
+const allowedOrigins = ['http://localhost:5173']
+
+const io = new Server(server, {
+    cors: {
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true)
+            } else {
+                callback(new Error('Not allowed by CORS'), false)
+            }
+        },
+        methods: ['GET', 'POST'],
+    },
+})
+
 initSocket(io)
 initInGmaeSocket(io)
 
