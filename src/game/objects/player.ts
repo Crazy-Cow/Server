@@ -9,6 +9,8 @@ export type Directions = {
     right: boolean
 }
 
+const CHARACTER_SIZE = 1
+
 export class Character {
     id: string
     position: Position
@@ -40,9 +42,9 @@ export class Character {
 
         const body = new CANNON.Body({
             mass: 1,
-            position: new CANNON.Vec3(position[0], position[1], position[2]),
-            material: material,
-            shape: new CANNON.Sphere(1),
+            position: new CANNON.Vec3(position.x, position.y, position.z),
+            material,
+            shape: new CANNON.Sphere(CHARACTER_SIZE),
         })
         this.cannonBody = body
     }

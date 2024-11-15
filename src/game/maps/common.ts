@@ -61,7 +61,7 @@ export class CommonMap {
     private generateRandomPosition(): Position {
         return {
             x: GROUND_POS.x + Math.random() * 10,
-            y: GROUND_POS.y + 3,
+            y: GROUND_POS.y + 2,
             z: GROUND_POS.z + Math.random() * 10,
         }
     }
