@@ -1,6 +1,17 @@
 import * as CANNON from 'cannon-es'
 import { Character, Position } from '../objects/player'
 
+const GROUND_SIZE = {
+    x: 25,
+    y: 1,
+    z: 25,
+}
+const GROUND_POS = {
+    x: 0,
+    y: -1,
+    z: 0,
+}
+
 export class CommonMap {
     updateInterval: number
     world: CANNON.World
@@ -37,8 +48,10 @@ export class CommonMap {
         const groundBody = new CANNON.Body({
             mass: 0,
             material: this.groundMaterial,
-            shape: new CANNON.Box(new CANNON.Vec3(25, 1, 25)),
-            position: new CANNON.Vec3(0, -1, 0),
+            shape: new CANNON.Box(
+                new CANNON.Vec3(GROUND_SIZE.x, GROUND_SIZE.y, GROUND_SIZE.z)
+            ),
+            position: new CANNON.Vec3(GROUND_POS.x, GROUND_POS.y, GROUND_POS.z),
         })
 
         this.world.addBody(groundBody)
@@ -46,7 +59,11 @@ export class CommonMap {
     }
 
     private generateRandomPosition(): Position {
-        return { x: Math.random() * 10, y: 2, z: Math.random() * 10 }
+        return {
+            x: GROUND_POS.x + Math.random() * 10,
+            y: GROUND_POS.y + 3,
+            z: GROUND_POS.z + Math.random() * 10,
+        }
     }
 
     findCharacter(id: string) {
