@@ -8,10 +8,10 @@ const handleMove = (character: Character, directions: Directions) => {
         const angleRad = character.angleRad || 0
 
         // 카메라 각도에 따른 방향 벡터 계산
-        const forwardX = -Math.sin(angleRad)
-        const forwardZ = -Math.cos(angleRad)
+        const forwardX = Math.sin(angleRad)
+        const forwardZ = Math.cos(angleRad)
         const rightX = Math.cos(angleRad)
-        const rightZ = Math.sin(angleRad)
+        const rightZ = -Math.sin(angleRad)
 
         let targetVelocityX = 0
         let targetVelocityZ = 0
