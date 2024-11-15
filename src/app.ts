@@ -15,7 +15,7 @@ import { initInGmaeSocket } from './game/server'
 const port = process.env.PORT
 
 const app: Express = express()
-app.use(cors())
+app.use(cors({ origin: '*' }))
 app.use(cookieParser())
 app.use(express.json())
 app.use('/example', routes.example)
