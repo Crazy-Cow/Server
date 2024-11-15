@@ -5,7 +5,7 @@ import cors from 'cors'
 import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import routes from './routes'
-import { connectDB } from './schemas'
+// import { connectDB } from './schemas'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
 import { initSocket } from './socket'
@@ -31,18 +31,26 @@ app.use('/example', routes.example)
 app.use('/user', routes.user)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-connectDB()
-    .then(() => console.log('[1] DB Connected'))
-    .then(() => {
-        console.log('[1] (mongoDB) DB Connected')
-        const server = app.listen(port, () => {
-            console.log(`[2] Server runs at <http://localhost>:${port}`)
-        })
+const server = app.listen(port, () => {
+    console.log(`[2] Server runs at <http://localhost>:${port}`)
+})
 
-        const io = new Server(server, socketCorsOption)
-        initSocket(io)
-        initInGmaeSocket(io)
-    })
-    .catch((err) => {
-        console.error('[Error] DB Connection Failed:', err)
-    })
+const io = new Server(server, socketCorsOption)
+initSocket(io)
+initInGmaeSocket(io)
+
+// connectDB()
+//     .then(() => console.log('[1] DB Connected'))
+//     .then(() => {
+//         console.log('[1] (mongoDB) DB Connected')
+//         const server = app.listen(port, () => {
+//             console.log(`[2] Server runs at <http://localhost>:${port}`)
+//         })
+
+//         const io = new Server(server, socketCorsOption)
+//         initSocket(io)
+//         initInGmaeSocket(io)
+//     })
+//     .catch((err) => {
+//         console.error('[Error] DB Connection Failed:', err)
+//     })

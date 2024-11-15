@@ -1,18 +1,19 @@
 import { Server, Socket } from 'socket.io'
-import { GameWorld } from './objects/world'
-import { Character, Directions, Position } from './objects/player'
+import { Directions } from './objects/player'
 import * as CANNON from 'cannon-es'
 import { SocketOnEvtData } from '../socket/type'
 import { SOCKET_ON_EVT_TYPE } from '../socket/constant'
+import { TailTagRound, CommonRound } from './rounds'
+
+const gameWorld: CommonRound = new TailTagRound() // TODO: 라운드 신규 생성 시 주입 필요
+
 const MAX_SPEED = 10
 
 class SocketImplement {
     socket: Socket
-    gameWorld: GameWorld // TODO: 새로운 방 생성 시 분리 필요함
 
     constructor(socket: Socket) {
         this.socket = socket
-        this.gameWorld = new GameWorld()
         this.register()
         this.handleConnect()
         this.updateGameState() // TODO: 게임방별로 돌아야함
@@ -27,36 +28,12 @@ class SocketImplement {
     }
 
     handleConnect() {
-        const newPosition = this.generateRandomPosition()
-        const newCharacter = new Character(
-            this.socket.id,
-            newPosition,
-            this.gameWorld.characterMaterial
-        )
-        this.gameWorld.addCharacter(newCharacter)
-        // TODO: broadcast only room
-
-        this.socket.emit('characters', this.getSerializableCharacters())
-    }
-
-    private getSerializableCharacters = () => {
-        return this.gameWorld.characters.map((char) => ({
-            id: char.id,
-            position: char.position,
-            bodyColor: char.bodyColor,
-            hairColor: char.hairColor,
-            bellyColor: char.bellyColor,
-            hasTail: char.hasTail,
-            facingAngleRad: char.facingAngleRad,
-        }))
-    }
-
-    private generateRandomPosition = (): Position => {
-        return [Math.random() * 10, 2, Math.random() * 10]
+        gameWorld.addCharacter(this.socket.id)
+        // this.socket.emit('characters', gameWorld.convertGametate()) // TODO: broadcast only room
     }
 
     handleMove = (directions: Directions) => {
-        const character = this.gameWorld.characters.find(
+        const character = gameWorld.characters.find(
             (char) => char.id === this.socket.id
         )
         if (character && character.cannonBody) {
@@ -108,7 +85,7 @@ class SocketImplement {
     }
 
     handleJump = (jump: boolean) => {
-        const character = this.gameWorld.characters.find(
+        const character = gameWorld.characters.find(
             (char) => char.id === this.socket.id
         )
         if (character && jump && character.cannonBody && character.isOnGround) {
@@ -121,7 +98,7 @@ class SocketImplement {
     }
 
     handleAngle = (angleRad: number) => {
-        const character = this.gameWorld.characters.find(
+        const character = gameWorld.characters.find(
             (char) => char.id === this.socket.id
         )
         if (character) {
@@ -130,7 +107,7 @@ class SocketImplement {
     }
 
     handleSift = (shift: boolean) => {
-        const character = this.gameWorld.characters.find(
+        const character = gameWorld.characters.find(
             (char) => char.id === this.socket.id
         )
         if (character) {
@@ -139,7 +116,7 @@ class SocketImplement {
     }
 
     handleDisconnect = () => {
-        const characters = this.gameWorld.characters
+        const characters = gameWorld.characters
 
         const index = characters.findIndex(
             (character) => character.id === this.socket.id
@@ -147,18 +124,20 @@ class SocketImplement {
         if (index !== -1) {
             const character = characters[index]
             if (character.cannonBody) {
-                this.gameWorld.world.removeBody(character.cannonBody)
+                gameWorld.world.removeBody(character.cannonBody)
             }
             characters.splice(index, 1)
         }
-        this.socket.emit('characters', this.getSerializableCharacters())
+
+        // this.socket.emit('characters', gameWorld.convertGametate()) // TODO: broadcast only room
     }
 
     updateGameState = () => {
         setInterval(() => {
-            this.gameWorld.update()
-            this.socket.emit('characters', this.getSerializableCharacters())
-        }, 1000 / 60)
+            gameWorld.updateGameState()
+            // Q. 업데이트 주기에만 쏘면되지 않나??
+            this.socket.emit('characters', gameWorld.convertGametate()) // TODO: broadcast only room
+        }, 1000 * gameWorld.updateInterval)
     }
 
     public logger = (msg: string, args?: SocketOnEvtData) => {
