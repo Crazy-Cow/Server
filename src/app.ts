@@ -9,13 +9,25 @@ import routes from './routes'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
 import { initSocket } from './socket'
-import { Server, ServerOptions } from 'socket.io'
+import { Server } from 'socket.io'
 import { initInGmaeSocket } from './game/server'
 
 const port = process.env.PORT
+const allowedOrigins = ['http://localhost:5173']
+const corsOption = {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true)
+        } else {
+            callback(new Error('Not allowed by CORS'), false)
+        }
+    },
+    methods: ['GET', 'POST'],
+    credentials: true,
+}
 
 const app: Express = express()
-app.use(cors())
+app.use(cors(corsOption))
 app.use(cookieParser())
 app.use(express.json())
 app.use('/example', routes.example)
@@ -26,23 +38,10 @@ const server = app.listen(port, () => {
     console.log(`[2] Server runs at <http://localhost>:${port}`)
 })
 
-const allowedOrigins = ['http://localhost:5173']
-const socketCorsOption: Partial<ServerOptions> = {
-    cors: {
-        origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin)) {
-                callback(null, true)
-            } else {
-                callback(new Error('Not allowed by CORS'), false)
-            }
-        },
-        methods: ['GET', 'POST'],
-        credentials: true,
-    },
+const io = new Server(server, {
+    cors: corsOption,
     transports: ['websocket', 'polling'],
-}
-
-const io = new Server(server, socketCorsOption)
+})
 
 initSocket(io)
 initInGmaeSocket(io)
