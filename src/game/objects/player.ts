@@ -7,6 +7,7 @@ export type Directions = {
     down: boolean
     left: boolean
     right: boolean
+    angleRad: number
 }
 
 const CHARACTER_SIZE = 1
@@ -40,11 +41,16 @@ export class Character {
         this.velocity = { x: 0, y: 0, z: 0 }
         this.acceleration = { x: 0, y: 0, z: 0 }
         this.isOnGround = true
-        this.directions = { up: false, down: false, left: false, right: false }
+        this.directions = {
+            up: false,
+            down: false,
+            left: false,
+            right: false,
+            angleRad: 0,
+        }
         this.hasTail = Math.random() > 0.5 // TODO // characters.length % 2 === 0,
         this.shift = false
         this.isBeingStolen = false
-        this.angleRad = 0 // 임시값
 
         const body = new CANNON.Body({
             mass: 1,

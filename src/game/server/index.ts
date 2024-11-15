@@ -39,11 +39,6 @@ class SocketImplement {
         socketHandler.handleJump(character, jump)
     }
 
-    handleAngle = (angleRad: number) => {
-        const character = gameWorld.findCharacter(this.socket.id)
-        socketHandler.handleAngle(character, angleRad)
-    }
-
     handleSift = (shift: boolean) => {
         const character = gameWorld.findCharacter(this.socket.id)
         socketHandler.handleSift(character, shift)
