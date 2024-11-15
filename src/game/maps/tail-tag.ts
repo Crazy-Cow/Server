@@ -1,9 +1,9 @@
 import { Character, Position } from '../objects/player'
-import { CommonRound } from './common'
+import { CommonMap } from './common'
 
 const TAIL_STEAL_DISTANCE = 5
 
-export class TailTagRound extends CommonRound {
+export class TailTagMap extends CommonMap {
     handleCatch(character: Character) {
         if (character.hasTail) return
 

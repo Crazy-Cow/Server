@@ -1,7 +1,7 @@
 import * as CANNON from 'cannon-es'
 import { Character, Position } from '../objects/player'
 
-export class CommonRound {
+export class CommonMap {
     updateInterval: number
     world: CANNON.World
     characters: Character[] = []

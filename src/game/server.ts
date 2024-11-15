@@ -3,9 +3,9 @@ import { Directions } from './objects/player'
 import * as CANNON from 'cannon-es'
 import { SocketOnEvtData } from '../socket/type'
 import { SOCKET_ON_EVT_TYPE } from '../socket/constant'
-import { TailTagRound, CommonRound } from './rounds'
+import { TailTagRound, CommonMap } from './maps'
 
-const gameWorld: CommonRound = new TailTagRound() // TODO: 라운드 신규 생성 시 주입 필요
+const gameWorld: CommonMap = new TailTagRound() // TODO: 라운드 신규 생성 시 주입 필요
 
 const MAX_SPEED = 10
 
