@@ -14,7 +14,6 @@ class SocketImplement {
         this.socket = socket
         this.register()
         this.handleConnect()
-        this.updateGameState() // TODO: 게임방별로 돌아야함
     }
 
     private register = () => {
@@ -55,14 +54,6 @@ class SocketImplement {
         this.socket.emit('characters', gameWorld.convertGameState())
     }
 
-    updateGameState = () => {
-        setInterval(() => {
-            gameWorld.updateGameState()
-            // Q. 업데이트 주기에만 쏘면되지 않나??
-            this.socket.emit('characters', gameWorld.convertGameState()) // TODO: broadcast only room
-        }, 1000 * gameWorld.updateInterval)
-    }
-
     public logger = (msg: string, args?: SocketOnEvtData) => {
         console.log(
             `[${this.socket.id}] ${msg} ${args ? JSON.stringify(args) : ''}`
@@ -72,6 +63,13 @@ class SocketImplement {
 
 export function initInGmaeSocket(io: Server): void {
     const root = io.of('/')
+
+    // 게임 서버 interval ON
+    gameWorld.startGameLoop((gameState) => {
+        root.emit('characters', gameState) // TODO: broadcast only room
+    })
+
+    // TODO: OFF
 
     root.on(SOCKET_ON_EVT_TYPE.CONNECT, (socket: Socket) => {
         const instance = new SocketImplement(socket)
