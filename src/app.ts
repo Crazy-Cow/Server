@@ -13,9 +13,7 @@ import { Server } from 'socket.io'
 import { initInGmaeSocket } from './game/server'
 
 const port = process.env.PORT
-const corsOption: CorsOptions = {
-    origin: 'http://localhost:5173',
-}
+const corsOption: CorsOptions = { origin: '*' }
 
 const app: Express = express()
 app.use(cors(corsOption))
