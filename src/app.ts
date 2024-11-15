@@ -9,19 +9,10 @@ import routes from './routes'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
 import { initSocket } from './socket'
-import { Server, ServerOptions } from 'socket.io'
+import { Server } from 'socket.io'
 import { initInGmaeSocket } from './game/server'
 
 const port = process.env.PORT
-const socketClientUrl = process.env.SOCKET_CLIENT_URL
-const socketCorsOption: Partial<ServerOptions> = {
-    cors: {
-        origin: socketClientUrl,
-        methods: ['GET', 'POST'],
-        credentials: true,
-    },
-    transports: ['websocket', 'polling'],
-}
 
 const app: Express = express()
 app.use(cors())
@@ -35,7 +26,7 @@ const server = app.listen(port, () => {
     console.log(`[2] Server runs at <http://localhost>:${port}`)
 })
 
-const io = new Server(server, socketCorsOption)
+const io = new Server(server, { cors: { origin: '*' } })
 initSocket(io)
 initInGmaeSocket(io)
 
