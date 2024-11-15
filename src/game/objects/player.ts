@@ -1,6 +1,7 @@
 import * as CANNON from 'cannon-es'
 
-export type Position = [number, number, number]
+export type Position = { x: number; y: number; z: number }
+
 export type Directions = {
     up: boolean
     down: boolean
@@ -27,7 +28,7 @@ export class Character {
     constructor(id: string, position: Position, material: CANNON.Material) {
         this.id = id
         this.position = position
-        this.velocity = [0, 0, 0]
+        this.velocity = { x: 0, y: 0, z: 0 }
         this.bodyColor = this.generateRandomHexColor()
         this.hairColor = this.generateRandomHexColor()
         this.bellyColor = this.generateRandomHexColor()
@@ -53,16 +54,16 @@ export class Character {
 
     updatePosition() {
         if (this.cannonBody) {
-            this.position = [
-                this.cannonBody.position.x,
-                this.cannonBody.position.y,
-                this.cannonBody.position.z,
-            ]
-            this.velocity = [
-                this.cannonBody.velocity.x,
-                this.cannonBody.velocity.y,
-                this.cannonBody.velocity.z,
-            ]
+            this.position = {
+                x: this.cannonBody.position.x,
+                y: this.cannonBody.position.y,
+                z: this.cannonBody.position.z,
+            }
+            this.velocity = {
+                x: this.cannonBody.velocity.x,
+                y: this.cannonBody.velocity.y,
+                z: this.cannonBody.velocity.z,
+            }
         }
     }
 }

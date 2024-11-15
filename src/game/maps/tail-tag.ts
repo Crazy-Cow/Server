@@ -5,8 +5,8 @@ const TAIL_STEAL_DISTANCE = 5
 
 export class TailTagMap extends CommonMap {
     private calculateDistance(pos1: Position, pos2: Position) {
-        const dx = pos1[0] - pos2[0]
-        const dz = pos1[2] - pos2[2]
+        const dx = pos1.x - pos2.x
+        const dz = pos1.z - pos2.z
         return Math.sqrt(dx * dx + dz * dz)
     }
 

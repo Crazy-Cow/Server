@@ -46,7 +46,7 @@ export class CommonMap {
     }
 
     private generateRandomPosition(): Position {
-        return [Math.random() * 10, 2, Math.random() * 10]
+        return { x: Math.random() * 10, y: 2, z: Math.random() * 10 }
     }
 
     findCharacter(id: string) {
