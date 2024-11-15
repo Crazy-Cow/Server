@@ -11,13 +11,13 @@ export class TailTagMap extends CommonMap {
     }
 
     handleCatch(character: Character) {
-        if (character.hasTail) return
+        if (character.hasTail) return // 이미 꼬리를 가지고 있다면 훔치지 않음
 
         for (const other of this.characters) {
             if (
                 character.id !== other.id &&
                 other.hasTail &&
-                !other.isBeingStolen
+                !other.isBeingStolen // 다른 캐릭터가 훔쳐지는 중인지 확인
             ) {
                 const distance = this.calculateDistance(
                     character.position,
@@ -25,9 +25,17 @@ export class TailTagMap extends CommonMap {
                 )
 
                 if (distance <= TAIL_STEAL_DISTANCE) {
-                    other.isBeingStolen = true
+                    other.isBeingStolen = true // 다른 캐릭터를 훔쳐지고 있는 상태로 설정
+
+                    // 꼬리를 훔치는 로직
                     character.hasTail = true
                     other.hasTail = false
+
+                    console.log(
+                        `${character.id} has stolen the tail from ${other.id}`
+                    )
+
+                    // 꼬리 훔치기 후 반복 종료
                     break
                 }
             }

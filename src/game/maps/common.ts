@@ -8,7 +8,7 @@ const GROUND_SIZE = {
 }
 const GROUND_POS = {
     x: 0,
-    y: -1,
+    y: -1, // y축에서 바닥이 약간 아래로 설정됩니다.
     z: 0,
 }
 
@@ -29,7 +29,7 @@ export class CommonMap {
     }
 
     private initWorld() {
-        this.world.gravity.set(0, -9.82, 0)
+        this.world.gravity.set(0, -9.82, 0) // 중력 설정 (y축 방향으로 -9.82)
         this.createGround()
         this.setCollision()
     }
@@ -46,7 +46,7 @@ export class CommonMap {
 
     private createGround() {
         const groundBody = new CANNON.Body({
-            mass: 0,
+            mass: 0, // 바닥은 움직이지 않도록 질량을 0으로 설정
             material: this.groundMaterial,
             shape: new CANNON.Box(
                 new CANNON.Vec3(GROUND_SIZE.x, GROUND_SIZE.y, GROUND_SIZE.z)
@@ -93,6 +93,8 @@ export class CommonMap {
             bodyColor: char.bodyColor,
             hairColor: char.hairColor,
             bellyColor: char.bellyColor,
+            velocity: char.velocity,
+            isOnGround: char.isOnGround,
             hasTail: char.hasTail,
             facingAngleRad: char.facingAngleRad,
         }))

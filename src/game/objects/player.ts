@@ -15,6 +15,8 @@ export class Character {
     id: string
     position: Position
     velocity: Position
+    acceleration: Position
+
     bodyColor: string
     hairColor: string
     bellyColor: string
@@ -24,21 +26,25 @@ export class Character {
     cannonBody: CANNON.Body
     angleRad: number
     shift: boolean
+    jump: boolean
+
     facingAngleRad: number
     isBeingStolen: boolean
 
     constructor(id: string, position: Position, material: CANNON.Material) {
         this.id = id
         this.position = position
-        this.velocity = { x: 0, y: 0, z: 0 }
         this.bodyColor = this.generateRandomHexColor()
         this.hairColor = this.generateRandomHexColor()
         this.bellyColor = this.generateRandomHexColor()
+        this.velocity = { x: 0, y: 0, z: 0 }
+        this.acceleration = { x: 0, y: 0, z: 0 }
         this.isOnGround = true
         this.directions = { up: false, down: false, left: false, right: false }
-        this.hasTail = Math.random() > 0.5
+        this.hasTail = Math.random() > 0.5 // TODO // characters.length % 2 === 0,
         this.shift = false
         this.isBeingStolen = false
+        this.angleRad = 0 // 임시값
 
         const body = new CANNON.Body({
             mass: 1,

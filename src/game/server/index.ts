@@ -27,7 +27,7 @@ class SocketImplement {
 
     handleConnect() {
         gameWorld.addCharacter(this.socket.id)
-        // this.socket.emit('characters', gameWorld.convertGametate())
+        this.socket.emit('characters', gameWorld.convertGameState())
     }
 
     handleMove = (directions: Directions) => {
@@ -52,7 +52,7 @@ class SocketImplement {
 
     handleDisconnect = () => {
         gameWorld.removeCharacter(this.socket.id)
-        // this.socket.emit('characters', gameWorld.convertGametate())
+        this.socket.emit('characters', gameWorld.convertGameState())
     }
 
     updateGameState = () => {
