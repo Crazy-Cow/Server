@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 dotenv.config()
 
-import cors from 'cors'
+import cors, { CorsOptions } from 'cors'
 import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import routes from './routes'
@@ -13,18 +13,7 @@ import { Server } from 'socket.io'
 import { initInGmaeSocket } from './game/server'
 
 const port = process.env.PORT
-const allowedOrigins = ['http://localhost:5173']
-const corsOption = {
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true)
-        } else {
-            callback(new Error('Not allowed by CORS'), false)
-        }
-    },
-    methods: ['GET', 'POST'],
-    credentials: true,
-}
+const corsOption: CorsOptions = { origin: '*' }
 
 const app: Express = express()
 app.use(cors(corsOption))
@@ -38,10 +27,7 @@ const server = app.listen(port, () => {
     console.log(`[2] Server runs at <http://localhost>:${port}`)
 })
 
-const io = new Server(server, {
-    cors: corsOption,
-    transports: ['websocket', 'polling'],
-})
+const io = new Server(server, { cors: corsOption })
 
 initSocket(io)
 initInGmaeSocket(io)
