@@ -5,7 +5,10 @@ const MAX_SPEED = 10
 
 const handleMove = (character: Character, directions: Directions) => {
     if (character && character.cannonBody) {
-        const angleRad = character.angleRad || 0
+        let angleRad = character.angleRad || 0
+
+        // -π ~ π 범위로 각도를 제한
+        angleRad = ((angleRad + Math.PI) % (2 * Math.PI)) - Math.PI
 
         // 카메라 각도에 따른 방향 벡터 계산
         const forwardX = Math.sin(angleRad)
