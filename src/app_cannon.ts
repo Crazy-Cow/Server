@@ -174,12 +174,12 @@ io.on('connection', (socket: Socket) => {
                 targetVelocityZ -= forwardZ * MAX_SPEED
             }
             if (directions.left) {
-                targetVelocityX -= rightX * MAX_SPEED
-                targetVelocityZ -= rightZ * MAX_SPEED
-            }
-            if (directions.right) {
                 targetVelocityX += rightX * MAX_SPEED
                 targetVelocityZ += rightZ * MAX_SPEED
+            }
+            if (directions.right) {
+                targetVelocityX -= rightX * MAX_SPEED
+                targetVelocityZ -= rightZ * MAX_SPEED
             }
 
             // 현재 속도와 목표 속도 간의 차이를 줄여 이동이 부드럽게 되도록 설정
