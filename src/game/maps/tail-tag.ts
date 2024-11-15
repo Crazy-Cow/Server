@@ -38,8 +38,21 @@ export class TailTagMap extends CommonMap {
         super.updateGameState()
 
         this.characters.forEach((character) => {
-            character.updatePosition()
             character.isBeingStolen = false
+            character.updatePosition()
+
+            if (character.shift) this.handleCatch(character)
+
+            // 꼬리가 있을 때 색상 변경
+            if (character.hasTail) {
+                character.bodyColor = '#888888'
+                character.hairColor = '#888888'
+                character.bellyColor = '#888888'
+            } else {
+                character.bodyColor = '#FFFFFF'
+                character.hairColor = '#FFFFFF'
+                character.bellyColor = '#FFFFFF'
+            }
         })
     }
 }
