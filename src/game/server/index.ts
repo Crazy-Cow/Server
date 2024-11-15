@@ -1,9 +1,9 @@
 import { Server, Socket } from 'socket.io'
-import { Directions } from './objects/player'
-import { SocketOnEvtData } from '../socket/type'
-import { SOCKET_ON_EVT_TYPE } from '../socket/constant'
-import { TailTagMap, CommonMap } from './maps'
-import socketHandler from './server.util'
+import { Directions } from '../objects/player'
+import { SocketOnEvtData } from '../../socket/type'
+import { SOCKET_ON_EVT_TYPE } from '../../socket/constant'
+import { TailTagMap, CommonMap } from '../maps'
+import socketHandler from './index.util'
 
 const gameWorld: CommonMap = new TailTagMap() // TODO: 라운드 신규 생성 시 주입 필요
 

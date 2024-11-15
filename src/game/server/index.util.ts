@@ -1,4 +1,4 @@
-import { Character, Directions } from './objects/player'
+import { Character, Directions } from '../objects/player'
 import * as CANNON from 'cannon-es'
 
 const MAX_SPEED = 10
