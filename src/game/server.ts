@@ -1,13 +1,11 @@
 import { Server, Socket } from 'socket.io'
 import { Directions } from './objects/player'
-import * as CANNON from 'cannon-es'
 import { SocketOnEvtData } from '../socket/type'
 import { SOCKET_ON_EVT_TYPE } from '../socket/constant'
-import { TailTagRound, CommonMap } from './maps'
+import { TailTagMap, CommonMap } from './maps'
+import socketHandler from './server.util'
 
-const gameWorld: CommonMap = new TailTagRound() // TODO: 라운드 신규 생성 시 주입 필요
-
-const MAX_SPEED = 10
+const gameWorld: CommonMap = new TailTagMap() // TODO: 라운드 신규 생성 시 주입 필요
 
 class SocketImplement {
     socket: Socket
@@ -29,114 +27,39 @@ class SocketImplement {
 
     handleConnect() {
         gameWorld.addCharacter(this.socket.id)
-        // this.socket.emit('characters', gameWorld.convertGametate()) // TODO: broadcast only room
+        // this.socket.emit('characters', gameWorld.convertGametate())
     }
 
     handleMove = (directions: Directions) => {
-        const character = gameWorld.characters.find(
-            (char) => char.id === this.socket.id
-        )
-        if (character && character.cannonBody) {
-            const angleRad = character.angleRad || 0
-
-            // 카메라 각도에 따른 방향 벡터 계산
-            const forwardX = -Math.sin(angleRad)
-            const forwardZ = -Math.cos(angleRad)
-            const rightX = Math.cos(angleRad)
-            const rightZ = Math.sin(angleRad)
-
-            let targetVelocityX = 0
-            let targetVelocityZ = 0
-
-            if (directions.up) {
-                targetVelocityX += forwardX * MAX_SPEED
-                targetVelocityZ += forwardZ * MAX_SPEED
-            }
-            if (directions.down) {
-                targetVelocityX -= forwardX * MAX_SPEED
-                targetVelocityZ -= forwardZ * MAX_SPEED
-            }
-            if (directions.left) {
-                targetVelocityX -= rightX * MAX_SPEED
-                targetVelocityZ -= rightZ * MAX_SPEED
-            }
-            if (directions.right) {
-                targetVelocityX += rightX * MAX_SPEED
-                targetVelocityZ += rightZ * MAX_SPEED
-            }
-
-            // 현재 속도와 목표 속도 간의 차이를 줄여 이동이 부드럽게 되도록 설정
-            character.cannonBody.velocity.x = targetVelocityX
-            character.cannonBody.velocity.z = targetVelocityZ
-
-            // 키가 떼어진 상태라면 속도를 완전히 0으로 설정
-            if (targetVelocityX === 0 && targetVelocityZ === 0) {
-                character.cannonBody.velocity.x = 0
-                character.cannonBody.velocity.z = 0
-                character.cannonBody.angularVelocity.set(0, 0, 0) // 각속도도 0으로 설정
-            }
-
-            const facingAngleRad = Math.atan2(
-                character.cannonBody.velocity.x,
-                character.cannonBody.velocity.z
-            )
-            character.facingAngleRad = facingAngleRad
-        }
+        const character = gameWorld.findCharacter(this.socket.id)
+        socketHandler.handleMove(character, directions)
     }
 
     handleJump = (jump: boolean) => {
-        const character = gameWorld.characters.find(
-            (char) => char.id === this.socket.id
-        )
-        if (character && jump && character.cannonBody && character.isOnGround) {
-            character.cannonBody.applyImpulse(
-                new CANNON.Vec3(0, 5, 0),
-                character.cannonBody.position
-            )
-            character.isOnGround = false
-        }
+        const character = gameWorld.findCharacter(this.socket.id)
+        socketHandler.handleJump(character, jump)
     }
 
     handleAngle = (angleRad: number) => {
-        const character = gameWorld.characters.find(
-            (char) => char.id === this.socket.id
-        )
-        if (character) {
-            character.angleRad = angleRad
-        }
+        const character = gameWorld.findCharacter(this.socket.id)
+        socketHandler.handleAngle(character, angleRad)
     }
 
     handleSift = (shift: boolean) => {
-        const character = gameWorld.characters.find(
-            (char) => char.id === this.socket.id
-        )
-        if (character) {
-            character.shift = shift
-        }
+        const character = gameWorld.findCharacter(this.socket.id)
+        socketHandler.handleSift(character, shift)
     }
 
     handleDisconnect = () => {
-        const characters = gameWorld.characters
-
-        const index = characters.findIndex(
-            (character) => character.id === this.socket.id
-        )
-        if (index !== -1) {
-            const character = characters[index]
-            if (character.cannonBody) {
-                gameWorld.world.removeBody(character.cannonBody)
-            }
-            characters.splice(index, 1)
-        }
-
-        // this.socket.emit('characters', gameWorld.convertGametate()) // TODO: broadcast only room
+        gameWorld.removeCharacter(this.socket.id)
+        // this.socket.emit('characters', gameWorld.convertGametate())
     }
 
     updateGameState = () => {
         setInterval(() => {
             gameWorld.updateGameState()
             // Q. 업데이트 주기에만 쏘면되지 않나??
-            this.socket.emit('characters', gameWorld.convertGametate()) // TODO: broadcast only room
+            this.socket.emit('characters', gameWorld.convertGameState()) // TODO: broadcast only room
         }, 1000 * gameWorld.updateInterval)
     }
 

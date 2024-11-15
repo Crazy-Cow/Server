@@ -49,6 +49,10 @@ export class CommonMap {
         return [Math.random() * 10, 2, Math.random() * 10]
     }
 
+    findCharacter(id: string) {
+        return this.characters.find((char) => char.id === id)
+    }
+
     addCharacter(id: string) {
         const position = this.generateRandomPosition()
         const character = new Character(id, position, this.characterMaterial)
@@ -57,14 +61,15 @@ export class CommonMap {
         if (character.cannonBody) this.world.addBody(character.cannonBody)
     }
 
-    removeCharacter(character: Character) {
-        this.characters = this.characters.filter(
-            (char) => char.id !== character.id
-        )
-        if (character.cannonBody) this.world.removeBody(character.cannonBody)
+    removeCharacter(id: string) {
+        const character = this.characters.find((char) => char.id === id)
+        if (character && character.cannonBody) {
+            this.world.removeBody(character.cannonBody)
+        }
+        this.characters = this.characters.filter((char) => char.id !== id)
     }
 
-    convertGametate() {
+    convertGameState() {
         return this.characters.map((char) => ({
             id: char.id,
             position: char.position,
@@ -78,10 +83,5 @@ export class CommonMap {
 
     updateGameState() {
         this.world.step(this.updateInterval)
-
-        this.characters.forEach((character) => {
-            character.updatePosition()
-            character.isBeingStolen = false
-        })
     }
 }
