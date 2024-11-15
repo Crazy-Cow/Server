@@ -99,6 +99,23 @@ const handleCatch = (character: Character) => {
         }
     }
 }
+// 캐릭터 위치 초기화 함수
+const resetPosition = (character: Character) => {
+    const newPosition = generateRandomPosition()
+    if (character.cannonBody) {
+        character.cannonBody.position.set(
+            newPosition.x,
+            newPosition.y,
+            newPosition.z
+        )
+        character.cannonBody.velocity.set(0, 0, 0) // 속도도 초기화
+        character.cannonBody.angularVelocity.set(0, 0, 0) // 각속도 초기화
+    }
+    character.position = newPosition
+    character.velocity = { x: 0, y: 0, z: 0 }
+    character.isOnGround = true
+    console.log(`Character ${character.id} reset to initial position.`)
+}
 
 // 필요한 데이터를 캐릭터 목록으로 변환하는 함수
 function getSerializableCharacters(raw_characters: Character[]) {
@@ -250,10 +267,14 @@ setInterval(() => {
 
     characters.forEach((character) => {
         character.isBeingStolen = false
-        console.log(character.id, character.position)
-    })
-
-    characters.forEach((character) => {
+        // console.log(character.id, character.position)
+        if (
+            Math.abs(character.position.x) > 30 ||
+            Math.abs(character.position.y) > 30 ||
+            Math.abs(character.position.z) > 30
+        ) {
+            resetPosition(character)
+        }
         if (character.cannonBody) {
             character.position = {
                 x: character.cannonBody.position.x,
