@@ -13,11 +13,12 @@ const GROUND_POS = {
 }
 
 export class CommonMap {
-    updateInterval: number
+    private updateInterval: number
     world: CANNON.World
     characters: Character[] = []
     characterMaterial: CANNON.Material
     groundMaterial: CANNON.Material
+    private intervalId?: NodeJS.Timeout
 
     constructor() {
         this.updateInterval = 1 / 60 // 60 FPS
@@ -134,5 +135,20 @@ export class CommonMap {
         this.characters.forEach((character) => {
             this.checkAndUpdatePosition(character)
         })
+    }
+
+    startGameLoop(emitter: (data: unknown) => void) {
+        this.intervalId = setInterval(() => {
+            this.updateGameState()
+            const gameState = this.convertGameState()
+            emitter(gameState) // 특정 방이나 전체에 상태를 브로드캐스트
+        }, 1000 * this.updateInterval)
+    }
+
+    stopGameLoop() {
+        if (this.intervalId) {
+            clearInterval(this.intervalId)
+            this.intervalId = undefined
+        }
     }
 }
