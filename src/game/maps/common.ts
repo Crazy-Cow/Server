@@ -6,6 +6,8 @@ const GROUND_POS = {
     z: 0,
 }
 
+const MIN_DISTANCE = 2
+
 export class CommonMap {
     private updateInterval: number
     characters: Character[] = []
@@ -17,11 +19,33 @@ export class CommonMap {
 
     private generateRandomPosition(): Position {
         // TODO: 안겹치게 생성되도록
-        return {
-            x: GROUND_POS.x + Math.random() * 10,
-            y: GROUND_POS.y + 2,
-            z: GROUND_POS.z + Math.random() * 10,
+        let position: Position
+        do {
+            position = {
+                x: GROUND_POS.x + Math.random() * 10,
+                y: GROUND_POS.y + 2,
+                z: GROUND_POS.z + Math.random() * 10,
+            }
+        } while (!this.isValidPosition(position))
+
+        return position
+    }
+
+    private isValidPosition(newPos: Position): boolean {
+        // 기존 캐릭터 위치들과의 충돌 검사
+        for (const character of this.characters) {
+            const distance = this.calculateDistance(newPos, character.position)
+            if (distance < MIN_DISTANCE) {
+                return false
+            }
         }
+        return true
+    }
+
+    public calculateDistance(pos1: Position, pos2: Position): number {
+        const dx = pos1.x - pos2.x
+        const dz = pos1.z - pos2.z
+        return Math.sqrt(dx * dx + dz * dz)
     }
 
     findCharacter(id: string) {
