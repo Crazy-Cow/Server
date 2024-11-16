@@ -14,8 +14,8 @@ export class Room {
     maxWaitingTime: number
 
     constructor({
-        maxPlayerCnt = 20,
-        minPlayerCnt = 10,
+        maxPlayerCnt = 2,
+        minPlayerCnt = 1,
         maxWaitingTime = 30,
     }: {
         maxPlayerCnt?: number

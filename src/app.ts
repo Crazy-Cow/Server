@@ -10,7 +10,7 @@ import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
 import { initSocket } from './socket'
 import { Server } from 'socket.io'
-import { initInGmaeSocket } from './game/server'
+// import { initInGmaeSocket } from './game/server'
 
 const port = process.env.PORT
 const corsOption: CorsOptions = { origin: '*' }
@@ -30,7 +30,7 @@ const server = app.listen(port, () => {
 const io = new Server(server, { cors: corsOption })
 
 initSocket(io)
-initInGmaeSocket(io)
+// initInGmaeSocket(io)
 
 // connectDB()
 //     .then(() => console.log('[1] DB Connected'))

@@ -35,6 +35,10 @@ class SocketImplement {
         const room = roomService.joinRoom(player)
         this.socket.join(room.roomId)
         this.broadcastRoomState(room)
+
+        if (room.state == 'playing') {
+            this.socket.to(room.roomId).emit(SOCKET_EMIT_EVT_TYPE.GAME_START)
+        }
     }
 
     private handleRoomLeave = (args: SocketOnEvtData['room.leave']) => {
