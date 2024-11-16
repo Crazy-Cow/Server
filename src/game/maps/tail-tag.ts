@@ -2,8 +2,19 @@ import { Character, Position } from '../objects/player'
 import { CommonMap } from './common'
 
 const TAIL_STEAL_DISTANCE = 5
+const HAS_TAIL_RATIO = 2
 
 export class TailTagMap extends CommonMap {
+    constructor() {
+        super()
+
+        for (let i = 0; i < this.characters.length; i++) {
+            if (i % HAS_TAIL_RATIO == 0) {
+                this.characters[i][0].setHasTail(true)
+            }
+        }
+    }
+
     private calculateDistance(pos1: Position, pos2: Position) {
         const dx = pos1.x - pos2.x
         const dz = pos1.z - pos2.z
