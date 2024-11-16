@@ -1,5 +1,9 @@
 import { Request, Response } from 'express'
-import { CreateUserRequest, CreateUserResponse } from './users.type'
+import {
+    CreateUserRequest,
+    CreateUserResponse,
+    GetRandomNickNameResponse,
+} from './users.type'
 import userService from '../service/users'
 import StatusCode from '../constants/statusCode'
 import {
@@ -7,6 +11,17 @@ import {
     ErrorResponse,
     handleToCatchInternalServerError,
 } from '../utils/error'
+import userUtil from '../service/users.util'
+
+export const getRandomNicknameController = (
+    _,
+    res: Response<GetRandomNickNameResponse | ErrorResponse>
+) => {
+    const nickname = userUtil.generateGuestNickName()
+    res.status(StatusCode.OK).json({
+        nickName: nickname,
+    })
+}
 
 export const createUserController = (
     req: Request<object, object, CreateUserRequest>,
