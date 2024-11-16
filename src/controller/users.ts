@@ -45,6 +45,13 @@ export const createUserController = (
         return
     }
 
+    if (!nickName) {
+        res.status(StatusCode.BadRequest).json(
+            createErrorRes({ msg: '[nickName] is required' })
+        )
+        return
+    }
+
     try {
         if (userService.checkDuplicatedNickName(userId, nickName)) {
             res.status(StatusCode.Conflict).json(
