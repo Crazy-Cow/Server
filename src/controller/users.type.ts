@@ -1,3 +1,7 @@
+export type GetRandomNickNameRequest = {
+    userId: string
+}
+
 export type GetRandomNickNameResponse = {
     nickName: string
 }

@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import {
     CreateUserRequest,
     CreateUserResponse,
+    GetRandomNickNameRequest,
     GetRandomNickNameResponse,
 } from './users.type'
 import userService from '../service/users'
@@ -11,13 +12,21 @@ import {
     ErrorResponse,
     handleToCatchInternalServerError,
 } from '../utils/error'
-import userUtil from '../service/users.util'
 
 export const getRandomNicknameController = (
-    _,
+    req: Request<object, object, GetRandomNickNameRequest>,
     res: Response<GetRandomNickNameResponse | ErrorResponse>
 ) => {
-    const nickname = userUtil.generateGuestNickName()
+    const { userId } = req.body
+
+    if (!userId) {
+        res.status(StatusCode.BadRequest).json(
+            createErrorRes({ msg: '[userId] is required' })
+        )
+        return
+    }
+
+    const nickname = userService.createTempNickname(userId)
     res.status(StatusCode.OK).json({
         nickName: nickname,
     })
@@ -28,8 +37,16 @@ export const createUserController = (
     res: Response<CreateUserResponse | ErrorResponse>
 ) => {
     const { userId, nickName } = req.body
+
+    if (!userId) {
+        res.status(StatusCode.BadRequest).json(
+            createErrorRes({ msg: '[userId] is required' })
+        )
+        return
+    }
+
     try {
-        if (userService.checkDuplicatedNickName(nickName)) {
+        if (userService.checkDuplicatedNickName(userId, nickName)) {
             res.status(StatusCode.Conflict).json(
                 createErrorRes({ msg: '중복된 닉네임입니다' })
             )
