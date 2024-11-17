@@ -19,6 +19,10 @@
         <button id="leaveRoomButton">Leave Room</button>
         <br />
         <div id="roomState"></div>
+        <br />
+        <div id="gamePlay"></div>
+        <br />
+        <div id="gameState"></div>
         <script>
             let socketId = ''
             const socket = io.connect('http://localhost:8000')
@@ -63,8 +67,19 @@
             })
 
             socket.on('room.changeState', (data) => {
-                console.log('Received room.changeState:', data)
                 $('#roomState').text(`Room State: ${JSON.stringify(data)}`)
+            })
+
+            socket.on('game.start', (data) => {
+                $('#gamePlay').text(`GAME START!: ${JSON.stringify(data)}`)
+            })
+
+            socket.on('game.over', (data) => {
+                $('#gamePlay').text(`GAME END!`)
+            })
+
+            socket.on('game.state', (data) => {
+                $('#gameState').text(`Game State: ${JSON.stringify(data)}`)
             })
         </script>
     </body>

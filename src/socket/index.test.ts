@@ -31,11 +31,7 @@ describe('대기실 관련 소켓 통신 테스트', () => {
     })
 
     it('should work with an acknowledgement', (done) => {
-        const mockRoom = new Room({
-            maxPlayerCnt: 5,
-            minPlayerCnt: 2,
-            maxWaitingTime: 30,
-        })
+        const mockRoom = new Room({ maxPlayerCnt: 5 })
         const mockPlayer = new User('user-id', 'nick-name')
         mockRoom.addPlayer(mockPlayer)
         roomService.joinRoom = jest.fn().mockReturnValue(mockRoom)

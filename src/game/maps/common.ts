@@ -1,3 +1,7 @@
+import {
+    SocketEmitEvtDataGameStateV1Item,
+    SocketEmitEvtDataGameStateV2,
+} from 'socket/type'
 import { Character, Position } from '../objects/player'
 
 const GROUND_POS = {
@@ -8,14 +12,26 @@ const GROUND_POS = {
 
 const MIN_DISTANCE = 2
 
-export class CommonMap {
-    private updateInterval: number
-    characters: Character[] = []
-    private intervalId?: NodeJS.Timeout
+export type MapInitialType = { remainRunningTime: number }
+export type MapStartLoopType = {
+    handleGameStateV1: (data: SocketEmitEvtDataGameStateV1Item[]) => void
+    handleGameStateV2: (data: SocketEmitEvtDataGameStateV2) => void
+    handleGameOver: () => void
+}
 
-    constructor() {
-        this.updateInterval = 1 / 60 // 60 FPS
+export class CommonMap {
+    private updateInterval = 1 / 60 // 60 FPS
+    private remainRunningTime = 0
+    private loopIdToReduceTime?: NodeJS.Timeout
+    private loopIdToUpdateGameState?: NodeJS.Timeout
+
+    characters: Character[] = []
+
+    constructor({ remainRunningTime }: MapInitialType) {
+        this.remainRunningTime = remainRunningTime
     }
+
+    init() {}
 
     private generateRandomPosition(): Position {
         // TODO: 안겹치게 생성되도록
@@ -62,7 +78,7 @@ export class CommonMap {
         this.characters = this.characters.filter((char) => char.id !== id)
     }
 
-    convertGameState() {
+    convertGameStateV1(): SocketEmitEvtDataGameStateV1Item[] {
         return this.characters.map((char) => ({
             id: char.id,
             position: char.position,
@@ -74,22 +90,57 @@ export class CommonMap {
         }))
     }
 
+    convertGameStateV2(): SocketEmitEvtDataGameStateV2 {
+        return {
+            remainRunningTime: this.remainRunningTime,
+            characters: this.convertGameStateV1(),
+        }
+    }
+
     updateGameState() {
         // TODO: 검증로직
     }
 
-    startGameLoop(emitter: (data: unknown) => void) {
-        this.intervalId = setInterval(() => {
+    startGameLoop({
+        handleGameStateV1,
+        handleGameStateV2,
+        handleGameOver,
+    }: MapStartLoopType) {
+        this.loopIdToReduceTime = setInterval(() => {
+            this.remainRunningTime -= 1
+
+            if (this.isGameOver()) {
+                handleGameOver()
+                this.stopGameLoop()
+            }
+        }, 1000)
+
+        this.loopIdToUpdateGameState = setInterval(() => {
             this.updateGameState()
-            const gameState = this.convertGameState()
-            emitter(gameState) // 특정 방이나 전체에 상태를 브로드캐스트
+
+            const gameStateV1 = this.convertGameStateV1()
+            handleGameStateV1(gameStateV1)
+
+            const gameStateV2 = this.convertGameStateV2()
+            handleGameStateV2(gameStateV2)
         }, 1000 * this.updateInterval)
     }
 
     stopGameLoop() {
-        if (this.intervalId) {
-            clearInterval(this.intervalId)
-            this.intervalId = undefined
+        if (this.loopIdToReduceTime) {
+            clearInterval(this.loopIdToReduceTime)
+            this.loopIdToReduceTime = undefined
         }
+
+        if (this.loopIdToUpdateGameState) {
+            clearInterval(this.loopIdToUpdateGameState)
+            this.loopIdToUpdateGameState = undefined
+        }
+    }
+
+    private isGameOver(): boolean {
+        const cond1 = this.remainRunningTime <= 0
+        const cond2 = this.characters.length == 0
+        return cond1 || cond2
     }
 }

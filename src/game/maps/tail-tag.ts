@@ -2,8 +2,19 @@ import { Character } from '../objects/player'
 import { CommonMap } from './common'
 
 const TAIL_STEAL_DISTANCE = 5
+const HAS_TAIL_RATIO = 2
 
 export class TailTagMap extends CommonMap {
+    init() {
+        super.init()
+
+        for (let i = 0; i < this.characters.length; i++) {
+            if (i % HAS_TAIL_RATIO == 0) {
+                this.characters[i].setHasTail(true)
+            }
+        }
+    }
+
     handleCatch(character: Character) {
         if (character.hasTail) return // 이미 꼬리를 가지고 있다면 훔치지 않음
 
