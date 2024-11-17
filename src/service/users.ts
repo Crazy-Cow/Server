@@ -2,12 +2,19 @@ import util from './users.util'
 
 export class User {
     userId: string
-
     nickName: string
+    roomId: string
 
     constructor(userId: string, nickName: string) {
         this.userId = userId
         this.nickName = nickName
+    }
+
+    updateRoomId = (roomId: string) => {
+        this.roomId = roomId
+    }
+    resetRoomId = () => {
+        this.roomId = undefined
     }
 }
 
@@ -75,6 +82,7 @@ class UserService {
 
     removeUser(userId: string) {
         this.userPool.removeUser(userId)
+        this.userPool.removeTempNickname(userId)
     }
 
     checkDuplicatedNickName(userId: string, nickName: string) {
