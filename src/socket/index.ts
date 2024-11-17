@@ -30,7 +30,11 @@ class SocketImplement {
         const userId = this.socket.id
         const room = roomService.leaveRoom(userId)
         userService.removeUser(userId)
-        this.broadcastRoomState(room)
+
+        if (room) {
+            // user가 존재하던 room
+            this.broadcastRoomState(room)
+        }
 
         // ingame
         if (this.gameMap) {
@@ -84,9 +88,10 @@ class SocketImplement {
 
     private handleStartGame = (room: Room) => {
         this.gameMap = room.gameMap
-        this.gameMap.addCharacter(this.socket.id)
+        this.broadcast(room.roomId, 'game.start', { players: room.players })
 
-        this.broadcast(room.roomId, 'game.start', undefined)
+        room.moveUserToInGame()
+
         room.startGameLoop({
             handleGameStateV1: (data) => {
                 this.broadcast(room.roomId, 'characters', data)

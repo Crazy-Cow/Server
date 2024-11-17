@@ -53,6 +53,12 @@ export class Room {
         return this.getPlayerCnt() >= this.maxPlayerCnt
     }
 
+    moveUserToInGame() {
+        for (const user of this.players) {
+            this.gameMap.addCharacter(user.userId)
+        }
+    }
+
     startGameLoop(props: MapStartLoopType) {
         this.gameMap.startGameLoop({
             ...props,
@@ -88,18 +94,19 @@ class RoomPool {
     leaveRoom(userId: string) {
         const player = userService.findUserById(userId)
 
+        if (!player) return
+
         if (player.roomId === this.waitingRoom.roomId) {
             this.waitingRoom.removePlayer(userId)
+            return this.waitingRoom
         } else {
             for (const room of this.gameRooms) {
                 if (room.roomId === player.roomId) {
                     room.removePlayer(userId)
-                    break
+                    return room
                 }
             }
         }
-
-        return this.waitingRoom
     }
 
     deleteGameRoom(room: Room) {
