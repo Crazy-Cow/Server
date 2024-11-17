@@ -26,6 +26,7 @@ export type SocketEmitEvtDataGameStateV2 = {
 
 export type SocketEmitEvtData = {
     [SOCKET_EMIT_EVT_TYPE.ROOM_CHANGE_STATE]: {
+        roomId: string
         state: RoomState
         playerCnt: number
         maxPlayerCnt: number
