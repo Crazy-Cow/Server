@@ -14,12 +14,7 @@ export class Room {
     maxWaitingTime: number
     gameMap: CommonMap = new TailTagMap({ remainRunningTime: 10 })
 
-    constructor({
-        maxPlayerCnt = 2,
-    }: {
-        maxPlayerCnt?: number
-        maxWaitingTime?: number
-    }) {
+    constructor({ maxPlayerCnt = 2 }: { maxPlayerCnt?: number }) {
         this.roomId = util.generateRoomId()
         this.createdAt = new Date()
         this.state = 'waiting'
