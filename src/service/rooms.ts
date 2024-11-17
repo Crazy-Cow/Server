@@ -1,4 +1,4 @@
-import { User } from './users'
+import userService, { User } from './users'
 import util from './rooms.util'
 import { CommonMap, TailTagMap } from '../game/maps'
 import { MapStartLoopType } from 'game/maps/common'
@@ -33,10 +33,16 @@ export class Room {
 
     addPlayer = (player: User) => {
         this.players.push(player)
+        player.updateRoomId(this.roomId)
     }
 
     removePlayer = (userId: string) => {
-        this.players = this.players.filter((user) => user.userId !== userId)
+        const player = this.players.find((user) => user.userId === userId)
+
+        if (player) {
+            this.players = this.players.filter((user) => user.userId !== userId)
+            player.resetRoomId()
+        }
     }
 
     canStartGame = (): boolean => {
@@ -85,7 +91,19 @@ class RoomPool {
     }
 
     leaveRoom(userId: string) {
-        this.waitingRoom.removePlayer(userId)
+        const player = userService.findUserById(userId)
+
+        if (player.roomId === this.waitingRoom.roomId) {
+            this.waitingRoom.removePlayer(userId)
+        } else {
+            for (const room of this.gameRooms) {
+                if (room.roomId === player.roomId) {
+                    room.removePlayer(userId)
+                    break
+                }
+            }
+        }
+
         return this.waitingRoom
     }
 
@@ -95,7 +113,7 @@ class RoomPool {
         )
 
         if (gameRoomIndex > -1) {
-            this.gameRooms.splice(gameRoomIndex, 1) // 게임 종료 후 gameRooms에서 제거
+            this.gameRooms.splice(gameRoomIndex, 1)
         }
     }
 }

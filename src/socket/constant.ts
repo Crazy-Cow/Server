@@ -6,7 +6,7 @@ export const SOCKET_ON_EVT_TYPE = {
     MOVE: 'move',
 } as const
 
-export type SOCKET_EMIT_EVT_TYPE_NEW =
+export type SocketEmitEvtTypeNew =
     | 'room.changeState' // 대기실 상태 변경
     | 'game.start' // 게임 시작
     | 'characters' // v1 게임 상태

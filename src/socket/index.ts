@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io'
-import { SOCKET_EMIT_EVT_TYPE_NEW, SOCKET_ON_EVT_TYPE } from './constant'
+import { SocketEmitEvtTypeNew, SOCKET_ON_EVT_TYPE } from './constant'
 import { SocketOnEvtData } from './type'
 import roomService, { Room } from '../service/rooms'
 import userService from '../service/users'
@@ -21,7 +21,7 @@ class SocketImplement {
         this.socket.on(SOCKET_ON_EVT_TYPE.DISCONNECT, this.handleDisconnect)
         this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_ENTER, this.handleRoomEnter)
         this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_LEAVE, this.handleRoomLeave)
-        this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_LEAVE, this.handleMove)
+        this.socket.on(SOCKET_ON_EVT_TYPE.MOVE, this.handleMove)
         this.logger('eventHandlers registered')
     }
 
@@ -40,8 +40,8 @@ class SocketImplement {
 
     private broadcast = (
         roomId: string,
-        emitMessage: SOCKET_EMIT_EVT_TYPE_NEW,
-        data: any // TODO: emitMessage에 따른 data 타입 결정하기
+        emitMessage: SocketEmitEvtTypeNew,
+        data: unknown // TODO: emitMessage에 따른 data 타입 결정하기
     ) => {
         this.logger(`roomId${roomId}, emitMessage: ${emitMessage}`)
 
