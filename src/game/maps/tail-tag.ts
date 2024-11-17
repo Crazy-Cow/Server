@@ -1,16 +1,10 @@
-import { Character, Position } from '../objects/player'
+import { Character } from '../objects/player'
 import { CommonMap } from './common'
 
 const TAIL_STEAL_DISTANCE = 5
 const HAS_TAIL_RATIO = 2
 
 export class TailTagMap extends CommonMap {
-    private calculateDistance(pos1: Position, pos2: Position) {
-        const dx = pos1.x - pos2.x
-        const dz = pos1.z - pos2.z
-        return Math.sqrt(dx * dx + dz * dz)
-    }
-
     init() {
         super.init()
 
@@ -30,7 +24,7 @@ export class TailTagMap extends CommonMap {
                 other.hasTail &&
                 !other.isBeingStolen // 다른 캐릭터가 훔쳐지는 중인지 확인
             ) {
-                const distance = this.calculateDistance(
+                const distance = super.calculateDistance(
                     character.position,
                     other.position
                 )
@@ -60,17 +54,6 @@ export class TailTagMap extends CommonMap {
             character.isBeingStolen = false
 
             if (character.shift) this.handleCatch(character)
-
-            // 꼬리가 있을 때 색상 변경
-            if (character.hasTail) {
-                character.bodyColor = '#888888'
-                character.hairColor = '#888888'
-                character.bellyColor = '#888888'
-            } else {
-                character.bodyColor = '#FFFFFF'
-                character.hairColor = '#FFFFFF'
-                character.bellyColor = '#FFFFFF'
-            }
         })
     }
 }
