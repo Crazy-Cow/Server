@@ -1,12 +1,12 @@
 import { Character, Position } from '../objects/player'
-import { CommonMap } from './common'
+import { CommonMap, MapInitialType } from './common'
 
 const TAIL_STEAL_DISTANCE = 5
 const HAS_TAIL_RATIO = 2
 
 export class TailTagMap extends CommonMap {
-    constructor() {
-        super()
+    constructor(initialProps: MapInitialType) {
+        super(initialProps)
 
         for (let i = 0; i < this.characters.length; i++) {
             if (i % HAS_TAIL_RATIO == 0) {

@@ -1,25 +1,23 @@
 import { User } from './users'
 import util from './rooms.util'
+import { CommonMap, TailTagMap } from '../game/maps'
+import { MapStartLoopType } from 'game/maps/common'
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
-// 그룹 (대기실 | 게임중)
 export class Room {
     roomId: string
     players: User[] = []
     createdAt: Date
     state: RoomState = 'initial'
     maxPlayerCnt: number
-    minPlayerCnt: number
     maxWaitingTime: number
+    gameMap: CommonMap = new TailTagMap({ remainRunningTime: 10 })
 
     constructor({
         maxPlayerCnt = 2,
-        minPlayerCnt = 1,
-        maxWaitingTime = 30,
     }: {
         maxPlayerCnt?: number
-        minPlayerCnt?: number
         maxWaitingTime?: number
     }) {
         this.roomId = util.generateRoomId()
@@ -27,8 +25,6 @@ export class Room {
         this.state = 'waiting'
 
         this.maxPlayerCnt = maxPlayerCnt
-        this.minPlayerCnt = minPlayerCnt
-        this.maxWaitingTime = maxWaitingTime
     }
 
     getPlayerCnt = () => {
@@ -44,16 +40,9 @@ export class Room {
     }
 
     canStartGame = (): boolean => {
-        const currentTime = new Date()
-        const waitingTime =
-            (currentTime.getTime() - this.createdAt.getTime()) / 1000 // time in seconds
-
         const cond1 = this.isFull()
-        const cond2 =
-            this.getPlayerCnt() >= this.minPlayerCnt &&
-            waitingTime >= this.maxWaitingTime
 
-        if (cond1 || cond2) {
+        if (cond1) {
             return true
         }
         return false
@@ -61,6 +50,16 @@ export class Room {
 
     isFull = (): boolean => {
         return this.getPlayerCnt() >= this.maxPlayerCnt
+    }
+
+    startGameLoop(props: MapStartLoopType) {
+        this.gameMap.startGameLoop({
+            ...props,
+            handleGameOver: () => {
+                this.state = 'gameOver'
+                props.handleGameOver()
+            },
+        })
     }
 }
 
@@ -73,7 +72,7 @@ class RoomPool {
     }
 
     joinRoom(user: User) {
-        const roomUserIn = this.waitingRoom
+        const prevWaitingRoom = this.waitingRoom
         this.waitingRoom.addPlayer(user)
 
         if (this.waitingRoom.canStartGame()) {
@@ -82,12 +81,22 @@ class RoomPool {
             this.waitingRoom = new Room({})
         }
 
-        return roomUserIn
+        return prevWaitingRoom
     }
 
     leaveRoom(userId: string) {
         this.waitingRoom.removePlayer(userId)
         return this.waitingRoom
+    }
+
+    deleteGameRoom(room: Room) {
+        const gameRoomIndex = this.gameRooms.findIndex(
+            (r) => r.roomId === room.roomId
+        )
+
+        if (gameRoomIndex > -1) {
+            this.gameRooms.splice(gameRoomIndex, 1) // 게임 종료 후 gameRooms에서 제거
+        }
     }
 }
 
@@ -113,6 +122,10 @@ class RoomService {
 
     leaveRoom(userId: string) {
         return this.roomPool.leaveRoom(userId)
+    }
+
+    endGame(room: Room) {
+        this.roomPool.deleteGameRoom(room)
     }
 }
 

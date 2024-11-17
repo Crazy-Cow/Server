@@ -1,12 +1,16 @@
 import { Server, Socket } from 'socket.io'
-import { SOCKET_EMIT_EVT_TYPE, SOCKET_ON_EVT_TYPE } from './constant'
+import { SOCKET_EMIT_EVT_TYPE_NEW, SOCKET_ON_EVT_TYPE } from './constant'
 import { SocketOnEvtData } from './type'
 import roomService, { Room } from '../service/rooms'
 import userService from '../service/users'
 import util from './index.util'
+import { CommonMap } from '../game/maps'
+import { SocketMoveData } from 'game/server/index.type'
+import inGameSocketHandler from '../game/server/index.util'
 
 class SocketImplement {
     socket: Socket
+    gameMap: CommonMap
 
     constructor(socket: Socket) {
         this.socket = socket
@@ -17,6 +21,7 @@ class SocketImplement {
         this.socket.on(SOCKET_ON_EVT_TYPE.DISCONNECT, this.handleDisconnect)
         this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_ENTER, this.handleRoomEnter)
         this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_LEAVE, this.handleRoomLeave)
+        this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_LEAVE, this.handleMove)
         this.logger('eventHandlers registered')
     }
 
@@ -26,6 +31,25 @@ class SocketImplement {
         const room = roomService.leaveRoom(userId)
         userService.removeUser(userId)
         this.broadcastRoomState(room)
+
+        // ingame
+        if (this.gameMap) {
+            this.gameMap.removeCharacter(this.socket.id)
+        }
+    }
+
+    private broadcast = (
+        roomId: string,
+        emitMessage: SOCKET_EMIT_EVT_TYPE_NEW,
+        data: any // TODO: emitMessage에 따른 data 타입 결정하기
+    ) => {
+        this.logger(`roomId${roomId}, emitMessage: ${emitMessage}`)
+
+        // self
+        this.socket.emit(emitMessage, data)
+
+        // the other
+        this.socket.to(roomId).emit(emitMessage, data)
     }
 
     private handleRoomEnter = (args: SocketOnEvtData['room.enter']) => {
@@ -36,8 +60,8 @@ class SocketImplement {
         this.socket.join(room.roomId)
         this.broadcastRoomState(room)
 
-        if (room.state == 'playing') {
-            this.socket.to(room.roomId).emit(SOCKET_EMIT_EVT_TYPE.GAME_START)
+        if (room.state === 'playing') {
+            this.handleStartGame(room)
         }
     }
 
@@ -48,16 +72,32 @@ class SocketImplement {
         this.broadcastRoomState(room)
     }
 
+    private handleMove = (data: SocketMoveData) => {
+        const character = this.gameMap.findCharacter(this.socket.id)
+        inGameSocketHandler.handleMove(character, data)
+    }
+
     private broadcastRoomState = (room: Room) => {
         const data = util.getRoomStateDto(room)
+        this.broadcast(room.roomId, 'room.changeState', data)
+    }
 
-        // self
-        this.socket.emit(SOCKET_EMIT_EVT_TYPE.ROOM_CHANGE_STATE, data)
+    private handleStartGame = (room: Room) => {
+        this.gameMap = room.gameMap
+        this.gameMap.addCharacter(this.socket.id)
 
-        // the other
-        this.socket
-            .to(room.roomId)
-            .emit(SOCKET_EMIT_EVT_TYPE.ROOM_CHANGE_STATE, data)
+        this.broadcast(room.roomId, 'game.start', undefined)
+        room.startGameLoop({
+            handleGameStateV1: (data) => {
+                this.broadcast(room.roomId, 'characters', data)
+            },
+            handleGameStateV2: (data) => {
+                this.broadcast(room.roomId, 'game.state', data)
+            },
+            handleGameOver: () => {
+                this.broadcast(room.roomId, 'game.over', undefined)
+            },
+        })
     }
 
     public logger = (msg: string, args?: SocketOnEvtData) => {
