@@ -16,7 +16,7 @@ export class TailTagMap extends CommonMap {
 
         for (let i = 0; i < this.characters.length; i++) {
             if (i % HAS_TAIL_RATIO == 0) {
-                this.characters[i][0].setHasTail(true)
+                this.characters[i].setHasTail(true)
             }
         }
     }

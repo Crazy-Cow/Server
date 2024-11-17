@@ -47,7 +47,7 @@ class SocketImplement {
         emitMessage: SocketEmitEvtTypeNew,
         data: unknown // TODO: emitMessage에 따른 data 타입 결정하기
     ) => {
-        this.logger(`roomId${roomId}, emitMessage: ${emitMessage}`)
+        // this.logger(`roomId${roomId}, emitMessage: ${emitMessage}`)
 
         // self
         this.socket.emit(emitMessage, data)
