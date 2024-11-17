@@ -38,6 +38,8 @@ export class CommonMap {
         }
     }
 
+    init() {}
+
     findCharacter(id: string) {
         return this.characters.find((char) => char.id === id)
     }

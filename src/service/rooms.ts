@@ -53,10 +53,12 @@ export class Room {
         return this.getPlayerCnt() >= this.maxPlayerCnt
     }
 
-    moveUserToInGame() {
+    loadGame() {
         for (const user of this.players) {
             this.gameMap.addCharacter(user.userId)
         }
+
+        this.gameMap.init()
     }
 
     startGameLoop(props: MapStartLoopType) {

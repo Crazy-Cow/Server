@@ -90,7 +90,7 @@ class SocketImplement {
         this.gameMap = room.gameMap
         this.broadcast(room.roomId, 'game.start', { players: room.players })
 
-        room.moveUserToInGame()
+        room.loadGame()
 
         room.startGameLoop({
             handleGameStateV1: (data) => {
