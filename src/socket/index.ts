@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io'
-import { SocketEmitEvtTypeNew, SOCKET_ON_EVT_TYPE } from './constant'
-import { SocketOnEvtData } from './type'
+import { SOCKET_ON_EVT_TYPE } from './constant'
+import { SocketEmitEvtType, SocketOnEvtData } from './type'
 import roomService, { Room } from '../service/rooms'
 import userService from '../service/users'
 import util from './index.util'
@@ -44,7 +44,7 @@ class SocketImplement {
 
     private broadcast = (
         roomId: string,
-        emitMessage: SocketEmitEvtTypeNew,
+        emitMessage: SocketEmitEvtType,
         data: unknown // TODO: emitMessage에 따른 data 타입 결정하기
     ) => {
         // this.logger(`roomId${roomId}, emitMessage: ${emitMessage}`)

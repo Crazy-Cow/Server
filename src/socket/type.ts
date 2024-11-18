@@ -1,5 +1,5 @@
 import { RoomState } from 'service/rooms'
-import { SOCKET_ON_EVT_TYPE, SOCKET_EMIT_EVT_TYPE } from './constant'
+import { SOCKET_ON_EVT_TYPE } from './constant'
 import { Character } from 'game/objects/player'
 
 export type SocketOnEvtData = {
@@ -24,14 +24,26 @@ export type SocketEmitEvtDataGameStateV2 = {
     characters: SocketEmitEvtDataGameStateV1Item[]
 }
 
-export type SocketEmitEvtData = {
-    [SOCKET_EMIT_EVT_TYPE.ROOM_CHANGE_STATE]: {
+export type SocketEmitEvtType =
+    | 'room.changeState' // 대기실 상태 변경
+    | 'game.start' // 게임 시작
+    | 'characters' // v1 게임 상태
+    | 'game.state' // v2 게임 상태
+    | 'game.over' // 게임 종료
+
+type SocketEmitEvtDataMap = {
+    'room.changeState': {
         roomId: string
         state: RoomState
         playerCnt: number
         maxPlayerCnt: number
     }
-    [SOCKET_EMIT_EVT_TYPE.GAME_STATE]: SocketEmitEvtDataGameStateV2
-    [SOCKET_EMIT_EVT_TYPE.GAME_START]: undefined
-    [SOCKET_EMIT_EVT_TYPE.GAME_OVER]: undefined
+    'game.start': undefined
+    characters: SocketEmitEvtDataGameStateV1Item[]
+    'game.state': SocketEmitEvtDataGameStateV2
+    'game.over': undefined
+}
+
+export type SocketEmitEvtDataType = {
+    [K in SocketEmitEvtType]: SocketEmitEvtDataMap[K]
 }
