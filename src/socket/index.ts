@@ -4,7 +4,6 @@ import roomService, { Room } from '../service/rooms'
 import userService from '../service/users'
 import util from './index.util'
 import { CommonMap } from '../game/maps'
-import inGameSocketHandler from '../game/server/index.util'
 import { OnEventData, OnEventName } from './types/on'
 
 class SocketImplement {
@@ -77,7 +76,7 @@ class SocketImplement {
 
     private handleMove = (data: OnEventData['move']) => {
         const character = this.gameMap.findCharacter(this.socket.id)
-        inGameSocketHandler.handleMove(character, data)
+        util.handleMove(character, data)
     }
 
     private broadcastRoomState = (room: Room) => {
