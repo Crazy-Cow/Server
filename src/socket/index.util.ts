@@ -1,9 +1,7 @@
 import { Room } from '../service/rooms'
-import { SocketEmitEvtDataType } from './type'
+import { EmitEventData } from './type'
 
-const getRoomStateDto = (
-    room: Room
-): SocketEmitEvtDataType['room.changeState'] => {
+const getRoomStateDto = (room: Room): EmitEventData['room.changeState'] => {
     return {
         roomId: room.roomId,
         playerCnt: room.players.length,

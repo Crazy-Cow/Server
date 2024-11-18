@@ -1,7 +1,7 @@
-import { Character } from 'game/objects/player'
-import { SocketMoveData } from './index.type'
+import { Character } from '../../game/objects/player'
+import { OnEventData } from '../../socket/type'
 
-const handleMove = (character: Character, data: SocketMoveData) => {
+const handleMove = (character: Character, data: OnEventData['move']) => {
     character.shift = data.shift
     character.position = data.character.position
     character.velocity = data.character.velocity
