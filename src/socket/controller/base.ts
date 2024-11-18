@@ -1,10 +1,18 @@
 import { Socket } from 'socket.io'
-import { EmitEventName } from 'socket/types/emit'
-import { OnEventData } from 'socket/types/on'
+import { EmitEventName } from '../../socket/types/emit'
+import { OnEventData } from '../../socket/types/on'
+import { User } from '../../service/users'
+
+export interface BaseCtrlInitProps {
+    userId: string
+    socket: Socket
+}
 
 export abstract class BaseController {
+    userId: User['userId']
     socket: Socket
-    constructor({ socket }: { socket: Socket }) {
+    constructor({ userId, socket }: BaseCtrlInitProps) {
+        this.userId = userId
         this.socket = socket
     }
 
@@ -12,7 +20,7 @@ export abstract class BaseController {
     abstract disconnect(): void
 
     getUserId(): string {
-        return this.socket.id
+        return this.userId
     }
 
     broadcast(roomId: string, emitMessage: EmitEventName, data: unknown) {

@@ -21,11 +21,11 @@ class IngameController extends BaseController {
     }
 
     disconnect() {
-        this.gameMap?.removeCharacter(this.socket.id)
+        this.gameMap?.removeCharacter(this.getUserId())
     }
 
     private handleMove = (data: OnEventData['move']) => {
-        const character = this.gameMap.findCharacter(this.socket.id)
+        const character = this.gameMap.findCharacter(this.getUserId())
         handleMove(character, data)
     }
 

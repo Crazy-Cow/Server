@@ -67,7 +67,9 @@
 
             // Join Room
             $('#joinRoomButton').click(function () {
-                socket = io.connect('http://localhost:8000')
+                socket = io.connect('http://localhost:8000', {
+                    auth: { token: accessToken },
+                })
 
                 // Room State Update
                 socket.on('room.changeState', (data) => {

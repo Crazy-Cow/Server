@@ -1,5 +1,4 @@
-import { Socket } from 'socket.io'
-import { BaseController } from './base'
+import { BaseController, BaseCtrlInitProps } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import userService from '../../service/users'
@@ -15,11 +14,15 @@ function getRoomStateDto(room: Room): EmitEventData['room.changeState'] {
     }
 }
 
+interface OutgameCtrlInitProps extends BaseCtrlInitProps {
+    ingameCtrl: IngameController
+}
+
 // 로비 ~ 대기실
 class OutgameController extends BaseController {
     ingameCtrl: IngameController
 
-    constructor(props: { socket: Socket; ingameCtrl: IngameController }) {
+    constructor(props: OutgameCtrlInitProps) {
         super(props)
         this.ingameCtrl = props.ingameCtrl
     }
@@ -47,7 +50,7 @@ class OutgameController extends BaseController {
 
     private handleRoomEnter = (args: OnEventData['room.enter']): Room => {
         this.logger('room.enter', args)
-        const userId = this.socket.id
+        const userId = this.getUserId()
         const player = userService.findUserById(userId)
         const room = roomService.joinRoom(player)
         this.socket.join(room.roomId)
@@ -62,7 +65,7 @@ class OutgameController extends BaseController {
 
     handleRoomLeave = (args: OnEventData['room.leave']) => {
         this.logger('room.leave', args)
-        const userId = this.socket.id
+        const userId = this.getUserId()
         const room = roomService.leaveRoom(userId)
         this.broadcastRoomState(room)
     }
