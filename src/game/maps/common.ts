@@ -1,7 +1,4 @@
-import {
-    SocketEmitEvtDataGameStateV1Item,
-    SocketEmitEvtDataGameStateV2,
-} from 'socket/type'
+import { SocketEmitEvtDataGameState } from 'socket/types/emit'
 import { Character, Position } from '../objects/player'
 
 const GROUND_POS = {
@@ -14,8 +11,7 @@ const MIN_DISTANCE = 2
 
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
-    handleGameStateV1: (data: SocketEmitEvtDataGameStateV1Item[]) => void
-    handleGameStateV2: (data: SocketEmitEvtDataGameStateV2) => void
+    handleGameState: (data: SocketEmitEvtDataGameState) => void
     handleGameOver: () => void
 }
 
@@ -78,22 +74,18 @@ export class CommonMap {
         this.characters = this.characters.filter((char) => char.id !== id)
     }
 
-    convertGameStateV1(): SocketEmitEvtDataGameStateV1Item[] {
-        return this.characters.map((char) => ({
-            id: char.id,
-            position: char.position,
-            bodyColor: char.bodyColor,
-            hairColor: char.hairColor,
-            bellyColor: char.bellyColor,
-            velocity: char.velocity,
-            hasTail: char.hasTail,
-        }))
-    }
-
-    convertGameStateV2(): SocketEmitEvtDataGameStateV2 {
+    convertGameState(): SocketEmitEvtDataGameState {
         return {
             remainRunningTime: this.remainRunningTime,
-            characters: this.convertGameStateV1(),
+            characters: this.characters.map((char) => ({
+                id: char.id,
+                position: char.position,
+                bodyColor: char.bodyColor,
+                hairColor: char.hairColor,
+                bellyColor: char.bellyColor,
+                velocity: char.velocity,
+                hasTail: char.hasTail,
+            })),
         }
     }
 
@@ -102,8 +94,7 @@ export class CommonMap {
     }
 
     startGameLoop({
-        handleGameStateV1,
-        handleGameStateV2,
+        handleGameState: handleGameStateV2,
         handleGameOver,
     }: MapStartLoopType) {
         this.loopIdToReduceTime = setInterval(() => {
@@ -118,10 +109,7 @@ export class CommonMap {
         this.loopIdToUpdateGameState = setInterval(() => {
             this.updateGameState()
 
-            const gameStateV1 = this.convertGameStateV1()
-            handleGameStateV1(gameStateV1)
-
-            const gameStateV2 = this.convertGameStateV2()
+            const gameStateV2 = this.convertGameState()
             handleGameStateV2(gameStateV2)
         }, 1000 * this.updateInterval)
     }

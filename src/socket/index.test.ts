@@ -4,8 +4,8 @@ import { Server, type Socket as ServerSocket } from 'socket.io'
 import { AddressInfo } from 'node:net'
 import roomService, { Room } from '../service/rooms'
 import { User } from '../service/users'
-import { SOCKET_ON_EVT_TYPE } from './constant'
 import { initSocket } from '.'
+import { OnEventName } from './types/on'
 
 describe('대기실 관련 소켓 통신 테스트', () => {
     let io: Server, serverSocket: ServerSocket, clientSocket: ClientSocket
@@ -36,8 +36,8 @@ describe('대기실 관련 소켓 통신 테스트', () => {
         mockRoom.addPlayer(mockPlayer)
         roomService.joinRoom = jest.fn().mockReturnValue(mockRoom)
 
-        clientSocket.emit(SOCKET_ON_EVT_TYPE.ROOM_ENTER)
-        serverSocket.on(SOCKET_ON_EVT_TYPE.ROOM_ENTER, () => {
+        clientSocket.emit('room.enter')
+        serverSocket.on<OnEventName>('room.enter', () => {
             expect(roomService.joinRoom).toHaveBeenCalled()
             done() // 테스트 종료 필수
         })

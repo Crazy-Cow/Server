@@ -1,111 +1,38 @@
 import { Server, Socket } from 'socket.io'
-import { SocketEmitEvtTypeNew, SOCKET_ON_EVT_TYPE } from './constant'
-import { SocketOnEvtData } from './type'
-import roomService, { Room } from '../service/rooms'
-import userService from '../service/users'
-import util from './index.util'
-import { CommonMap } from '../game/maps'
-import { SocketMoveData } from 'game/server/index.type'
-import inGameSocketHandler from '../game/server/index.util'
+import { OnEventData, OnEventName } from './types/on'
+import { IngameController, OutgameController } from './controller'
 
 class SocketImplement {
     socket: Socket
-    gameMap: CommonMap
+
+    outgameCtrl: OutgameController
+    ingameCtrl: IngameController
 
     constructor(socket: Socket) {
         this.socket = socket
+        this.ingameCtrl = new IngameController({ socket })
+        this.outgameCtrl = new OutgameController({
+            socket,
+            ingameCtrl: this.ingameCtrl,
+        })
+
         this.register()
     }
 
     private register = () => {
-        this.socket.on(SOCKET_ON_EVT_TYPE.DISCONNECT, this.handleDisconnect)
-        this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_ENTER, this.handleRoomEnter)
-        this.socket.on(SOCKET_ON_EVT_TYPE.ROOM_LEAVE, this.handleRoomLeave)
-        this.socket.on(SOCKET_ON_EVT_TYPE.MOVE, this.handleMove)
         this.logger('eventHandlers registered')
+        this.socket.on<OnEventName>('disconnect', this.handleDisconnect)
+        this.outgameCtrl.register()
+        this.ingameCtrl.register()
     }
 
-    private handleDisconnect = (args: SocketOnEvtData['disconnect']) => {
+    private handleDisconnect = (args: OnEventData['disconnect']) => {
         this.logger('disconnect', args)
-        const userId = this.socket.id
-        const room = roomService.leaveRoom(userId)
-        userService.removeUser(userId)
-
-        if (room) {
-            // user가 존재하던 room
-            this.broadcastRoomState(room)
-        }
-
-        // ingame
-        if (this.gameMap) {
-            this.gameMap.removeCharacter(this.socket.id)
-        }
+        this.outgameCtrl.disconnect()
+        this.ingameCtrl.disconnect()
     }
 
-    private broadcast = (
-        roomId: string,
-        emitMessage: SocketEmitEvtTypeNew,
-        data: unknown // TODO: emitMessage에 따른 data 타입 결정하기
-    ) => {
-        // this.logger(`roomId${roomId}, emitMessage: ${emitMessage}`)
-
-        // self
-        this.socket.emit(emitMessage, data)
-
-        // the other
-        this.socket.to(roomId).emit(emitMessage, data)
-    }
-
-    private handleRoomEnter = (args: SocketOnEvtData['room.enter']) => {
-        this.logger('room.enter', args)
-        const userId = this.socket.id
-        const player = userService.findUserById(userId)
-        const room = roomService.joinRoom(player)
-        this.socket.join(room.roomId)
-        this.broadcastRoomState(room)
-
-        if (room.state === 'playing') {
-            this.handleStartGame(room)
-        }
-    }
-
-    private handleRoomLeave = (args: SocketOnEvtData['room.leave']) => {
-        this.logger('room.leave', args)
-        const userId = this.socket.id
-        const room = roomService.leaveRoom(userId)
-        this.broadcastRoomState(room)
-    }
-
-    private handleMove = (data: SocketMoveData) => {
-        const character = this.gameMap.findCharacter(this.socket.id)
-        inGameSocketHandler.handleMove(character, data)
-    }
-
-    private broadcastRoomState = (room: Room) => {
-        const data = util.getRoomStateDto(room)
-        this.broadcast(room.roomId, 'room.changeState', data)
-    }
-
-    private handleStartGame = (room: Room) => {
-        this.gameMap = room.gameMap
-        this.broadcast(room.roomId, 'game.start', { players: room.players })
-
-        room.loadGame()
-
-        room.startGameLoop({
-            handleGameStateV1: (data) => {
-                this.broadcast(room.roomId, 'characters', data)
-            },
-            handleGameStateV2: (data) => {
-                this.broadcast(room.roomId, 'game.state', data)
-            },
-            handleGameOver: () => {
-                this.broadcast(room.roomId, 'game.over', undefined)
-            },
-        })
-    }
-
-    public logger = (msg: string, args?: SocketOnEvtData) => {
+    public logger = (msg: string, args?: OnEventData) => {
         console.log(
             `[${this.socket.id}] ${msg} ${args ? JSON.stringify(args) : ''}`
         )
@@ -115,7 +42,7 @@ class SocketImplement {
 export function initSocket(io: Server): void {
     const root = io.of('/')
 
-    root.on(SOCKET_ON_EVT_TYPE.CONNECT, (socket: Socket) => {
+    root.on<OnEventName>('connection', (socket: Socket) => {
         const instance = new SocketImplement(socket)
         instance.logger('complete connection')
     })
