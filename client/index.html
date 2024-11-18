@@ -9,12 +9,18 @@
     </head>
     <body>
         <h1>Socket.IO Client</h1>
-        <label>별명</label>
+
+        <!-- Nickname Registration Section -->
+        <label for="nickname">별명</label>
         <input id="nickname" />
         <button id="checkNicknameButton">별명 등록</button>
         <span id="nicknameStatus"></span>
         <br />
+
+        <span id="accessToken">AccessToken</span>
         <br />
+
+        <!-- Room Interaction -->
         <button id="joinRoomButton">Join Room</button>
         <button id="leaveRoomButton">Leave Room</button>
         <br />
@@ -23,22 +29,23 @@
         <div id="gamePlay"></div>
         <br />
         <div id="gameState"></div>
-        <script>
-            let socketId = ''
-            const socket = io.connect('http://localhost:8000')
-            socket.on('connect', () => {
-                socketId = socket.id
-            })
 
+        <script>
+            let accessToken = ''
+            let socket
+
+            // Register nickname
             $('#checkNicknameButton').click(function () {
                 const nickname = document.getElementById('nickname').value
-                fetch('http://localhost:8000/user/enter', {
+                if (!nickname) {
+                    $('#nicknameStatus').text('[nickName] is required')
+                    return
+                }
+
+                fetch('http://localhost:8000/user/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userId: socketId,
-                        nickName: nickname,
-                    }),
+                    body: JSON.stringify({ nickName: nickname }),
                 })
                     .then((response) => {
                         if (!response.ok) {
@@ -49,37 +56,47 @@
                         return response.json()
                     })
                     .then((data) => {
-                        $('#nicknameStatus').text(`등록 성공: ${data.nickName}`)
+                        accessToken = data.accessToken
+                        $('#accessToken').text(`accessToken: ${accessToken}`)
+                        $('#nicknameStatus').text(`등록 성공: ${nickname}`)
                     })
                     .catch((error) => {
                         $('#nicknameStatus').text('오류 발생')
                     })
             })
 
+            // Join Room
             $('#joinRoomButton').click(function () {
+                socket = io.connect('http://localhost:8000')
+
+                // Room State Update
+                socket.on('room.changeState', (data) => {
+                    $('#roomState').text(`Room State: ${JSON.stringify(data)}`)
+                })
+
+                // Game Start
+                socket.on('game.start', (data) => {
+                    $('#gamePlay').text(`GAME START!: ${JSON.stringify(data)}`)
+                })
+
+                // Game Over
+                socket.on('game.over', (data) => {
+                    $('#gamePlay').text(`GAME END!`)
+                })
+
+                // Game State Update
+                socket.on('game.state', (data) => {
+                    $('#gameState').text(`Game State: ${JSON.stringify(data)}`)
+                })
+
                 socket.emit('room.enter')
                 console.log('emit (room.enter)')
             })
 
+            // Leave Room
             $('#leaveRoomButton').click(function () {
                 socket.emit('room.leave')
                 console.log('emit (room.leave)')
-            })
-
-            socket.on('room.changeState', (data) => {
-                $('#roomState').text(`Room State: ${JSON.stringify(data)}`)
-            })
-
-            socket.on('game.start', (data) => {
-                $('#gamePlay').text(`GAME START!: ${JSON.stringify(data)}`)
-            })
-
-            socket.on('game.over', (data) => {
-                $('#gamePlay').text(`GAME END!`)
-            })
-
-            socket.on('game.state', (data) => {
-                $('#gameState').text(`Game State: ${JSON.stringify(data)}`)
             })
         </script>
     </body>
