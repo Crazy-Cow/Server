@@ -3,7 +3,7 @@ import * as ctrl from '../controller/users'
 
 const router = express.Router()
 
-router.post('/random-nickname', ctrl.getRandomNicknameController)
-router.post('/enter', ctrl.createUserController)
+router.get('/random-nickname', ctrl.getRandomNicknameController)
+router.post('/register', ctrl.createUserController)
 
 export default router

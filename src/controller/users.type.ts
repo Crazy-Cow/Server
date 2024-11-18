@@ -1,7 +1,3 @@
-export type GetRandomNickNameRequest = {
-    userId: string
-}
-
 export type GetRandomNickNameResponse = {
     nickName: string
 }
@@ -12,5 +8,5 @@ export type CreateUserRequest = {
 }
 
 export type CreateUserResponse = {
-    nickName: string
+    accessToken: string
 }

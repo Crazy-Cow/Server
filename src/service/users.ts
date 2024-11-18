@@ -1,7 +1,7 @@
 import util from './users.util'
 
 export class User {
-    userId: string
+    userId: string // accessToken
     nickName: string
     roomId: string
 
@@ -20,7 +20,6 @@ export class User {
 
 class UserPool {
     users: User[] = []
-    tempNicknames: Map<string, string> = new Map()
 
     getUsers() {
         return this.users
@@ -38,18 +37,8 @@ class UserPool {
         this.users = this.users.filter((user) => user.userId !== userId)
     }
 
-    checkDuplicatedNickName(userId: string, nickName: string) {
-        if (this.users.some((user) => user.nickName === nickName)) return true
-        else if (this.tempNicknames.get(userId) == nickName) return false
-        return Array.from(this.tempNicknames.values()).includes(nickName)
-    }
-
-    addTempNickname(userId: string, nickName: string) {
-        this.tempNicknames.set(userId, nickName)
-    }
-
-    removeTempNickname(userId: string) {
-        this.tempNicknames.delete(userId)
+    checkDuplicatedNickName(nickName: string) {
+        return this.users.some((user) => user.nickName === nickName)
     }
 }
 
@@ -75,28 +64,27 @@ class UserService {
 
     createUser(userId: string, nickName: string) {
         const user = new User(userId, nickName)
-        this.userPool.removeTempNickname(userId)
         this.userPool.addUser(user)
         return user
     }
 
     removeUser(userId: string) {
         this.userPool.removeUser(userId)
-        this.userPool.removeTempNickname(userId)
     }
 
-    checkDuplicatedNickName(userId: string, nickName: string) {
-        return this.userPool.checkDuplicatedNickName(userId, nickName)
+    checkDuplicatedNickName(nickName: string) {
+        return this.userPool.checkDuplicatedNickName(nickName)
     }
 
-    createTempNickname(userId: string): string {
+    createTempNickname(): string {
         let nickName = util.generateGuestNickName()
 
-        while (this.userPool.checkDuplicatedNickName(userId, nickName)) {
+        while (this.userPool.checkDuplicatedNickName(nickName)) {
             nickName = util.generateGuestNickName()
         }
 
-        this.userPool.addTempNickname(userId, nickName)
+        // TODO: 임시 발급된 닉네임 중복 위험
+        // this.userPool.addTempNickname(nickName)
         return nickName
     }
 }
