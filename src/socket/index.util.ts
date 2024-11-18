@@ -1,5 +1,5 @@
 import { Room } from '../service/rooms'
-import { EmitEventData } from './type'
+import { EmitEventData } from './types/emit'
 
 const getRoomStateDto = (room: Room): EmitEventData['room.changeState'] => {
     return {

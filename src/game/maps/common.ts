@@ -1,7 +1,7 @@
 import {
     SocketEmitEvtDataGameStateV1Item,
     SocketEmitEvtDataGameStateV2,
-} from 'socket/type'
+} from 'socket/types/emit'
 import { Character, Position } from '../objects/player'
 
 const GROUND_POS = {

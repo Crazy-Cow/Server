@@ -1,5 +1,5 @@
+import { OnEventData } from '../../socket/types/on'
 import { Character } from '../../game/objects/player'
-import { OnEventData } from '../../socket/type'
 
 const handleMove = (character: Character, data: OnEventData['move']) => {
     character.shift = data.shift

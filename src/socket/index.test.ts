@@ -5,7 +5,7 @@ import { AddressInfo } from 'node:net'
 import roomService, { Room } from '../service/rooms'
 import { User } from '../service/users'
 import { initSocket } from '.'
-import { OnEventName } from './type'
+import { OnEventName } from './types/on'
 
 describe('대기실 관련 소켓 통신 테스트', () => {
     let io: Server, serverSocket: ServerSocket, clientSocket: ClientSocket

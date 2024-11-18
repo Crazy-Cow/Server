@@ -1,10 +1,11 @@
 import { Server, Socket } from 'socket.io'
-import { EmitEventName, OnEventData, OnEventName } from './type'
+import { EmitEventName } from './types/emit'
 import roomService, { Room } from '../service/rooms'
 import userService from '../service/users'
 import util from './index.util'
 import { CommonMap } from '../game/maps'
 import inGameSocketHandler from '../game/server/index.util'
+import { OnEventData, OnEventName } from './types/on'
 
 class SocketImplement {
     socket: Socket
