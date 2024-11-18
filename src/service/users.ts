@@ -44,6 +44,7 @@ class UserPool {
 
 class UserService {
     private userPool: UserPool
+    private idCounter: number = 1
 
     private constructor() {
         this.userPool = new UserPool()
@@ -58,11 +59,19 @@ class UserService {
         return this.instance
     }
 
+    // TODO: return number type
+    private generateUserId(): string {
+        const userId = `user-${this.idCounter}`
+        this.idCounter += 1
+        return userId
+    }
+
     findUserById(userId: string) {
         return this.userPool.findUserById(userId)
     }
 
-    createUser(userId: string, nickName: string) {
+    createUser(nickName: string) {
+        const userId = this.generateUserId()
         const user = new User(userId, nickName)
         this.userPool.addUser(user)
         return user

@@ -11,7 +11,7 @@ import {
     ErrorResponse,
     handleToCatchInternalServerError,
 } from '../utils/error'
-import { generateAccessToken } from 'utils/jwt'
+import { generateAccessToken } from '../utils/jwt'
 
 export const getRandomNicknameController = (
     _,
@@ -43,9 +43,8 @@ export const createUserController = (
             )
             return
         }
-
-        const accessToken = generateAccessToken({ nickName })
-        const user = userService.createUser(accessToken, nickName)
+        const user = userService.createUser(nickName)
+        const accessToken = generateAccessToken(user)
         if (user) {
             res.status(StatusCode.Created).json({ accessToken })
         } else {
