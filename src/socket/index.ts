@@ -92,10 +92,7 @@ class SocketImplement {
         room.loadGame()
 
         room.startGameLoop({
-            handleGameStateV1: (data) => {
-                this.broadcast(room.roomId, 'characters', data)
-            },
-            handleGameStateV2: (data) => {
+            handleGameState: (data) => {
                 this.broadcast(room.roomId, 'game.state', data)
             },
             handleGameOver: () => {
