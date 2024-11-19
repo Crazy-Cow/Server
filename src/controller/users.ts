@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { CreateUserResponse, GetRandomNickNameResponse } from './users.type'
+import { GetRandomNickNameResponse } from './users.type'
 import userService from '../service/users'
 import StatusCode from '../constants/statusCode'
 import {
@@ -21,7 +21,7 @@ export const getRandomNicknameController = (
 
 export const createUserController = (
     req: Request<object, object, { nickName: string }>,
-    res: Response<CreateUserResponse | ErrorResponse>
+    res: Response<{ userId: string } | ErrorResponse>
 ) => {
     const { nickName } = req.body
 
@@ -42,7 +42,7 @@ export const createUserController = (
 
         const user = userService.createUser(nickName)
         if (user) {
-            res.status(StatusCode.Created).json({ nickName: user.nickName })
+            res.status(StatusCode.Created).json({ userId: user.userId })
         } else {
             throw new Error('유저 생성 실패')
         }

@@ -1,7 +1,7 @@
 import cors from 'cors'
 import express from 'express'
 import http from 'http'
-import socketIo from 'socket.io'
+import socketIo, { Socket } from 'socket.io'
 import dotenv from 'dotenv'
 import routes from './routes'
 import cookieParser from 'cookie-parser'
@@ -18,6 +18,38 @@ app.use(cors({ origin: '*' }))
 app.use('/user', routes.user)
 const server = http.createServer(app)
 const io = new socketIo.Server(server, { cors: { origin: '*' } })
+import userService from './service/users'
+import roomService, { Room } from './service/rooms'
+
+// 방 상태 브로드캐스트
+const broadcastRoomState = (room: Room) => {
+    io.to(room.roomId).emit('room.changeState', room) // 방 상태를 해당 방의 모든 클라이언트에게 전달
+}
+
+const handleRoomEnter = (socket: Socket) => {
+    const userId = socket.data.clientId
+    const player = userService.findUserById(userId) // userService에서 유저 찾기
+    if (!player) {
+        console.error(`User with socketId ${userId} not found.`)
+        return
+    }
+
+    const room = roomService.joinRoom(player) // roomService에서 방에 유저 추가
+    socket.join(room.roomId) // 해당 방에 유저 소켓을 입장시킴
+    broadcastRoomState(room) // 방 상태 브로드캐스트
+
+    if (room.state === 'playing') {
+        // 게임 시작 상태인 경우 게임을 시작 처리
+        console.log(`게임이 시작됩니다: ${room.roomId}`)
+        // 이 부분에서 게임 시작 처리 로직을 넣을 수 있음
+    }
+}
+
+const handleRoomLeave = (socket: Socket) => {
+    const userId = socket.data.clientId
+    const room = roomService.leaveRoom(userId)
+    broadcastRoomState(room)
+}
 
 io.use((socket, next) => {
     const clientId = socket.handshake.auth.clientId // 클라이언트가 보낸 clientId를 가져옵니다.
@@ -61,6 +93,14 @@ io.on('connection', (socket) => {
         console.log(`클라이언트 ${socket.id}가 재연결됨. 세션 ID: ${clientId}`)
         // 재연결 시에도 기존 clientId에 맞게 새 socket.id로 갱신됩니다.
         clients.set(clientId, socket.id)
+    })
+
+    socket.on('room.enter', () => {
+        handleRoomEnter(socket)
+    })
+
+    socket.on('room.leave', () => {
+        handleRoomLeave(socket)
     })
 })
 
