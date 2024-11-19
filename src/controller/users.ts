@@ -1,10 +1,5 @@
 import { Request, Response } from 'express'
-import {
-    CreateUserRequest,
-    CreateUserResponse,
-    GetRandomNickNameRequest,
-    GetRandomNickNameResponse,
-} from './users.type'
+import { CreateUserResponse, GetRandomNickNameResponse } from './users.type'
 import userService from '../service/users'
 import StatusCode from '../constants/statusCode'
 import {
@@ -12,38 +7,23 @@ import {
     ErrorResponse,
     handleToCatchInternalServerError,
 } from '../utils/error'
+import util from '../service/users.util'
 
 export const getRandomNicknameController = (
-    req: Request<object, object, GetRandomNickNameRequest>,
+    _,
     res: Response<GetRandomNickNameResponse | ErrorResponse>
 ) => {
-    const { userId } = req.body
-
-    if (!userId) {
-        res.status(StatusCode.BadRequest).json(
-            createErrorRes({ msg: '[userId] is required' })
-        )
-        return
-    }
-
-    const nickname = userService.createTempNickname(userId)
+    const nickname = util.generateGuestNickName()
     res.status(StatusCode.OK).json({
         nickName: nickname,
     })
 }
 
 export const createUserController = (
-    req: Request<object, object, CreateUserRequest>,
+    req: Request<object, object, { nickName: string }>,
     res: Response<CreateUserResponse | ErrorResponse>
 ) => {
-    const { userId, nickName } = req.body
-
-    if (!userId) {
-        res.status(StatusCode.BadRequest).json(
-            createErrorRes({ msg: '[userId] is required' })
-        )
-        return
-    }
+    const { nickName } = req.body
 
     if (!nickName) {
         res.status(StatusCode.BadRequest).json(
@@ -53,14 +33,14 @@ export const createUserController = (
     }
 
     try {
-        if (userService.checkDuplicatedNickName(userId, nickName)) {
+        if (userService.checkDuplicatedNickName(nickName)) {
             res.status(StatusCode.Conflict).json(
                 createErrorRes({ msg: '중복된 닉네임입니다' })
             )
             return
         }
 
-        const user = userService.createUser(userId, nickName)
+        const user = userService.createUser(nickName)
         if (user) {
             res.status(StatusCode.Created).json({ nickName: user.nickName })
         } else {

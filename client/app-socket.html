@@ -5,15 +5,51 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Socket.IO - 랜덤 Nickname</title>
         <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     </head>
     <body>
         <h1>Socket.IO 연결 테스트</h1>
         <button id="sendMessageBtn">서버에 메시지 보내기</button>
         <button id="generateNickBtn">랜덤 Nickname 생성</button>
-        <p id="nickname">현재 닉네임: <span id="nickNameValue"></span></p>
+        <p id="nickname">
+            현재 닉네임: <span id="nickNameValue"></span>
+            <button id="enterLobby">로비 입장</button>
+            <span id="nicknameStatus"></span>
+        </p>
         <p id="response"></p>
 
         <script>
+            const baseUrl = 'http://localhost:8000'
+            $('#enterLobby').click(function () {
+                const nickname = $('#nickNameValue').text()
+                console.log('nickname', nickname)
+
+                if (!nickname) {
+                    $('#nicknameStatus').text('[nickName] is required')
+                    return
+                }
+
+                fetch(`${baseUrl}/user/enter`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nickName: nickname }),
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            throw new Error(
+                                `HTTP error! status: ${response.status}`
+                            )
+                        }
+                        return response.json()
+                    })
+                    .then((data) => {
+                        $('#nicknameStatus').text(`등록 성공: ${nickname}`)
+                    })
+                    .catch((error) => {
+                        $('#nicknameStatus').text('오류 발생')
+                    })
+            })
+
             // 랜덤 Nickname 생성 함수
             function generateRandomNickName() {
                 const randomNum = Math.floor(Math.random() * 10000) // 0-9999까지 랜덤 숫자
@@ -44,7 +80,7 @@
             displayNickName()
 
             // socket.io 연결
-            const socket = io('http://localhost:8000', {
+            const socket = io(baseUrl, {
                 reconnection: true, // 자동 재연결 활성화
                 reconnectionAttempts: Infinity, // 무한 재연결 시도
                 reconnectionDelay: 1000, // 재연결 시도 간 간격 (ms)
@@ -81,12 +117,29 @@
             document
                 .getElementById('generateNickBtn')
                 .addEventListener('click', () => {
-                    const newNickName = generateRandomNickName()
-                    localStorage.setItem('nickName', newNickName) // 새로운 Nickname을 localStorage에 저장
-                    displayNickName() // 새로운 닉네임 화면에 반영
+                    fetch(`${baseUrl}/user/random-nickname`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                    })
+                        .then((response) => {
+                            if (!response.ok) {
+                                throw new Error(
+                                    `HTTP error! status: ${response.status}`
+                                )
+                            }
+                            return response.json()
+                        })
+                        .then((data) => {
+                            const newNickName = data.nickName
+                            localStorage.setItem('nickName', newNickName) // 새로운 Nickname을 localStorage에 저장
+                            displayNickName() // 새로운 닉네임 화면에 반영
 
-                    console.log(`새로운 Nickname 생성: ${newNickName}`)
-                    alert(`새로운 Nickname: ${newNickName}`)
+                            console.log(`새로운 Nickname 생성: ${newNickName}`)
+                            alert(`새로운 Nickname: ${newNickName}`)
+                        })
+                        .catch((error) => {
+                            $('#nicknameStatus').text('오류 발생')
+                        })
                 })
 
             // 메시지 보내기 버튼 클릭 시 서버로 메시지 전송

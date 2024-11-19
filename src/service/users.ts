@@ -38,10 +38,8 @@ class UserPool {
         this.users = this.users.filter((user) => user.userId !== userId)
     }
 
-    checkDuplicatedNickName(userId: string, nickName: string) {
+    checkDuplicatedNickName(nickName: string) {
         if (this.users.some((user) => user.nickName === nickName)) return true
-        else if (this.tempNicknames.get(userId) == nickName) return false
-        return Array.from(this.tempNicknames.values()).includes(nickName)
     }
 
     addTempNickname(userId: string, nickName: string) {
@@ -55,6 +53,7 @@ class UserPool {
 
 class UserService {
     private userPool: UserPool
+    private idCounter: number = 1
 
     private constructor() {
         this.userPool = new UserPool()
@@ -69,11 +68,18 @@ class UserService {
         return this.instance
     }
 
+    private generateUserId(): string {
+        const userId = `user-${this.idCounter}`
+        this.idCounter += 1
+        return userId
+    }
+
     findUserById(userId: string) {
         return this.userPool.findUserById(userId)
     }
 
-    createUser(userId: string, nickName: string) {
+    createUser(nickName: string) {
+        const userId = this.generateUserId()
         const user = new User(userId, nickName)
         this.userPool.removeTempNickname(userId)
         this.userPool.addUser(user)
@@ -85,14 +91,14 @@ class UserService {
         this.userPool.removeTempNickname(userId)
     }
 
-    checkDuplicatedNickName(userId: string, nickName: string) {
-        return this.userPool.checkDuplicatedNickName(userId, nickName)
+    checkDuplicatedNickName(nickName: string) {
+        return this.userPool.checkDuplicatedNickName(nickName)
     }
 
     createTempNickname(userId: string): string {
         let nickName = util.generateGuestNickName()
 
-        while (this.userPool.checkDuplicatedNickName(userId, nickName)) {
+        while (this.userPool.checkDuplicatedNickName(nickName)) {
             nickName = util.generateGuestNickName()
         }
 

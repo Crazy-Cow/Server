@@ -1,13 +1,21 @@
+import cors from 'cors'
 import express from 'express'
 import http from 'http'
 import socketIo from 'socket.io'
 import dotenv from 'dotenv'
+import routes from './routes'
+import cookieParser from 'cookie-parser'
+
 dotenv.config()
 
 const clients = new Map<string, string>() // 세션 ID를 저장: { clientId -> socketId }
 
 // Express 앱 생성
 const app = express()
+app.use(cookieParser())
+app.use(express.json())
+app.use(cors({ origin: '*' }))
+app.use('/user', routes.user)
 const server = http.createServer(app)
 const io = new socketIo.Server(server, { cors: { origin: '*' } })
 
