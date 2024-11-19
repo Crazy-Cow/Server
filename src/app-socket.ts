@@ -20,11 +20,21 @@ const server = http.createServer(app)
 const io = new socketIo.Server(server, { cors: { origin: '*' } })
 import userService from './service/users'
 import roomService, { Room } from './service/rooms'
-import { EmitEventName } from 'socket/types/emit'
+import { EmitEventData, EmitEventName } from 'socket/types/emit'
+
+function getRoomStateDto(room: Room): EmitEventData['room.changeState'] {
+    return {
+        roomId: room.roomId,
+        playerCnt: room.players.length,
+        state: room.state,
+        maxPlayerCnt: room.maxPlayerCnt,
+    }
+}
 
 // 방 상태 브로드캐스트
 const broadcastRoomState = (room: Room) => {
-    io.to(room.roomId).emit('room.changeState', room) // 방 상태를 해당 방의 모든 클라이언트에게 전달
+    const data = getRoomStateDto(room)
+    io.to(room.roomId).emit('room.changeState', data) // 방 상태를 해당 방의 모든 클라이언트에게 전달
 }
 
 const handleRoomEnter = (socket: Socket) => {
