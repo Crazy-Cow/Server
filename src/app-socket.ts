@@ -174,8 +174,6 @@ io.on('connection', (socket) => {
 
     // 클라이언트가 보낸 "move" 이벤트 처리
     socket.on('move', (data) => {
-        console.log('move', data)
-        console.log('socket.id', clientId)
         wrappedHandleMove(data, socket) // 여기서 handleMove2를 호출
     })
 })
