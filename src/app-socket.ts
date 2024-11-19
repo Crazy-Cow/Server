@@ -21,6 +21,9 @@ const io = new socketIo.Server(server, { cors: { origin: '*' } })
 import userService from './service/users'
 import roomService, { Room } from './service/rooms'
 import { EmitEventData, EmitEventName } from 'socket/types/emit'
+import { Character } from 'game/objects/player'
+import { OnEventData } from 'socket/types/on'
+import { CommonMap } from 'game/maps'
 
 function getRoomStateDto(room: Room): EmitEventData['room.changeState'] {
     return {
@@ -29,6 +32,21 @@ function getRoomStateDto(room: Room): EmitEventData['room.changeState'] {
         state: room.state,
         maxPlayerCnt: room.maxPlayerCnt,
     }
+}
+
+function handleMove(character: Character, data: OnEventData['move']) {
+    character.shift = data.shift
+    character.position = data.character.position
+    character.velocity = data.character.velocity
+    character.isOnGround = data.character.isOnGround
+}
+
+let gameMap: CommonMap
+
+const wrappedHandleMove = (data: OnEventData['move'], socket: Socket) => {
+    const userId = socket.data.clientId
+    const character = gameMap.findCharacter(userId)
+    handleMove(character, data)
 }
 
 // 방 상태 브로드캐스트
@@ -73,7 +91,7 @@ const handleRoomEnter = (socket: Socket) => {
         broadcast(room.roomId, 'game.start', { players: room.players })
 
         room.loadGame()
-
+        gameMap = room.gameMap
         room.startGameLoop({
             handleGameState: (data) => {
                 broadcast(room.roomId, 'game.state', data)
@@ -152,6 +170,13 @@ io.on('connection', (socket) => {
 
     socket.on('room.leave', () => {
         handleRoomLeave(socket)
+    })
+
+    // 클라이언트가 보낸 "move" 이벤트 처리
+    socket.on('move', (data) => {
+        console.log('move', data)
+        console.log('socket.id', clientId)
+        wrappedHandleMove(data, socket) // 여기서 handleMove2를 호출
     })
 })
 

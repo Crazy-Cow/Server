@@ -189,7 +189,7 @@
                 .getElementById('generateNickBtn')
                 .addEventListener('click', () => {
                     fetch(`${baseUrl}/user/random-nickname`, {
-                        method: 'POST',
+                        method: 'GET',
                         headers: { 'Content-Type': 'application/json' },
                     })
                         .then((response) => {
@@ -219,7 +219,14 @@
                 .addEventListener('click', () => {
                     const message = 'Hello from client!'
                     console.log('서버로 메시지 전송:', message)
-                    socket.emit('client_message', message)
+                    socket.emit('move', {
+                        shift: false,
+                        character: {
+                            position: { x: 1, y: 2, z: 3 },
+                            velocity: { x: 1, y: 2, z: 3 },
+                            isOnGround: true,
+                        },
+                    })
                 })
         </script>
     </body>
