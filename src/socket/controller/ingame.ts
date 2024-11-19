@@ -1,4 +1,3 @@
-import { Socket } from 'socket.io'
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import { Room } from '../../service/rooms'
@@ -12,29 +11,31 @@ function handleMove(character: Character, data: OnEventData['move']) {
     character.isOnGround = data.character.isOnGround
 }
 
+let gameMap: CommonMap
+
 class IngameController extends BaseController {
-    socket: Socket
-    gameMap: CommonMap
+    // gameMap: CommonMap
 
     register() {
+        // TODO this.gameMap이랑 연관
         this.socket.on<OnEventName>('move', this.handleMove)
     }
 
-    disconnect() {
-        this.gameMap?.removeCharacter(this.socket.id)
-    }
+    // disconnect() {
+    //     this.gameMap?.removeCharacter(this.socket.id)
+    // }
 
     private handleMove = (data: OnEventData['move']) => {
-        const character = this.gameMap.findCharacter(this.socket.id)
+        const userId = this.getUserId()
+        const character = gameMap.findCharacter(userId)
         handleMove(character, data)
     }
 
     handleStartGame = (room: Room) => {
-        this.gameMap = room.gameMap
-        this.broadcast(room.roomId, 'game.start', { players: room.players })
+        console.log('room.gameMap 등록 완료', Boolean(room.gameMap))
+        gameMap = room.gameMap
 
         room.loadGame()
-
         room.startGameLoop({
             handleGameState: (data) => {
                 this.broadcast(room.roomId, 'game.state', data)

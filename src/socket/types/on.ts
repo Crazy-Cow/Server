@@ -1,6 +1,7 @@
 import { Position } from '../../game/objects/player'
 
 export type OnEventName =
+    | 'reconnect'
     | 'connection' // 연결
     | 'disconnect' // 끊김
     | 'room.enter' // 빠른 시작
@@ -8,8 +9,9 @@ export type OnEventName =
     | 'move'
 
 type OnEventDataMap = {
+    reconnect: undefined
     connection: undefined
-    disconnect: undefined
+    disconnect: string // reason
     'room.enter': undefined
     'room.leave': undefined
     move: {
