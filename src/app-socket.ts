@@ -15,7 +15,7 @@ io.use((socket, next) => {
     const clientId = socket.handshake.auth.clientId // 클라이언트가 보낸 clientId를 가져옵니다.
 
     if (!clientId) {
-        return next(new Error('세션 ID가 필요합니다.')) // clientId가 없으면 연결을 거부
+        return next(new Error('clientId 가 필요합니다.')) // clientId가 없으면 연결을 거부
     }
 
     // 세션 유효하면 소켓에 세션 정보를 추가하고 인증을 허용
@@ -37,10 +37,15 @@ io.on('connection', (socket) => {
     })
 
     // 연결 끊어졌을 때 처리
-    socket.on('disconnect', () => {
-        console.log(`클라이언트 ${socket.id}가 연결을 끊었습니다.`)
-        // 연결 종료 시 session.delete는 하지 않습니다.
-        // 세션 정보는 클라이언트가 재연결하면 유지됩니다.
+    socket.on('disconnect', (reason) => {
+        console.log(
+            `클라이언트 ${socket.id}가 연결을 끊었습니다. 이유: ${reason}`
+        )
+
+        // 연결이 끊어졌을 때만 세션을 삭제 (영구적인 연결 종료)
+        if (reason === 'transport close') {
+            console.log('TODO: 완전한 disconnect 판단 후 clients.delete 필요함')
+        }
     })
 
     // 재연결 시도 처리
