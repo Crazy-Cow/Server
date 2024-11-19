@@ -12,7 +12,7 @@ export class Room {
     state: RoomState = 'initial'
     maxPlayerCnt: number
     maxWaitingTime: number
-    gameMap: CommonMap = new TailTagMap({ remainRunningTime: 10 * 60 })
+    gameMap: CommonMap = new TailTagMap({ remainRunningTime: 2 * 60 })
 
     constructor({ maxPlayerCnt = 2 }: { maxPlayerCnt?: number }) {
         this.roomId = util.generateRoomId()
