@@ -98,9 +98,10 @@
             // 페이지 로드 시 닉네임 표시
             displayNickName()
 
+            let socket
             // socket.io 연결 함수
             function connectSocket(clientId) {
-                const socket = io(baseUrl, {
+                socket = io(baseUrl, {
                     reconnection: true, // 자동 재연결 활성화
                     reconnectionAttempts: Infinity, // 무한 재연결 시도
                     reconnectionDelay: 1000, // 재연결 시도 간 간격 (ms)

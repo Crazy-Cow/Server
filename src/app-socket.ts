@@ -20,6 +20,7 @@ const server = http.createServer(app)
 const io = new socketIo.Server(server, { cors: { origin: '*' } })
 import userService from './service/users'
 import roomService, { Room } from './service/rooms'
+import { EmitEventName } from 'socket/types/emit'
 
 // 방 상태 브로드캐스트
 const broadcastRoomState = (room: Room) => {
@@ -27,6 +28,22 @@ const broadcastRoomState = (room: Room) => {
 }
 
 const handleRoomEnter = (socket: Socket) => {
+    const broadcast = (
+        roomId: string,
+        emitMessage: EmitEventName,
+        data: unknown
+    ) => {
+        // roomId에 속한 클라이언트들의 socket.id 리스트를 서버에서 가져오기
+        // const clientsInRoom = io.sockets.adapter.rooms.get(roomId)
+        // console.log('clientsInRoom', clientsInRoom)
+
+        // self
+        socket.emit<EmitEventName>(emitMessage, data)
+
+        // the other
+        socket.to(roomId).emit<EmitEventName>(emitMessage, data)
+    }
+
     const userId = socket.data.clientId
     const player = userService.findUserById(userId) // userService에서 유저 찾기
     if (!player) {
@@ -42,6 +59,19 @@ const handleRoomEnter = (socket: Socket) => {
         // 게임 시작 상태인 경우 게임을 시작 처리
         console.log(`게임이 시작됩니다: ${room.roomId}`)
         // 이 부분에서 게임 시작 처리 로직을 넣을 수 있음
+
+        broadcast(room.roomId, 'game.start', { players: room.players })
+
+        room.loadGame()
+
+        room.startGameLoop({
+            handleGameState: (data) => {
+                broadcast(room.roomId, 'game.state', data)
+            },
+            handleGameOver: () => {
+                broadcast(room.roomId, 'game.over', undefined)
+            },
+        })
     }
 }
 
@@ -67,6 +97,17 @@ io.use((socket, next) => {
 // 클라이언트 연결 시
 io.on('connection', (socket) => {
     const clientId = socket.data.clientId
+    if (clients.get(clientId)) {
+        const userId = clientId
+        const player = userService.findUserById(userId) // userService에서 유저 찾기
+        if (!player) {
+            console.error(`User with socketId ${userId} not found.`)
+            return
+        }
+
+        socket.join(player.roomId) // 해당 방에 유저 소켓을 재입장
+    }
+
     clients.set(clientId, socket.id)
 
     console.log('clients', clients)
