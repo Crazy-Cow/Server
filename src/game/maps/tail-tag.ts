@@ -38,10 +38,6 @@ export class TailTagMap extends CommonMap {
                     character.hasTail = true
                     other.hasTail = false
 
-                    console.log(
-                        `${character.id} has stolen the tail from ${other.id}`
-                    )
-
                     // 꼬리 훔치기 후 반복 종료
                     break
                 }
