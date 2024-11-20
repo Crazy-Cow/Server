@@ -7,6 +7,12 @@ const GROUND_POS = {
     z: 0,
 }
 
+const GROUND_SIZE = {
+    x: 50,
+    y: 0,
+    z: 50,
+}
+
 const MIN_DISTANCE = 2
 
 export type MapInitialType = { remainRunningTime: number }
@@ -34,9 +40,9 @@ export class CommonMap {
         let position: Position
         do {
             position = {
-                x: GROUND_POS.x + Math.random() * 10,
+                x: GROUND_POS.x + Math.random() * GROUND_SIZE.x,
                 y: GROUND_POS.y + 2,
-                z: GROUND_POS.z + Math.random() * 10,
+                z: GROUND_POS.z + Math.random() * GROUND_SIZE.z,
             }
         } while (!this.isValidPosition(position))
 
