@@ -28,7 +28,7 @@ export class Character {
         this.bellyColor = this.generateRandomHexColor()
         this.velocity = { x: 0, y: 0, z: 0 }
         this.isOnGround = true
-        this.hasTail = Math.random() > 0.5 // TODO // characters.length % 2 === 0,
+        this.hasTail = false
         this.shift = false
         this.isBeingStolen = false
     }
