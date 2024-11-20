@@ -9,6 +9,7 @@ export type Directions = {
 
 export class Character {
     id: string
+    nickName: string
     position: Position
     bodyColor: string
     hairColor: string
@@ -20,8 +21,17 @@ export class Character {
     shift: boolean
     isBeingStolen: boolean
 
-    constructor(id: string, position: Position) {
+    constructor({
+        id,
+        nickName,
+        position,
+    }: {
+        id: string
+        nickName: string
+        position: Position
+    }) {
         this.id = id
+        this.nickName = nickName
         this.position = position
         this.bodyColor = this.generateRandomHexColor()
         this.hairColor = this.generateRandomHexColor()

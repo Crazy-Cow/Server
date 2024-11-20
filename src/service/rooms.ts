@@ -55,7 +55,10 @@ export class Room {
 
     loadGame() {
         for (const user of this.players) {
-            this.gameMap.addCharacter(user.userId)
+            this.gameMap.addCharacter({
+                id: user.userId,
+                nickName: user.nickName,
+            })
         }
 
         this.gameMap.init()
