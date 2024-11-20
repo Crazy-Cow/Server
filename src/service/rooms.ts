@@ -79,6 +79,10 @@ class RoomPool {
     gameRooms: Room[] = [] // TODO: migrate gameService
     waitingRoom = new Room({})
 
+    findGameRoomById(roomId: string): Room {
+        return this.gameRooms.find((room) => room.roomId == roomId)
+    }
+
     isWaitingRoomFull(): boolean {
         return this.waitingRoom.isFull()
     }
@@ -139,6 +143,10 @@ class RoomService {
             this.instance = new RoomService()
         }
         return this.instance
+    }
+
+    findGameRoomById(roomId: string): Room {
+        return this.roomPool.findGameRoomById(roomId)
     }
 
     joinRoom(player: User): Room {

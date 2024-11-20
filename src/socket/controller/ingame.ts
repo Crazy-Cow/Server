@@ -1,8 +1,8 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
-import { Room } from '../../service/rooms'
-import { CommonMap } from '../../game/maps'
+import roomService, { Room } from '../../service/rooms'
 import { Character } from '../../game/objects/player'
+import userService from '../../service/users'
 
 function handleMove(character: Character, data: OnEventData['move']) {
     character.shift = data.shift
@@ -11,11 +11,7 @@ function handleMove(character: Character, data: OnEventData['move']) {
     character.isOnGround = data.character.isOnGround
 }
 
-let gameMap: CommonMap
-
 class IngameController extends BaseController {
-    // gameMap: CommonMap
-
     register() {
         // TODO this.gameMap이랑 연관
         this.socket.on<OnEventName>('move', this.handleMove)
@@ -27,13 +23,18 @@ class IngameController extends BaseController {
 
     private handleMove = (data: OnEventData['move']) => {
         const userId = this.getUserId()
-        const character = gameMap.findCharacter(userId)
-        handleMove(character, data)
+        const player = userService.findUserById(userId)
+        const room = roomService.findGameRoomById(player.roomId)
+        const gameMap = room?.gameMap
+        if (gameMap) {
+            const character = gameMap.findCharacter(userId)
+            handleMove(character, data)
+        } else {
+            console.error('palyer가 게임 실행중이 아니에요')
+        }
     }
 
     handleStartGame = (room: Room) => {
-        gameMap = room.gameMap
-
         room.loadGame()
         room.startGameLoop({
             handleGameState: (data) => {
