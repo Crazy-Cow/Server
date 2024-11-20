@@ -11,6 +11,8 @@ export class TailTagMap extends CommonMap {
         for (let i = 0; i < this.characters.length; i++) {
             if (i % HAS_TAIL_RATIO == 0) {
                 this.characters[i].setHasTail(true)
+            } else {
+                this.characters[i].setHasTail(false)
             }
         }
     }
@@ -35,10 +37,6 @@ export class TailTagMap extends CommonMap {
                     // 꼬리를 훔치는 로직
                     character.hasTail = true
                     other.hasTail = false
-
-                    console.log(
-                        `${character.id} has stolen the tail from ${other.id}`
-                    )
 
                     // 꼬리 훔치기 후 반복 종료
                     break

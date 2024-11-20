@@ -21,7 +21,6 @@ class SocketImplement {
     }
 
     private register = () => {
-        this.logger('eventHandlers registered')
         this.socket.on<OnEventName>('disconnect', this.handleDisconnect)
         this.outgameCtrl.register()
         this.ingameCtrl.register()
@@ -29,12 +28,10 @@ class SocketImplement {
 
     private handleDisconnect = (reason: OnEventData['disconnect']) => {
         console.log(`[${this.socket.id}] disconnect (${reason})`)
-
-        // 연결이 끊어졌을 때만 세션을 삭제 (영구적인 연결 종료)
-        if (reason === 'transport close') {
-            console.log('TODO: 완전한 disconnect 판단 후 clients.delete 필요함')
-        }
-
+        // // 연결이 끊어졌을 때만 세션을 삭제 (영구적인 연결 종료)
+        // if (reason === 'transport close') {
+        //     console.log('TODO: 완전한 disconnect 판단 후 clients.delete 필요함')
+        // }
         // this.logger('disconnect', args)
         // this.outgameCtrl.disconnect()
         // this.ingameCtrl.disconnect()

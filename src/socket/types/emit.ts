@@ -27,6 +27,7 @@ export type SocketEmitEvtDataGameState = {
     remainRunningTime: number
     characters: {
         id: Character['id']
+        nickName: Character['nickName']
         position: Character['position']
         bodyColor: Character['bodyColor']
         hairColor: Character['hairColor']

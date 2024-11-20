@@ -7,6 +7,12 @@ const GROUND_POS = {
     z: 0,
 }
 
+const GROUND_SIZE = {
+    x: 50,
+    y: 0,
+    z: 50,
+}
+
 const MIN_DISTANCE = 2
 
 export type MapInitialType = { remainRunningTime: number }
@@ -34,9 +40,9 @@ export class CommonMap {
         let position: Position
         do {
             position = {
-                x: GROUND_POS.x + Math.random() * 10,
+                x: GROUND_POS.x + Math.random() * GROUND_SIZE.x,
                 y: GROUND_POS.y + 2,
-                z: GROUND_POS.z + Math.random() * 10,
+                z: GROUND_POS.z + Math.random() * GROUND_SIZE.z,
             }
         } while (!this.isValidPosition(position))
 
@@ -64,9 +70,9 @@ export class CommonMap {
         return this.characters.find((char) => char.id === id)
     }
 
-    addCharacter(id: string) {
+    addCharacter({ id, nickName }: { id: string; nickName: string }) {
         const position = this.generateRandomPosition()
-        const character = new Character(id, position)
+        const character = new Character({ id, position, nickName })
         this.characters.push(character)
     }
 
@@ -79,6 +85,7 @@ export class CommonMap {
             remainRunningTime: this.remainRunningTime,
             characters: this.characters.map((char) => ({
                 id: char.id,
+                nickName: char.nickName,
                 position: char.position,
                 bodyColor: char.bodyColor,
                 hairColor: char.hairColor,
@@ -93,10 +100,7 @@ export class CommonMap {
         // TODO: 검증로직
     }
 
-    startGameLoop({
-        handleGameState: handleGameStateV2,
-        handleGameOver,
-    }: MapStartLoopType) {
+    startGameLoop({ handleGameState, handleGameOver }: MapStartLoopType) {
         this.loopIdToReduceTime = setInterval(() => {
             this.remainRunningTime -= 1
 
@@ -109,8 +113,8 @@ export class CommonMap {
         this.loopIdToUpdateGameState = setInterval(() => {
             this.updateGameState()
 
-            const gameStateV2 = this.convertGameState()
-            handleGameStateV2(gameStateV2)
+            const gameState = this.convertGameState()
+            handleGameState(gameState)
         }, 1000 * this.updateInterval)
     }
 

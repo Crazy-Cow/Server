@@ -32,7 +32,6 @@ class IngameController extends BaseController {
     }
 
     handleStartGame = (room: Room) => {
-        console.log('room.gameMap 등록 완료', Boolean(room.gameMap))
         gameMap = room.gameMap
 
         room.loadGame()
@@ -41,6 +40,7 @@ class IngameController extends BaseController {
                 this.broadcast(room.roomId, 'game.state', data)
             },
             handleGameOver: () => {
+                console.log('게임 끝!')
                 this.broadcast(room.roomId, 'game.over', undefined)
             },
         })
