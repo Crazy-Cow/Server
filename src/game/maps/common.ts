@@ -128,7 +128,7 @@ export class CommonMap {
 
     private isGameOver(): boolean {
         const cond1 = this.remainRunningTime <= 0
-        const cond2 = this.characters.length == 0
+        const cond2 = this.characters.length == 1
         return cond1 || cond2
     }
 }
