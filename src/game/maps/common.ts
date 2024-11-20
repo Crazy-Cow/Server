@@ -8,9 +8,9 @@ const GROUND_POS = {
 }
 
 const GROUND_SIZE = {
-    x: 50,
+    x: 20,
     y: 0,
-    z: 50,
+    z: 20,
 }
 
 const MIN_DISTANCE = 2
