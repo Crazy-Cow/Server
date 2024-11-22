@@ -5,11 +5,11 @@ import cors, { CorsOptions } from 'cors'
 import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import routes from './routes'
-// import { connectDB } from './schemas'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
 import { initSocket } from './socket'
 import { Server } from 'socket.io'
+import { connectRedisDB } from './db/redis'
 
 const port = process.env.PORT
 const corsOption: CorsOptions = { origin: '*' }
@@ -22,26 +22,16 @@ app.use('/example', routes.example)
 app.use('/user', routes.user)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
-const server = app.listen(port, () => {
-    console.log(`[2] Server runs at <http://localhost>:${port}`)
-})
+connectRedisDB()
+    .then(() => console.log('[1] Redis DB Connected'))
+    .then(() => {
+        const server = app.listen(port, () => {
+            console.log(`[2] Server runs at <http://localhost>:${port}`)
+        })
 
-const io = new Server(server, { cors: corsOption })
-
-initSocket(io)
-
-// connectDB()
-//     .then(() => console.log('[1] DB Connected'))
-//     .then(() => {
-//         console.log('[1] (mongoDB) DB Connected')
-//         const server = app.listen(port, () => {
-//             console.log(`[2] Server runs at <http://localhost>:${port}`)
-//         })
-
-//         const io = new Server(server, socketCorsOption)
-//         initSocket(io)
-//         initInGmaeSocket(io)
-//     })
-//     .catch((err) => {
-//         console.error('[Error] DB Connection Failed:', err)
-//     })
+        const io = new Server(server, { cors: corsOption })
+        initSocket(io)
+    })
+    .catch((err) => {
+        console.error('[Error] Fail to start server', err)
+    })
