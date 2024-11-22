@@ -15,6 +15,9 @@ const GROUND_SIZE = {
 
 const MIN_DISTANCE = 2
 
+const MAX_GROUND = 71
+const MAX_SPEED = 10
+
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
     handleGameState: (data: SocketEmitEvtDataGameState) => void
@@ -44,12 +47,12 @@ export class CommonMap {
                 y: GROUND_POS.y + 2,
                 z: GROUND_POS.z + Math.random() * GROUND_SIZE.z,
             }
-        } while (!this.isValidPosition(position))
+        } while (!this.isCollisionPosition(position))
 
         return position
     }
 
-    private isValidPosition(newPos: Position): boolean {
+    private isCollisionPosition(newPos: Position): boolean {
         // 기존 캐릭터 위치들과의 충돌 검사
         for (const character of this.characters) {
             const distance = this.calculateDistance(newPos, character.position)
@@ -94,6 +97,16 @@ export class CommonMap {
                 hasTail: char.hasTail,
             })),
         }
+    }
+
+    private isValidVelocity(velocity: Position): boolean {
+        const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
+        return speed <= MAX_SPEED
+    }
+
+    private isValidPosition(position: Position): boolean {
+        const pos = Math.sqrt(position.x ** 2 + position.z ** 2)
+        return pos <= MAX_GROUND && position.y >= GROUND_POS.y
     }
 
     updateGameState() {
