@@ -24,7 +24,9 @@ class IngameController extends BaseController {
     private handleMove = async (data: OnEventData['move']) => {
         const userId = this.getUserId()
         const player = await userService.findUserById(userId)
-        const room = roomService.findGameRoomById(player.roomId)
+
+        // TODO: 현재 mock room
+        const room = await roomService.findGameRoomById(player.roomId)
         const gameMap = room?.gameMap
         if (gameMap) {
             const character = gameMap.findCharacter(userId)

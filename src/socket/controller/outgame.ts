@@ -54,8 +54,10 @@ class OutgameController extends BaseController {
             console.log('게임 시작!')
 
             this.broadcast(room.roomId, 'game.start', { players: room.players })
+            await roomService.moveOutgameToIngame()
             this.ingameCtrl.handleStartGame(room)
         }
+
         return room
     }
 

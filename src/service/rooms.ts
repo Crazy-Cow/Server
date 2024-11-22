@@ -2,6 +2,7 @@ import userService, { User } from './users'
 import util from './rooms.util'
 import { CommonMap, TailTagMap } from '../game/maps'
 import { MapStartLoopType } from 'game/maps/common'
+import roomRepository, { RoomRepository } from '../db/redis/repository/rooms'
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
@@ -18,7 +19,6 @@ export class Room {
         this.roomId = util.generateRoomId()
         this.createdAt = new Date()
         this.state = 'waiting'
-
         this.maxPlayerCnt = maxPlayerCnt
     }
 
@@ -75,65 +75,13 @@ export class Room {
     }
 }
 
-class RoomPool {
-    gameRooms: Room[] = [] // TODO: migrate gameService
-    waitingRoom = new Room({})
-
-    findGameRoomById(roomId: string): Room {
-        return this.gameRooms.find((room) => room.roomId == roomId)
-    }
-
-    isWaitingRoomFull(): boolean {
-        return this.waitingRoom.isFull()
-    }
-
-    joinRoom(user: User) {
-        const prevWaitingRoom = this.waitingRoom
-        this.waitingRoom.addPlayer(user)
-
-        if (this.waitingRoom.canStartGame()) {
-            this.waitingRoom.state = 'playing'
-            this.gameRooms.push(this.waitingRoom)
-            this.waitingRoom = new Room({})
-        }
-
-        return prevWaitingRoom
-    }
-
-    async leaveRoom(userId: string) {
-        const player = await userService.findUserById(userId)
-
-        if (!player) return
-
-        if (player.roomId === this.waitingRoom.roomId) {
-            this.waitingRoom.removePlayer(userId)
-            return this.waitingRoom
-        } else {
-            for (const room of this.gameRooms) {
-                if (room.roomId === player.roomId) {
-                    room.removePlayer(userId)
-                    return room
-                }
-            }
-        }
-    }
-
-    deleteGameRoom(room: Room) {
-        const gameRoomIndex = this.gameRooms.findIndex(
-            (r) => r.roomId === room.roomId
-        )
-
-        if (gameRoomIndex > -1) {
-            this.gameRooms.splice(gameRoomIndex, 1)
-        }
-    }
-}
-
 class RoomService {
-    roomPool: RoomPool
+    repository: RoomRepository
+    waitingRoom: Room
 
     private constructor() {
-        this.roomPool = new RoomPool()
+        this.repository = roomRepository
+        this.waitingRoom = new Room({})
     }
 
     private static instance: RoomService
@@ -145,20 +93,45 @@ class RoomService {
         return this.instance
     }
 
-    findGameRoomById(roomId: string): Room {
-        return this.roomPool.findGameRoomById(roomId)
+    async findGameRoomById(roomId: string) {
+        return this.repository.findById(roomId)
     }
 
-    joinRoom(player: User): Room {
-        return this.roomPool.joinRoom(player)
+    joinRoom(user: User) {
+        this.waitingRoom.addPlayer(user)
+
+        if (this.waitingRoom.canStartGame()) {
+            this.waitingRoom.state = 'playing'
+        }
+
+        return this.waitingRoom
     }
 
-    leaveRoom(userId: string) {
-        return this.roomPool.leaveRoom(userId)
+    async moveOutgameToIngame() {
+        // TODO: Event to Ingame Server
+        await this.repository.createAndSave(this.waitingRoom)
+        this.waitingRoom = new Room({})
     }
 
-    endGame(room: Room) {
-        this.roomPool.deleteGameRoom(room)
+    async leaveRoom(userId: string) {
+        const player = await userService.findUserById(userId)
+
+        if (!player) return
+
+        if (player.roomId === this.waitingRoom.roomId) {
+            this.waitingRoom.removePlayer(userId)
+            return this.waitingRoom
+        }
+
+        // TODO: ingame player leave
+        // else {
+        //     for (const room of this.gameRooms) {
+        //         if (room.roomId === player.roomId) {
+        //             room.removePlayer(userId)
+        //             return room
+        //         }
+        //     }
+        // }
     }
 }
 
