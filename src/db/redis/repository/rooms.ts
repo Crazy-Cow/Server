@@ -4,7 +4,9 @@ import { Room } from '../../../service/rooms'
 const COMMON_KEY = 'game-room'
 const createRoomKey = (roomId: string) => `${COMMON_KEY}:${roomId}`
 const createError = (method: string, error: unknown) => {
-    return new Error(`[REDIS]${COMMON_KEY}: ${method} failed\n${error}`)
+    const message = `[REDIS]${COMMON_KEY}: ${method} failed\n${error}`
+    console.log(message)
+    return new Error(message)
 }
 
 const createAndSave = async (room: Room) => {
@@ -20,11 +22,12 @@ const createAndSave = async (room: Room) => {
 }
 
 const findById = async (roomId: string) => {
-    console.log('TODO: findById', roomId)
-    // const result = await redisClient.hGetAll(createRoomKey(roomId))
-    const room = new Room({}) // TODO: Load players from outgame to ingame
-
-    return room
+    try {
+        const result = await redisClient.sMembers(createRoomKey(roomId))
+        return result
+    } catch (err) {
+        throw createError('findById', err)
+    }
 }
 
 export type RoomRepository = {

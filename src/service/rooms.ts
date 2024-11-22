@@ -1,7 +1,5 @@
-import userService, { User } from './users'
+import { User } from './users'
 import util from './rooms.util'
-import { CommonMap, TailTagMap } from '../game/maps'
-import { MapStartLoopType } from 'game/maps/common'
 import roomRepository, { RoomRepository } from '../db/redis/repository/rooms'
 import { redisClient } from '../db/redis'
 
@@ -14,7 +12,6 @@ export class Room {
     state: RoomState = 'initial'
     maxPlayerCnt: number
     maxWaitingTime: number
-    gameMap: CommonMap = new TailTagMap({ remainRunningTime: 10 * 60 })
 
     constructor({ maxPlayerCnt = 2 }: { maxPlayerCnt?: number }) {
         this.roomId = util.generateRoomId()
@@ -53,27 +50,6 @@ export class Room {
     isFull = (): boolean => {
         return this.getPlayerCnt() >= this.maxPlayerCnt
     }
-
-    loadGame() {
-        for (const user of this.players) {
-            this.gameMap.addCharacter({
-                id: user.userId,
-                nickName: user.nickName,
-            })
-        }
-
-        this.gameMap.init()
-    }
-
-    startGameLoop(props: MapStartLoopType) {
-        this.gameMap.startGameLoop({
-            ...props,
-            handleGameOver: () => {
-                this.state = 'gameOver'
-                props.handleGameOver()
-            },
-        })
-    }
 }
 
 class RoomService {
@@ -94,10 +70,6 @@ class RoomService {
         return this.instance
     }
 
-    async findGameRoomById(roomId: string) {
-        return this.repository.findById(roomId)
-    }
-
     joinRoom(user: User) {
         this.waitingRoom.addPlayer(user)
 
@@ -108,32 +80,15 @@ class RoomService {
         return this.waitingRoom
     }
 
+    leaveRoom(userId: string) {
+        return this.waitingRoom.removePlayer(userId)
+    }
+
     async moveOutgameToIngame() {
         const room = this.waitingRoom
         await this.repository.createAndSave(room)
-        await redisClient.publish('game.start', room.roomId)
+        await redisClient.publish('game.ready', room.roomId)
         this.waitingRoom = new Room({})
-    }
-
-    async leaveRoom(userId: string) {
-        const player = await userService.findUserById(userId)
-
-        if (!player) return
-
-        if (player.roomId === this.waitingRoom.roomId) {
-            this.waitingRoom.removePlayer(userId)
-            return this.waitingRoom
-        }
-
-        // TODO: ingame player leave
-        // else {
-        //     for (const room of this.gameRooms) {
-        //         if (room.roomId === player.roomId) {
-        //             room.removePlayer(userId)
-        //             return room
-        //         }
-        //     }
-        // }
     }
 }
 

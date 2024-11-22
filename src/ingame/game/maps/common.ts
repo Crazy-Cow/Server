@@ -1,4 +1,4 @@
-import { SocketEmitEvtDataGameState } from 'socket/types/emit'
+import { SocketEmitEvtDataGameState } from 'ingame/types/emit'
 import { Character, Position } from '../objects/player'
 
 const GROUND_POS = {
@@ -102,6 +102,7 @@ export class CommonMap {
 
     startGameLoop({ handleGameState, handleGameOver }: MapStartLoopType) {
         this.loopIdToReduceTime = setInterval(() => {
+            console.log(`${this.remainRunningTime}초 남음`)
             this.remainRunningTime -= 1
 
             if (this.isGameOver()) {

@@ -1,22 +1,15 @@
-import { Character } from '../../../game/objects/player'
-import { RoomState } from '../../../service/rooms'
+import { Character } from '../game/objects/player'
 
+// TODO: protocol 수정
 export type EmitEventName =
-    | 'room.changeState' // 대기실 상태 변경
-    | 'game.start' // 게임 시작
-    | 'game.state' // v2 게임 상태
-    | 'game.over' // 게임 종료
+    | 'ingame.start' // 게임 시작
+    | 'ingame.state' // v2 게임 상태
+    | 'ingame.over' // 게임 종료
 
 type EmitEventDataMap = {
-    'room.changeState': {
-        roomId: string
-        state: RoomState
-        playerCnt: number
-        maxPlayerCnt: number
-    }
-    'game.start': undefined
-    'game.state': SocketEmitEvtDataGameState
-    'game.over': undefined
+    'ingame.start': undefined
+    'ingame.state': SocketEmitEvtDataGameState
+    'ingame.over': undefined
 }
 
 export type EmitEventData = {

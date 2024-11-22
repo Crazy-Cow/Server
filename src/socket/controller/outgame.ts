@@ -17,18 +17,7 @@ function getRoomStateDto(room: Room): EmitEventData['room.changeState'] {
 class OutgameController extends BaseController {
     register() {
         this.socket.on<OnEventName>('room.enter', this.handleRoomEnter)
-        // this.getSocket().on<OnEventName>('room.leave', this.handleRoomLeave)
     }
-
-    // disconnect() {
-    //     const userId = this.getUserId()
-    //     const room = roomService.leaveRoom(userId)
-    //     userService.removeUser(userId)
-    //     if (room) {
-    //         // user가 존재하던 room
-    //         this.broadcastRoomState(room)
-    //     }
-    // }
 
     private broadcastRoomState = (room: Room) => {
         const data = getRoomStateDto(room)
@@ -44,19 +33,16 @@ class OutgameController extends BaseController {
 
         if (room.state === 'playing') {
             console.log('게임 시작!')
-            this.broadcast(room.roomId, 'game.start', { players: room.players })
+
             await roomService.moveOutgameToIngame()
+            this.broadcast(room.roomId, 'game.ready', undefined)
+            setInterval(() => {
+                this.broadcast(room.roomId, 'game.enter', undefined)
+            }, 3000)
         }
 
         return room
     }
-
-    // handleRoomLeave = (args: OnEventData['room.leave']) => {
-    //     this.logger('room.leave', args)
-    //     const userId = this.socket.id
-    //     const room = roomService.leaveRoom(userId)
-    //     this.broadcastRoomState(room)
-    // }
 }
 
 export default OutgameController
