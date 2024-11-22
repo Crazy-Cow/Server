@@ -3,6 +3,7 @@ import { OnEventData, OnEventName } from './types/on'
 import { IngameController } from './controller'
 import socketClientManager, { SocketClientId } from './service/client-manager'
 import userService from '../../service/users'
+import { RedisPubSub } from '../../db/redis/ingame'
 
 class SocketImplement {
     socket: Socket
@@ -38,7 +39,15 @@ class SocketImplement {
     }
 }
 
-export function initSocket(io: Server) {
+export function initInGameSocket(io: Server) {
+    // redisClient.unsubscribe('game.start')
+    const subscriber = new RedisPubSub() // 구독자
+    subscriber.subscribe('game.start')
+
+    // redisClient.subscribe('game.start', (roomId) => {
+    //     console.log('TODO: load players from roomId: ', roomId)
+    // })
+
     io.use((socket, next) => {
         const clientId: SocketClientId = socket.handshake.auth.clientId
         if (!clientId) {

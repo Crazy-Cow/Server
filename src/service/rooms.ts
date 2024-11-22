@@ -3,6 +3,7 @@ import util from './rooms.util'
 import { CommonMap, TailTagMap } from '../game/maps'
 import { MapStartLoopType } from 'game/maps/common'
 import roomRepository, { RoomRepository } from '../db/redis/repository/rooms'
+import { redisClient } from '../db/redis'
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
@@ -108,8 +109,9 @@ class RoomService {
     }
 
     async moveOutgameToIngame() {
-        // TODO: Event to Ingame Server
-        await this.repository.createAndSave(this.waitingRoom)
+        const room = this.waitingRoom
+        await this.repository.createAndSave(room)
+        await redisClient.publish('game.start', room.roomId)
         this.waitingRoom = new Room({})
     }
 

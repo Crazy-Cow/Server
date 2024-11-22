@@ -6,7 +6,9 @@ const REDIS_NICKNAMES = `${COMMON_KEY}:nicknames`
 
 const createUserKey = (userId: string) => `${COMMON_KEY}:${userId}`
 const createError = (method: string, error: unknown) => {
-    return new Error(`[REDIS]${COMMON_KEY}: ${method} failed\n${error}`)
+    const message = `[REDIS]${COMMON_KEY}: ${method} failed\n${error}`
+    console.log(message)
+    return new Error(message)
 }
 
 const createAndSave = async (user: User) => {

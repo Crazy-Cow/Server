@@ -12,6 +12,13 @@ function handleMove(character: Character, data: OnEventData['move']) {
 }
 
 class IngameController extends BaseController {
+    // constructor(props: { socket: Socket }) {
+    //     super(props)
+
+    //     // TODO: load players from roomId
+    //     // TODO: handleStartGame
+    // }
+
     register() {
         // TODO this.gameMap이랑 연관
         this.socket.on<OnEventName>('move', this.handleMove)
