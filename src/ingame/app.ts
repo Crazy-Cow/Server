@@ -21,7 +21,8 @@ import userService from './service/user'
 
 const socketClientManager = new SocketClientManager()
 
-const io = new Server(9000, { cors: { origin: '*' } })
+const port = Number(process.env.INGAME_PORT)
+const io = new Server(port, { cors: { origin: '*' } })
 
 io.use((socket, next) => {
     const clientId = socket.handshake.auth.clientId

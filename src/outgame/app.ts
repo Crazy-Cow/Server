@@ -9,7 +9,7 @@ import { Server } from 'socket.io'
 import { initOutGameSocket } from './socket'
 import redisManager from '../db/redis/redis-manager'
 
-const port = process.env.PORT
+const port = process.env.OUTGAME_PORT
 const corsOption: CorsOptions = { origin: '*' }
 
 const app: Express = express()
