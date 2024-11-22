@@ -1,0 +1,57 @@
+name: CI/CD Pipeline
+
+on:
+    push:
+        branches:
+            - CD-201
+
+jobs:
+    build-and-deploy:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Set up Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '22'
+
+            - name: Build and push Docker images
+              run: |
+                  echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+                  cd outgame
+                  docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/outgame:latest .
+                  docker push ${{ secrets.DOCKERHUB_USERNAME }}/outgame:latest
+                  cd ..
+
+                  cd ingame
+                  docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/ingame:latest .
+                  docker push ${{ secrets.DOCKERHUB_USERNAME }}/ingame:latest
+                  cd ..
+
+            - name: Deploy to EC2
+              uses: appleboy/ssh-action@v1.1.0
+              with:
+                  host: ${{ secrets.REMOTE_IP }}
+                  username: ${{ secrets.REMOTE_USER }}
+                  key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+                  port: ${{ secrets.REMOTE_SSH_PORT }}
+                  script: |
+                      echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+                      export MONGO_DB_USERNAME=${{ secrets.MONGO_DB_USERNAME }}
+                      export MONGO_DB_PASSWORD=${{ secrets.MONGO_DB_PASSWORD }}
+                      export MONGO_DB_DATABASE=${{ secrets.MONGO_DB_DATABASE }}
+
+                      echo "MONGO_DB_USERNAME=$MONGO_DB_USERNAME" > docker-compose.env
+                      echo "MONGO_DB_PASSWORD=$MONGO_DB_PASSWORD" >> docker-compose.env
+                      echo "MONGO_DB_DATABASE=$MONGO_DB_DATABASE" >> docker-compose.env
+
+                      sudo docker compose down
+
+                      sudo docker compose pull
+
+                      sudo docker compose up -d
