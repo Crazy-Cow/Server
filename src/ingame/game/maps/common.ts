@@ -102,7 +102,7 @@ export class CommonMap {
 
     startGameLoop({ handleGameState, handleGameOver }: MapStartLoopType) {
         this.loopIdToReduceTime = setInterval(() => {
-            console.log(`${this.remainRunningTime}초 남음`)
+            // console.log(`${this.remainRunningTime}초 남음`)
             this.remainRunningTime -= 1
 
             if (this.isGameOver()) {

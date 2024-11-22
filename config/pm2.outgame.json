@@ -1,6 +1,6 @@
 {
-    "name": "express-project",
-    "script": "./build/app.js",
+    "name": "outgame",
+    "script": "./build/outgame/app.js",
     "cwd": ".",
     "watch": true,
     "ignore_watch": ["node_modules", "logs"],

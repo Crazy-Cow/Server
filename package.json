@@ -8,9 +8,11 @@
         "lint": "eslint -c ./.eslintrc \"./src/**/*.ts\"",
         "lint-test": "npm run lint && echo \"No tests specified\" && exit 0",
         "test": "jest",
-        "dev": "nodemon",
+        "ingame:dev": "nodemon --config config/nodemon.ingame.json",
+        "outgame:dev": "nodemon --config config/nodemon.outgame.json",
         "build": "rimraf ./build && tsc",
-        "prd": "npm run build && pm2 start pm2.config.json",
+        "ingame:prd": "pm2 start config/pm2.ingame.json",
+        "outgame:prd": "pm2 start config/pm2.outgame.json",
         "prepare": "husky install .husky"
     },
     "lint-staged": {
