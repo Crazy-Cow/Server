@@ -7,9 +7,9 @@ import cookieParser from 'cookie-parser'
 import routes from './routes'
 import swaggerUi from 'swagger-ui-express'
 import swaggerDocument from './docs/swagger-output.json'
-import { initSocket } from './socket'
 import { Server } from 'socket.io'
 import { connectRedisDB } from './db/redis'
+import { initOutGameSocket } from './socket'
 
 const port = process.env.PORT
 const corsOption: CorsOptions = { origin: '*' }
@@ -30,7 +30,7 @@ connectRedisDB()
         })
 
         const io = new Server(server, { cors: corsOption })
-        initSocket(io)
+        initOutGameSocket(io)
     })
     .catch((err) => {
         console.error('[Error] Fail to start server', err)

@@ -1,29 +1,22 @@
 import { Server, Socket } from 'socket.io'
 import { OnEventData, OnEventName } from './types/on'
-import { IngameController, OutgameController } from './controller'
+import { OutgameController } from './controller'
 import userService from '../service/users'
 import socketClientManager, { SocketClientId } from './service/client-manager'
 
 class SocketImplement {
     socket: Socket
-
     outgameCtrl: OutgameController
-    ingameCtrl: IngameController
 
     constructor(socket: Socket) {
         this.socket = socket
-        this.ingameCtrl = new IngameController({ socket })
-        this.outgameCtrl = new OutgameController({
-            socket,
-            ingameCtrl: this.ingameCtrl,
-        })
+        this.outgameCtrl = new OutgameController({ socket })
         this.register()
     }
 
     private register = () => {
         this.socket.on<OnEventName>('disconnect', this.handleDisconnect)
         this.outgameCtrl.register()
-        this.ingameCtrl.register()
     }
 
     private handleDisconnect = (reason: OnEventData['disconnect']) => {
@@ -44,7 +37,7 @@ class SocketImplement {
     }
 }
 
-export function initSocket(io: Server) {
+export function initOutGameSocket(io: Server) {
     io.use((socket, next) => {
         const clientId: SocketClientId = socket.handshake.auth.clientId
         if (!clientId) {

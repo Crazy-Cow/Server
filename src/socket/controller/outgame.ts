@@ -1,10 +1,8 @@
-import { Socket } from 'socket.io'
 import { BaseController } from './base'
 import { OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import userService from '../../service/users'
 import { EmitEventData } from '../types/emit'
-import IngameController from './ingame'
 
 function getRoomStateDto(room: Room): EmitEventData['room.changeState'] {
     return {
@@ -17,12 +15,6 @@ function getRoomStateDto(room: Room): EmitEventData['room.changeState'] {
 
 // 로비 ~ 대기실
 class OutgameController extends BaseController {
-    ingameCtrl: IngameController
-
-    constructor(props: { socket: Socket; ingameCtrl: IngameController }) {
-        super(props)
-        this.ingameCtrl = props.ingameCtrl
-    }
     register() {
         this.socket.on<OnEventName>('room.enter', this.handleRoomEnter)
         // this.getSocket().on<OnEventName>('room.leave', this.handleRoomLeave)
@@ -52,10 +44,8 @@ class OutgameController extends BaseController {
 
         if (room.state === 'playing') {
             console.log('게임 시작!')
-
             this.broadcast(room.roomId, 'game.start', { players: room.players })
             await roomService.moveOutgameToIngame()
-            this.ingameCtrl.handleStartGame(room)
         }
 
         return room
