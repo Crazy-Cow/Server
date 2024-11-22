@@ -47,6 +47,7 @@ jobs:
                   port: ${{ secrets.REMOTE_SSH_PORT }}
                   source: ./docker-compose.prod.yml
                   target: /home/ubuntu/docker-compose.yml
+                  strip_components: 0
 
             - name: Deploy to EC2
               uses: appleboy/ssh-action@v1.1.0
