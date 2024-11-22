@@ -3,11 +3,12 @@ dotenv.config()
 
 import { Server } from 'socket.io'
 import { Character } from './game/objects/player'
-import socketClientManager from './utils/client-manager'
 import { EmitEventName } from './types/emit'
 import { OnEventName, OnEventData } from './types/on'
 import gameRoomService from './service/game-room'
 import redisManager from '../db/redis/redis-manager'
+import SocketClientManager from '../socket/client-manager'
+import userService from './service/user'
 ;(async () => {
     await redisManager.common
         .connect()
@@ -18,20 +19,38 @@ import redisManager from '../db/redis/redis-manager'
         .then(() => console.log('[2] (ingame) Redis Connected'))
 })()
 
+const socketClientManager = new SocketClientManager()
+
 const io = new Server(9000, { cors: { origin: '*' } })
 
 io.use((socket, next) => {
     const clientId = socket.handshake.auth.clientId
-    const roomId = socket.handshake.auth.roomId
 
     if (!clientId) {
         return next(new Error('[clientId] required'))
     }
 
     socket.data.clientId = clientId
-    socket.data.roomId = roomId // TODO protocol 추가
     socketClientManager.addOrUpdateClient(clientId, socket.id)
     next()
+})
+
+io.use(async (socket, next) => {
+    const userId = socket.data.clientId
+
+    const player = await userService.findUserById(userId)
+    if (!player) {
+        return next(new Error('로비 입장 필요'))
+    }
+
+    const roomId = player.roomId
+    if (!roomId) {
+        next(new Error('대기실 입장 필요'))
+    } else {
+        socket.join(roomId)
+        socket.data.roomId = roomId
+        next()
+    }
 })
 
 function handleMove(character: Character, data: OnEventData['move']) {
@@ -43,7 +62,8 @@ function handleMove(character: Character, data: OnEventData['move']) {
 
 io.on('connection', (socket) => {
     const userId = socket.data.clientId
-    const roomId = socket.data.clientId
+    const roomId = socket.data.roomId
+
     socket.join(roomId)
     socket.on<OnEventName>('move', async (data: OnEventData['move']) => {
         const room = await gameRoomService.findById(roomId)

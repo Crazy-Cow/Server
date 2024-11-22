@@ -1,14 +1,14 @@
-import { User } from './users'
 import util from './rooms.util'
 import roomRepository, { RoomRepository } from '../../db/redis/repository/rooms'
 import { RedisGameRoom } from '../../db/redis/models/room'
 import redisManager from '../../db/redis/redis-manager'
+import { RedisUser } from '../../db/redis/models/user'
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
 export class Room {
     roomId: string
-    players: User[] = []
+    players: RedisUser[] = []
     createdAt: Date
     state: RoomState = 'initial'
     maxPlayerCnt: number
@@ -25,9 +25,9 @@ export class Room {
         return this.players.length
     }
 
-    addPlayer = (player: User) => {
+    addPlayer = (player: RedisUser) => {
         this.players.push(player)
-        // player.updateRoomId(this.roomId)
+        player.updateRoomId(this.roomId)
     }
 
     removePlayer = (userId: string) => {
@@ -35,7 +35,7 @@ export class Room {
 
         if (player) {
             this.players = this.players.filter((user) => user.userId !== userId)
-            // player.resetRoomId()
+            player.resetRoomId()
         }
     }
 
@@ -71,7 +71,7 @@ class RoomService {
         return this.instance
     }
 
-    joinRoom(user: User) {
+    joinRoom(user: RedisUser) {
         this.waitingRoom.addPlayer(user)
 
         if (this.waitingRoom.canStartGame()) {

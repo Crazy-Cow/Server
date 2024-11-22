@@ -15,11 +15,20 @@ const createAndSave = async (user: RedisUser) => {
     try {
         await redisManager.common.hSet(createUserKey(user.userId), {
             nickName: user.nickName,
+            roomId: user.roomId,
         })
         await redisManager.common.sAdd(REDIS_NICKNAMES, user.nickName)
     } catch (err) {
         throw createError('create', err)
     }
+}
+
+const updateRoomId = async (props: { userId: string; roomId: string }) => {
+    await redisManager.common.hSet(
+        createUserKey(props.userId),
+        'roomId',
+        props.roomId
+    )
 }
 
 const findById = async (userId: string): Promise<RedisUser> => {
@@ -29,7 +38,11 @@ const findById = async (userId: string): Promise<RedisUser> => {
         return null
     }
 
-    const user = new RedisUser(userId, result.nickName)
+    const user = new RedisUser({
+        userId,
+        nickName: result.nickName,
+        roomId: result.roomId,
+    })
     return user
 }
 
@@ -55,6 +68,7 @@ const isDupNick = async (nickName: string) => {
 export type UserRepository = {
     createAndSave: typeof createAndSave
     findById: typeof findById
+    updateRoomId: typeof updateRoomId
     remove: typeof remove
     isDupNick: typeof isDupNick
 }
@@ -62,6 +76,7 @@ export type UserRepository = {
 const userRepository: UserRepository = {
     createAndSave,
     findById,
+    updateRoomId,
     remove,
     isDupNick,
 }

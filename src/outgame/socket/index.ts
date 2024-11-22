@@ -2,10 +2,10 @@ import { Server, Socket } from 'socket.io'
 import { OnEventData, OnEventName } from './types/on'
 import { OutgameController } from './controller'
 import userService from '../service/users'
-import socketClientManager, {
+import SocketClientManager, {
     SocketClientId,
-    SocketRoomId,
-} from './service/client-manager'
+} from '../../socket/client-manager'
+const socketClientManager = new SocketClientManager()
 
 class SocketImplement {
     socket: Socket
@@ -43,32 +43,26 @@ class SocketImplement {
 export function initOutGameSocket(io: Server) {
     io.use((socket, next) => {
         const clientId: SocketClientId = socket.handshake.auth.clientId
-        const roomId: SocketRoomId = socket.handshake.auth.roomId
         if (!clientId) {
             return next(new Error('[clientId] required'))
         }
         socket.data.clientId = clientId
-        socket.data.roomId = roomId
         socketClientManager.addOrUpdateClient(clientId, socket.id)
         next()
     })
 
     io.use(async (socket, next) => {
-        const clientId = socket.data.clientId
-        const roomId = socket.data.roomId
+        const userId = socket.data.clientId
 
-        console.log(socketClientManager.getAllClients())
-        if (socketClientManager.hasClient(clientId)) {
-            const userId = clientId
-            const player = await userService.findUserById(userId)
-            if (!player) {
-                return next(new Error('로비 입장 필요'))
-            }
+        const player = await userService.findUserById(userId)
+        if (!player) {
+            return next(new Error('로비 입장 필요'))
+        }
 
-            if (roomId) {
-                console.log('reconnect')
-                socket.join(roomId)
-            }
+        const roomId = player.roomId
+        if (roomId) {
+            console.log('reconnect')
+            socket.join(roomId)
         }
 
         next()

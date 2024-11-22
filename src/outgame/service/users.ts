@@ -1,14 +1,5 @@
+import { RedisUser } from '../../db/redis/models/user'
 import userRepository, { UserRepository } from '../../db/redis/repository/users'
-
-export class User {
-    userId: string
-    nickName: string
-
-    constructor(userId: string, nickName: string) {
-        this.userId = userId
-        this.nickName = nickName
-    }
-}
 
 class UserService {
     private repository: UserRepository
@@ -34,14 +25,12 @@ class UserService {
     }
 
     async findUserById(userId: string) {
-        const redisUser = await this.repository.findById(userId)
-        const user = new User(redisUser.userId, redisUser.nickName)
-        return user
+        return this.repository.findById(userId)
     }
 
     async createUser(nickName: string) {
         const userId = this.generateUserId()
-        const user = new User(userId, nickName)
+        const user = new RedisUser({ userId, nickName, roomId: '' })
         await this.repository.createAndSave(user)
         return user
     }

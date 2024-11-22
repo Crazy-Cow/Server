@@ -4,17 +4,9 @@ export type SocketClientId = string
 
 class SocketClientManager {
     private clients: Map<SocketClientId, Socket['id']>
-    private static instance: SocketClientManager
 
-    private constructor() {
+    constructor() {
         this.clients = new Map<SocketClientId, Socket['id']>()
-    }
-
-    public static getInstance(): SocketClientManager {
-        if (!this.instance) {
-            this.instance = new SocketClientManager()
-        }
-        return this.instance
     }
 
     hasClient(clientId: SocketClientId): boolean {
@@ -38,6 +30,4 @@ class SocketClientManager {
     }
 }
 
-const socketClientManager = SocketClientManager.getInstance()
-
-export default socketClientManager
+export default SocketClientManager
