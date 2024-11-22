@@ -1,5 +1,5 @@
-import { redisClient } from '..'
 import { RedisUser } from '../models/user'
+import redisManager from '../redis-manager'
 
 const COMMON_KEY = 'user'
 const REDIS_NICKNAMES = `${COMMON_KEY}:nicknames`
@@ -13,17 +13,17 @@ const createError = (method: string, error: unknown) => {
 
 const createAndSave = async (user: RedisUser) => {
     try {
-        await redisClient.hSet(createUserKey(user.userId), {
+        await redisManager.common.hSet(createUserKey(user.userId), {
             nickName: user.nickName,
         })
-        await redisClient.sAdd(REDIS_NICKNAMES, user.nickName)
+        await redisManager.common.sAdd(REDIS_NICKNAMES, user.nickName)
     } catch (err) {
         throw createError('create', err)
     }
 }
 
 const findById = async (userId: string): Promise<RedisUser> => {
-    const result = await redisClient.hGetAll(createUserKey(userId))
+    const result = await redisManager.common.hGetAll(createUserKey(userId))
 
     if (!result || Object.keys(result).length === 0) {
         return null
@@ -37,15 +37,18 @@ const remove = async (userId: string) => {
     try {
         const user = await findById(userId)
         if (!user) throw new Error('User not found')
-        await redisClient.del(createUserKey(userId))
-        await redisClient.sRem(REDIS_NICKNAMES, user.nickName)
+        await redisManager.common.del(createUserKey(userId))
+        await redisManager.common.sRem(REDIS_NICKNAMES, user.nickName)
     } catch (err) {
         throw createError('delete', err)
     }
 }
 
 const isDupNick = async (nickName: string) => {
-    const exists = await redisClient.sIsMember(REDIS_NICKNAMES, nickName)
+    const exists = await redisManager.common.sIsMember(
+        REDIS_NICKNAMES,
+        nickName
+    )
     return exists
 }
 

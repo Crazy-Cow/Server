@@ -6,8 +6,8 @@ import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import routes from './routes'
 import { Server } from 'socket.io'
-import { connectRedisDB } from '../db/redis'
 import { initOutGameSocket } from './socket'
+import redisManager from '../db/redis/redis-manager'
 
 const port = process.env.PORT
 const corsOption: CorsOptions = { origin: '*' }
@@ -19,8 +19,9 @@ app.use(express.json())
 app.use('/example', routes.example)
 app.use('/user', routes.user)
 
-connectRedisDB()
-    .then(() => console.log('[1] Redis DB Connected'))
+redisManager.common
+    .connect()
+    .then(() => console.log('[1] (common) Redis Connected'))
     .then(() => {
         const server = app.listen(port, () => {
             console.log(`[2] Server runs at <http://localhost>:${port}`)

@@ -4,17 +4,21 @@ dotenv.config()
 import { Server } from 'socket.io'
 import { Character } from './game/objects/player'
 import socketClientManager from './utils/client-manager'
-import { Redis } from './utils/redis'
 import { EmitEventName } from './types/emit'
 import { OnEventName, OnEventData } from './types/on'
 import gameRoomService from './service/game-room'
-import { connectRedisDB } from '../db/redis'
+import redisManager from '../db/redis/redis-manager'
 ;(async () => {
-    await connectRedisDB().then(() => console.log('[1] Redis DB Connected'))
+    await redisManager.common
+        .connect()
+        .then(() => console.log('[1] (common) Redis Connected'))
+
+    await redisManager.ingame
+        .connect()
+        .then(() => console.log('[2] (ingame) Redis Connected'))
 })()
 
 const io = new Server(9000, { cors: { origin: '*' } })
-const redis = new Redis()
 
 io.use((socket, next) => {
     const clientId = socket.handshake.auth.clientId
@@ -48,7 +52,7 @@ io.on('connection', (socket) => {
     })
 })
 
-redis.client.subscribe('game.ready', async (roomId: string) => {
+redisManager.ingame.subscribe('game.ready', async (roomId: string) => {
     console.log('[redis sub] game.ready', roomId)
     const room = await gameRoomService.createRoom(roomId)
     room.startGame(io)

@@ -1,5 +1,5 @@
-import { redisClient } from '..'
 import { RedisGameRoom } from '../models/room'
+import redisManager from '../redis-manager'
 
 const COMMON_KEY = 'game-room'
 const createRoomKey = (roomId: string) => `${COMMON_KEY}:${roomId}`
@@ -12,7 +12,7 @@ const createError = (method: string, error: unknown) => {
 const createAndSave = async (room: RedisGameRoom) => {
     try {
         for (const id of room.playerIds) {
-            await redisClient.sAdd(createRoomKey(room.roomId), id)
+            await redisManager.common.sAdd(createRoomKey(room.roomId), id)
         }
     } catch (err) {
         throw createError('create', err)
@@ -23,7 +23,7 @@ const getPlayerIds = async (
     roomId: string
 ): Promise<RedisGameRoom['playerIds']> => {
     try {
-        const result = await redisClient.sMembers(createRoomKey(roomId))
+        const result = await redisManager.common.sMembers(createRoomKey(roomId))
         return result
     } catch (err) {
         throw createError('findById', err)

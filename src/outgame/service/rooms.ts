@@ -1,8 +1,8 @@
 import { User } from './users'
 import util from './rooms.util'
 import roomRepository, { RoomRepository } from '../../db/redis/repository/rooms'
-import { redisClient } from '../../db/redis'
 import { RedisGameRoom } from '../../db/redis/models/room'
+import redisManager from '../../db/redis/redis-manager'
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
@@ -91,7 +91,7 @@ class RoomService {
         await this.repository.createAndSave(
             new RedisGameRoom(room.roomId, playerIds)
         )
-        await redisClient.publish('game.ready', room.roomId)
+        await redisManager.common.publish('game.ready', room.roomId)
         this.waitingRoom = new Room({})
     }
 }
