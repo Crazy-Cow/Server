@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io'
-import { EmitEventName } from 'socket/types/emit'
-import { OnEventData } from 'socket/types/on'
+import { EmitEventName } from '../../socket/types/emit'
+import { OnEventData } from '../../socket/types/on'
 
 export abstract class BaseController {
     socket: Socket

@@ -1,5 +1,5 @@
 import { redisClient } from '..'
-import { Room } from '../../../service/rooms'
+import { RedisGameRoom } from '../models/room'
 
 const COMMON_KEY = 'game-room'
 const createRoomKey = (roomId: string) => `${COMMON_KEY}:${roomId}`
@@ -9,19 +9,19 @@ const createError = (method: string, error: unknown) => {
     return new Error(message)
 }
 
-const createAndSave = async (room: Room) => {
-    const players = room.players
-
+const createAndSave = async (room: RedisGameRoom) => {
     try {
-        for (const player of players) {
-            await redisClient.sAdd(createRoomKey(room.roomId), player.userId)
+        for (const id of room.playerIds) {
+            await redisClient.sAdd(createRoomKey(room.roomId), id)
         }
     } catch (err) {
         throw createError('create', err)
     }
 }
 
-const findById = async (roomId: string) => {
+const getPlayerIds = async (
+    roomId: string
+): Promise<RedisGameRoom['playerIds']> => {
     try {
         const result = await redisClient.sMembers(createRoomKey(roomId))
         return result
@@ -32,12 +32,12 @@ const findById = async (roomId: string) => {
 
 export type RoomRepository = {
     createAndSave: typeof createAndSave
-    findById: typeof findById
+    getPlayerIds: typeof getPlayerIds
 }
 
 const roomRepository: RoomRepository = {
     createAndSave,
-    findById,
+    getPlayerIds,
 }
 
 export default roomRepository

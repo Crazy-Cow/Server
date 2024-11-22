@@ -2,7 +2,10 @@ import { Server, Socket } from 'socket.io'
 import { OnEventData, OnEventName } from './types/on'
 import { OutgameController } from './controller'
 import userService from '../service/users'
-import socketClientManager, { SocketClientId } from './service/client-manager'
+import socketClientManager, {
+    SocketClientId,
+    SocketRoomId,
+} from './service/client-manager'
 
 class SocketImplement {
     socket: Socket
@@ -40,16 +43,20 @@ class SocketImplement {
 export function initOutGameSocket(io: Server) {
     io.use((socket, next) => {
         const clientId: SocketClientId = socket.handshake.auth.clientId
+        const roomId: SocketRoomId = socket.handshake.auth.roomId
         if (!clientId) {
             return next(new Error('[clientId] required'))
         }
         socket.data.clientId = clientId
+        socket.data.roomId = roomId
         socketClientManager.addOrUpdateClient(clientId, socket.id)
         next()
     })
 
     io.use(async (socket, next) => {
         const clientId = socket.data.clientId
+        const roomId = socket.data.roomId
+
         console.log(socketClientManager.getAllClients())
         if (socketClientManager.hasClient(clientId)) {
             const userId = clientId
@@ -58,9 +65,9 @@ export function initOutGameSocket(io: Server) {
                 return next(new Error('로비 입장 필요'))
             }
 
-            if (player.roomId) {
+            if (roomId) {
                 console.log('reconnect')
-                socket.join(player.roomId)
+                socket.join(roomId)
             }
         }
 

@@ -5,10 +5,8 @@ import cors, { CorsOptions } from 'cors'
 import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import routes from './routes'
-import swaggerUi from 'swagger-ui-express'
-import swaggerDocument from './docs/swagger-output.json'
 import { Server } from 'socket.io'
-import { connectRedisDB } from './db/redis'
+import { connectRedisDB } from '../db/redis'
 import { initOutGameSocket } from './socket'
 
 const port = process.env.PORT
@@ -20,7 +18,6 @@ app.use(cookieParser())
 app.use(express.json())
 app.use('/example', routes.example)
 app.use('/user', routes.user)
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 connectRedisDB()
     .then(() => console.log('[1] Redis DB Connected'))

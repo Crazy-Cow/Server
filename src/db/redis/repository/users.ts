@@ -1,5 +1,5 @@
 import { redisClient } from '..'
-import { User } from '../../../service/users'
+import { RedisUser } from '../models/user'
 
 const COMMON_KEY = 'user'
 const REDIS_NICKNAMES = `${COMMON_KEY}:nicknames`
@@ -11,11 +11,10 @@ const createError = (method: string, error: unknown) => {
     return new Error(message)
 }
 
-const createAndSave = async (user: User) => {
+const createAndSave = async (user: RedisUser) => {
     try {
         await redisClient.hSet(createUserKey(user.userId), {
             nickName: user.nickName,
-            roomId: user.roomId,
         })
         await redisClient.sAdd(REDIS_NICKNAMES, user.nickName)
     } catch (err) {
@@ -23,16 +22,14 @@ const createAndSave = async (user: User) => {
     }
 }
 
-const findById = async (userId: string) => {
+const findById = async (userId: string): Promise<RedisUser> => {
     const result = await redisClient.hGetAll(createUserKey(userId))
 
     if (!result || Object.keys(result).length === 0) {
         return null
     }
 
-    const user = new User(userId, result.nickName)
-    user.updateRoomId(result.roomId)
-
+    const user = new RedisUser(userId, result.nickName)
     return user
 }
 

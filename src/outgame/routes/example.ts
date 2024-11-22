@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express'
-import Posts from '../db/mongo/example'
+import Posts from '../../db/mongo/example'
 
 const router = Router()
 

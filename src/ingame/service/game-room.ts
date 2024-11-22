@@ -52,7 +52,7 @@ class GameRoomService {
 
     async createRoom(roomId: string) {
         const room = new GameRoom({ roomId })
-        const playerIds = await this.roomRepository.findById(roomId)
+        const playerIds = await this.roomRepository.getPlayerIds(roomId)
         for (const id of playerIds) {
             const player = await this.userRepository.findById(id)
             room.addPlayer({ id, nickName: player.nickName })

@@ -1,7 +1,8 @@
 import { User } from './users'
 import util from './rooms.util'
-import roomRepository, { RoomRepository } from '../db/redis/repository/rooms'
-import { redisClient } from '../db/redis'
+import roomRepository, { RoomRepository } from '../../db/redis/repository/rooms'
+import { redisClient } from '../../db/redis'
+import { RedisGameRoom } from '../../db/redis/models/room'
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
@@ -26,7 +27,7 @@ export class Room {
 
     addPlayer = (player: User) => {
         this.players.push(player)
-        player.updateRoomId(this.roomId)
+        // player.updateRoomId(this.roomId)
     }
 
     removePlayer = (userId: string) => {
@@ -34,7 +35,7 @@ export class Room {
 
         if (player) {
             this.players = this.players.filter((user) => user.userId !== userId)
-            player.resetRoomId()
+            // player.resetRoomId()
         }
     }
 
@@ -86,7 +87,10 @@ class RoomService {
 
     async moveOutgameToIngame() {
         const room = this.waitingRoom
-        await this.repository.createAndSave(room)
+        const playerIds = room.players.map((player) => player.userId)
+        await this.repository.createAndSave(
+            new RedisGameRoom(room.roomId, playerIds)
+        )
         await redisClient.publish('game.ready', room.roomId)
         this.waitingRoom = new Room({})
     }

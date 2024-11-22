@@ -1,6 +1,7 @@
 import { Socket } from 'socket.io'
 
 export type SocketClientId = string
+export type SocketRoomId = string
 
 class SocketClientManager {
     private clients: Map<SocketClientId, Socket['id']>
