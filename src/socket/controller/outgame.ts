@@ -43,9 +43,9 @@ class OutgameController extends BaseController {
         this.broadcast(room.roomId, 'room.changeState', data)
     }
 
-    private handleRoomEnter = (): Room => {
+    private handleRoomEnter = async (): Promise<Room> => {
         const userId = this.getUserId()
-        const player = userService.findUserById(userId)
+        const player = await userService.findUserById(userId)
         const room = roomService.joinRoom(player)
         this.socket.join(room.roomId)
         this.broadcastRoomState(room)

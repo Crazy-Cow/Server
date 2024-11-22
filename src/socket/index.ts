@@ -55,12 +55,12 @@ export function initSocket(io: Server) {
         next()
     })
 
-    io.use((socket, next) => {
+    io.use(async (socket, next) => {
         const clientId = socket.data.clientId
         console.log(socketClientManager.getAllClients())
         if (socketClientManager.hasClient(clientId)) {
             const userId = clientId
-            const player = userService.findUserById(userId)
+            const player = await userService.findUserById(userId)
             if (!player) {
                 return next(new Error('로비 입장 필요'))
             }

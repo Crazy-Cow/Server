@@ -23,7 +23,7 @@ export const getRandomNicknameController = (
     })
 }
 
-export const createUserController = (
+export const createUserController = async (
     req: Request<object, object, CreateUserRequest>,
     res: Response<CreateUserResponse | ErrorResponse>
 ) => {
@@ -37,14 +37,15 @@ export const createUserController = (
     }
 
     try {
-        if (userService.checkDuplicatedNickName(nickName)) {
+        const exists = await userService.checkDupNick(nickName)
+        if (exists) {
             res.status(StatusCode.Conflict).json(
                 createErrorRes({ msg: '중복된 닉네임입니다' })
             )
             return
         }
 
-        const user = userService.createUser(nickName)
+        const user = await userService.createUser(nickName)
         if (user) {
             res.status(StatusCode.Created).json({ userId: user.userId })
         } else {

@@ -21,9 +21,9 @@ class IngameController extends BaseController {
     //     this.gameMap?.removeCharacter(this.socket.id)
     // }
 
-    private handleMove = (data: OnEventData['move']) => {
+    private handleMove = async (data: OnEventData['move']) => {
         const userId = this.getUserId()
-        const player = userService.findUserById(userId)
+        const player = await userService.findUserById(userId)
         const room = roomService.findGameRoomById(player.roomId)
         const gameMap = room?.gameMap
         if (gameMap) {

@@ -1,4 +1,4 @@
-import util from './users.util'
+import userRepository, { UserRepository } from '../db/redis/repository/users'
 
 export class User {
     userId: string
@@ -8,55 +8,23 @@ export class User {
     constructor(userId: string, nickName: string) {
         this.userId = userId
         this.nickName = nickName
+        this.roomId = ''
     }
 
     updateRoomId = (roomId: string) => {
         this.roomId = roomId
     }
     resetRoomId = () => {
-        this.roomId = undefined
-    }
-}
-
-class UserPool {
-    users: User[] = []
-    tempNicknames: Map<string, string> = new Map()
-
-    getUsers() {
-        return this.users
-    }
-
-    findUserById(userId: string): User | undefined {
-        return this.users.find((user) => user.userId === userId)
-    }
-
-    addUser(user: User) {
-        this.users.push(user)
-    }
-
-    removeUser(userId: string) {
-        this.users = this.users.filter((user) => user.userId !== userId)
-    }
-
-    checkDuplicatedNickName(nickName: string) {
-        if (this.users.some((user) => user.nickName === nickName)) return true
-    }
-
-    addTempNickname(userId: string, nickName: string) {
-        this.tempNicknames.set(userId, nickName)
-    }
-
-    removeTempNickname(userId: string) {
-        this.tempNicknames.delete(userId)
+        this.roomId = ''
     }
 }
 
 class UserService {
-    private userPool: UserPool
+    private repository: UserRepository
     private idCounter: number = 1
 
     private constructor() {
-        this.userPool = new UserPool()
+        this.repository = userRepository
     }
 
     private static instance: UserService
@@ -74,36 +42,23 @@ class UserService {
         return userId
     }
 
-    findUserById(userId: string) {
-        return this.userPool.findUserById(userId)
+    async findUserById(userId: string) {
+        return this.repository.findById(userId)
     }
 
-    createUser(nickName: string) {
+    async createUser(nickName: string) {
         const userId = this.generateUserId()
         const user = new User(userId, nickName)
-        this.userPool.removeTempNickname(userId)
-        this.userPool.addUser(user)
+        await this.repository.createAndSave(user)
         return user
     }
 
-    removeUser(userId: string) {
-        this.userPool.removeUser(userId)
-        this.userPool.removeTempNickname(userId)
+    async removeUser(userId: string) {
+        await this.repository.remove(userId)
     }
 
-    checkDuplicatedNickName(nickName: string) {
-        return this.userPool.checkDuplicatedNickName(nickName)
-    }
-
-    createTempNickname(userId: string): string {
-        let nickName = util.generateGuestNickName()
-
-        while (this.userPool.checkDuplicatedNickName(nickName)) {
-            nickName = util.generateGuestNickName()
-        }
-
-        this.userPool.addTempNickname(userId, nickName)
-        return nickName
+    async checkDupNick(nickName: string) {
+        return this.repository.isDupNick(nickName)
     }
 }
 

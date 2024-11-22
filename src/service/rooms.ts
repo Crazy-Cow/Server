@@ -100,8 +100,8 @@ class RoomPool {
         return prevWaitingRoom
     }
 
-    leaveRoom(userId: string) {
-        const player = userService.findUserById(userId)
+    async leaveRoom(userId: string) {
+        const player = await userService.findUserById(userId)
 
         if (!player) return
 
