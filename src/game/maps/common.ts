@@ -96,6 +96,7 @@ export class CommonMap {
                 giftCnt: char.giftCnt,
                 isBeingStolen: char.isBeingStolen,
                 isSteal: char.isSteal,
+                shift: char.shift,
             })),
         }
     }

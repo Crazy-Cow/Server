@@ -41,6 +41,7 @@ export class Character {
         this.giftCnt = 0
         this.shift = false
         this.isBeingStolen = false
+        this.isSteal = false
     }
 
     private generateRandomHexColor(): string {
