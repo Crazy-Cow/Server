@@ -13,7 +13,6 @@ function isValidVelocity(velocity: Position): boolean {
 
 function handleMove(character: Character, data: OnEventData['move']) {
     if (!isValidVelocity(data.character.velocity)) {
-        console.warn(`Invalid velocity for character ${character.id}`)
         character.position = {
             x: character.position.x + (character.velocity.x * 1) / 60,
             y: character.position.y + (character.velocity.y * 1) / 60,

@@ -107,13 +107,10 @@ export class CommonMap {
         // TODO: 검증로직
         this.characters.forEach((character) => {
             if (!this.isValidPosition(character.position)) {
-                console.warn(
-                    `out of map position for character ${character.id}`
-                )
                 character.velocity = { x: 0, y: 0, z: 0 }
                 character.position = {
                     x: character.position.x * 0.9,
-                    y: 2,
+                    y: GROUND_POS.y + 2,
                     z: character.position.z * 0.9,
                 }
             }
