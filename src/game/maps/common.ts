@@ -13,7 +13,7 @@ const GROUND_SIZE = {
     z: 20,
 }
 
-const MIN_DISTANCE = 2
+const MIN_DISTANCE = 3
 
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
@@ -61,9 +61,11 @@ export class CommonMap {
     }
 
     public calculateDistance(pos1: Position, pos2: Position): number {
-        const dx = pos1.x - pos2.x
-        const dz = pos1.z - pos2.z
-        return Math.sqrt(dx * dx + dz * dz)
+        const dx = pos2.x - pos1.x
+        const dy = pos2.y - pos1.y
+        const dz = pos2.z - pos1.z
+
+        return Math.sqrt(dx * dx + dy * dy + dz * dz)
     }
 
     findCharacter(id: string) {
@@ -91,7 +93,9 @@ export class CommonMap {
                 hairColor: char.hairColor,
                 bellyColor: char.bellyColor,
                 velocity: char.velocity,
-                hasTail: char.hasTail,
+                giftCnt: char.giftCnt,
+                isBeingStolen: char.isBeingStolen,
+                isSteal: char.isSteal,
             })),
         }
     }

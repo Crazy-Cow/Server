@@ -33,6 +33,8 @@ export type SocketEmitEvtDataGameState = {
         hairColor: Character['hairColor']
         bellyColor: Character['bellyColor']
         velocity: Character['velocity']
-        hasTail: Character['hasTail']
+        giftCnt: Character['giftCnt']
+        isBeingStolen: Character['isBeingStolen']
+        isSteal: Character['isSteal']
     }[]
 }

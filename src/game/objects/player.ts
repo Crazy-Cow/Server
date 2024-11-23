@@ -15,12 +15,12 @@ export class Character {
     hairColor: string
     bellyColor: string
     velocity: Position
-    hasTail: boolean
+    giftCnt: number
 
     isOnGround: boolean
     shift: boolean
     isBeingStolen: boolean
-
+    isSteal: boolean
     constructor({
         id,
         nickName,
@@ -38,7 +38,7 @@ export class Character {
         this.bellyColor = this.generateRandomHexColor()
         this.velocity = { x: 0, y: 0, z: 0 }
         this.isOnGround = true
-        this.hasTail = false
+        this.giftCnt = 0
         this.shift = false
         this.isBeingStolen = false
     }
@@ -48,7 +48,7 @@ export class Character {
         return '#' + color.padStart(6, '0')
     }
 
-    setHasTail(hasTail: boolean) {
-        this.hasTail = hasTail
+    setGiftCnt(giftCnt: number) {
+        this.giftCnt = giftCnt
     }
 }
