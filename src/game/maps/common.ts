@@ -16,7 +16,6 @@ const GROUND_SIZE = {
 const MIN_DISTANCE = 2
 
 const MAX_GROUND = 71
-const MAX_SPEED = 10
 
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
@@ -99,11 +98,6 @@ export class CommonMap {
         }
     }
 
-    private isValidVelocity(velocity: Position): boolean {
-        const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
-        return speed <= MAX_SPEED
-    }
-
     private isValidPosition(position: Position): boolean {
         const pos = Math.sqrt(position.x ** 2 + position.z ** 2)
         return pos <= MAX_GROUND && position.y >= GROUND_POS.y
@@ -111,6 +105,19 @@ export class CommonMap {
 
     updateGameState() {
         // TODO: 검증로직
+        this.characters.forEach((character) => {
+            if (!this.isValidPosition(character.position)) {
+                console.warn(
+                    `out of map position for character ${character.id}`
+                )
+                character.velocity = { x: 0, y: 0, z: 0 }
+                character.position = {
+                    x: character.position.x * 0.9,
+                    y: 2,
+                    z: character.position.z * 0.9,
+                }
+            }
+        })
     }
 
     startGameLoop({ handleGameState, handleGameOver }: MapStartLoopType) {
