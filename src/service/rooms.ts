@@ -108,13 +108,6 @@ class RoomPool {
         if (player.roomId === this.waitingRoom.roomId) {
             this.waitingRoom.removePlayer(userId)
             return this.waitingRoom
-        } else {
-            for (const room of this.gameRooms) {
-                if (room.roomId === player.roomId) {
-                    room.removePlayer(userId)
-                    return room
-                }
-            }
         }
     }
 
