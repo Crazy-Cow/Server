@@ -16,6 +16,7 @@ const GROUND_SIZE = {
 const MIN_DISTANCE = 2
 
 const MAX_GROUND = 71
+const MAX_HEIGHT = 33
 
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
@@ -128,6 +129,10 @@ export class CommonMap {
                     y: GROUND_POS.y + 2,
                     z: character.position.z * 0.9,
                 }
+            }
+            if (character.position.y >= MAX_HEIGHT) {
+                character.velocity.y = 0
+                character.position.y = 30
             }
         })
     }
