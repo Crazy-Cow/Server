@@ -65,11 +65,6 @@ export function initSocket(io: Server) {
     })
 
     io.on<OnEventName>('connection', (socket: Socket) => {
-        // const clientId = socket.data.clientId
-        // socket.on<OnEventName>('reconnect', () => {
-        //     socketClientManager.addOrUpdateClient(clientId, socket.id)
-        // })
-
         const instance = new SocketImplement(socket)
         instance.logger('complete connection')
     })
