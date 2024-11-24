@@ -65,13 +65,7 @@ export class Room {
     }
 
     startGameLoop(props: MapStartLoopType) {
-        this.gameMap.startGameLoop({
-            ...props,
-            handleGameOver: () => {
-                this.state = 'gameOver'
-                props.handleGameOver()
-            },
-        })
+        this.gameMap.startGameLoop(props)
     }
 }
 
