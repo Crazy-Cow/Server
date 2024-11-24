@@ -68,13 +68,28 @@ export class CommonMap {
         return Math.sqrt(dx * dx + dy * dy + dz * dz)
     }
 
+    private generateRandomHexColor(): string {
+        const color = Math.floor(Math.random() * 16777215).toString(16)
+        return '#' + color.padStart(6, '0')
+    }
+
+    checkDupColor(color: string) {
+        return this.characters.some((other) => other.hairColor == color)
+    }
+
     findCharacter(id: string) {
         return this.characters.find((char) => char.id === id)
     }
 
     addCharacter({ id, nickName }: { id: string; nickName: string }) {
         const position = this.generateRandomPosition()
-        const character = new Character({ id, position, nickName })
+        let color = this.generateRandomHexColor()
+
+        while (this.checkDupColor(color)) {
+            color = this.generateRandomHexColor()
+        }
+
+        const character = new Character({ id, position, nickName, color })
         this.characters.push(character)
     }
 
