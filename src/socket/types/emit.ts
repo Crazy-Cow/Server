@@ -16,11 +16,15 @@ type EmitEventDataMap = {
     }
     'game.start': undefined
     'game.state': SocketEmitEvtDataGameState
-    'game.over': undefined
+    'game.over': SocketEmitEvtDataGameOver
 }
 
 export type EmitEventData = {
     [K in EmitEventName]: EmitEventDataMap[K]
+}
+
+export type SocketEmitEvtDataGameOver = {
+    winner: { nickName: string }
 }
 
 export type SocketEmitEvtDataGameState = {

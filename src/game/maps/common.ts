@@ -1,4 +1,7 @@
-import { SocketEmitEvtDataGameState } from 'socket/types/emit'
+import {
+    SocketEmitEvtDataGameOver,
+    SocketEmitEvtDataGameState,
+} from 'socket/types/emit'
 import { Character, Position } from '../objects/player'
 
 const GROUND_POS = {
@@ -18,7 +21,7 @@ const MIN_DISTANCE = 3
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
     handleGameState: (data: SocketEmitEvtDataGameState) => void
-    handleGameOver: () => void
+    handleGameOver: (data: SocketEmitEvtDataGameOver) => void
 }
 
 export class CommonMap {
@@ -116,6 +119,17 @@ export class CommonMap {
         }
     }
 
+    findWinner(): SocketEmitEvtDataGameOver {
+        let winner = this.characters[0]
+
+        for (const character of this.characters) {
+            if (character.giftCnt > winner.giftCnt) {
+                winner = character
+            }
+        }
+
+        return { winner: { nickName: winner.nickName } }
+    }
     updateGameState() {
         // TODO: 검증로직
     }
@@ -125,8 +139,9 @@ export class CommonMap {
             this.remainRunningTime -= 1
 
             if (this.isGameOver()) {
-                handleGameOver()
                 this.stopGameLoop()
+                const data = this.findWinner()
+                handleGameOver(data)
             }
         }, 1000)
 
