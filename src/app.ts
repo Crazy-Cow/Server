@@ -6,8 +6,6 @@ import express, { Express } from 'express'
 import cookieParser from 'cookie-parser'
 import routes from './routes'
 // import { connectDB } from './schemas'
-import swaggerUi from 'swagger-ui-express'
-import swaggerDocument from './docs/swagger-output.json'
 import { initSocket } from './socket'
 import { Server } from 'socket.io'
 
@@ -20,7 +18,6 @@ app.use(cookieParser())
 app.use(express.json())
 app.use('/example', routes.example)
 app.use('/user', routes.user)
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 const server = app.listen(port, () => {
     console.log(`[2] Server runs at <http://localhost>:${port}`)

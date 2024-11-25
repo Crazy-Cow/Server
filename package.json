@@ -4,7 +4,6 @@
     "description": "",
     "main": "src/app.ts",
     "scripts": {
-        "generate-swagger": "ts-node ./src/docs/generate.ts",
         "lint": "eslint -c ./.eslintrc \"./src/**/*.ts\"",
         "lint-test": "npm run lint && echo \"No tests specified\" && exit 0",
         "test": "jest",
@@ -30,18 +29,13 @@
         "express": "^4.21.1",
         "jsonwebtoken": "^9.0.2",
         "mongoose": "^8.7.3",
-        "socket.io": "^4.8.1",
-        "swagger-autogen": "^2.23.7",
-        "swagger-jsdoc": "^6.2.8",
-        "swagger-ui-express": "^5.0.1"
+        "socket.io": "^4.8.1"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
         "@types/express": "^5.0.0",
         "@types/jest": "^29.5.14",
         "@types/node": "^22.9.0",
-        "@types/swagger-jsdoc": "^6.0.4",
-        "@types/swagger-ui-express": "^4.1.6",
         "@typescript-eslint/parser": "^7.18.0",
         "concurrently": "^9.0.1",
         "eslint": "^8.57.1",
