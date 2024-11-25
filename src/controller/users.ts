@@ -54,3 +54,11 @@ export const createUserController = (
         handleToCatchInternalServerError(res, err as ErrorResponse)
     }
 }
+
+export const guestInUserController = () => {}
+
+export const signInUserController = () => {}
+
+export const signUpUserController = () => {}
+
+export const signOutUserController = () => {}
