@@ -1,4 +1,7 @@
-import { SocketEmitEvtDataGameState } from 'socket/types/emit'
+import {
+    SocketEmitEvtDataGameOver,
+    SocketEmitEvtDataGameState,
+} from 'socket/types/emit'
 import { Character, Position } from '../objects/player'
 
 const GROUND_POS = {
@@ -13,12 +16,15 @@ const GROUND_SIZE = {
     z: 20,
 }
 
-const MIN_DISTANCE = 2
+const MIN_DISTANCE = 3
+
+const MAX_GROUND = 71
+const MAX_HEIGHT = 33
 
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
     handleGameState: (data: SocketEmitEvtDataGameState) => void
-    handleGameOver: () => void
+    handleGameOver: (data: SocketEmitEvtDataGameOver) => void
 }
 
 export class CommonMap {
@@ -44,12 +50,12 @@ export class CommonMap {
                 y: GROUND_POS.y + 2,
                 z: GROUND_POS.z + Math.random() * GROUND_SIZE.z,
             }
-        } while (!this.isValidPosition(position))
+        } while (!this.isCollisionPosition(position))
 
         return position
     }
 
-    private isValidPosition(newPos: Position): boolean {
+    private isCollisionPosition(newPos: Position): boolean {
         // 기존 캐릭터 위치들과의 충돌 검사
         for (const character of this.characters) {
             const distance = this.calculateDistance(newPos, character.position)
@@ -61,9 +67,11 @@ export class CommonMap {
     }
 
     public calculateDistance(pos1: Position, pos2: Position): number {
-        const dx = pos1.x - pos2.x
-        const dz = pos1.z - pos2.z
-        return Math.sqrt(dx * dx + dz * dz)
+        const dx = pos2.x - pos1.x
+        const dy = pos2.y - pos1.y
+        const dz = pos2.z - pos1.z
+
+        return Math.sqrt(dx * dx + dy * dy + dz * dz)
     }
 
     private generateRandomHexColor(): string {
@@ -106,13 +114,47 @@ export class CommonMap {
                 hairColor: char.hairColor,
                 bellyColor: char.bellyColor,
                 velocity: char.velocity,
-                hasTail: char.hasTail,
+                giftCnt: char.giftCnt,
+                isBeingStolen: char.isBeingStolen,
+                isSteal: char.isSteal,
+                shift: char.shift,
             })),
         }
     }
 
+    findWinner(): SocketEmitEvtDataGameOver {
+        let winner = this.characters[0]
+
+        for (const character of this.characters) {
+            if (character.giftCnt > winner.giftCnt) {
+                winner = character
+            }
+        }
+
+        return { winner: { nickName: winner.nickName } }
+    }
+
+    private isValidPosition(position: Position): boolean {
+        const pos = Math.sqrt(position.x ** 2 + position.z ** 2)
+        return pos <= MAX_GROUND && position.y >= GROUND_POS.y
+    }
+
     updateGameState() {
         // TODO: 검증로직
+        this.characters.forEach((character) => {
+            if (!this.isValidPosition(character.position)) {
+                character.velocity = { x: 0, y: 0, z: 0 }
+                character.position = {
+                    x: character.position.x * 0.9,
+                    y: GROUND_POS.y + 2,
+                    z: character.position.z * 0.9,
+                }
+            }
+            if (character.position.y >= MAX_HEIGHT) {
+                character.velocity.y = 0
+                character.position.y = 30
+            }
+        })
     }
 
     startGameLoop({ handleGameState, handleGameOver }: MapStartLoopType) {
@@ -120,8 +162,9 @@ export class CommonMap {
             this.remainRunningTime -= 1
 
             if (this.isGameOver()) {
-                handleGameOver()
                 this.stopGameLoop()
+                const data = this.findWinner()
+                handleGameOver(data)
             }
         }, 1000)
 

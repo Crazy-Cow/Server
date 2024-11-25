@@ -18,11 +18,15 @@ type EmitEventDataMap = {
     'game.ready': undefined
     'game.start': undefined
     'game.state': SocketEmitEvtDataGameState
-    'game.over': undefined
+    'game.over': SocketEmitEvtDataGameOver
 }
 
 export type EmitEventData = {
     [K in EmitEventName]: EmitEventDataMap[K]
+}
+
+export type SocketEmitEvtDataGameOver = {
+    winner: { nickName: string }
 }
 
 export type SocketEmitEvtDataGameState = {
@@ -35,6 +39,9 @@ export type SocketEmitEvtDataGameState = {
         hairColor: Character['hairColor']
         bellyColor: Character['bellyColor']
         velocity: Character['velocity']
-        hasTail: Character['hasTail']
+        giftCnt: Character['giftCnt']
+        shift: Character['shift']
+        isBeingStolen: Character['isBeingStolen']
+        isSteal: Character['isSteal']
     }[]
 }
