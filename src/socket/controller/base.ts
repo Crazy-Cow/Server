@@ -8,6 +8,7 @@ export abstract class BaseController {
         this.socket = socket
     }
     abstract register(): void
+    abstract disconnect(): void
 
     getSocket(): Socket {
         return this.socket

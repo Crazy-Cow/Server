@@ -17,9 +17,9 @@ class IngameController extends BaseController {
         this.socket.on<OnEventName>('move', this.handleMove)
     }
 
-    // disconnect() {
-    //     this.gameMap?.removeCharacter(this.socket.id)
-    // }
+    disconnect() {
+        console.log('[disconnect] ingame - 세션 유지')
+    }
 
     private handleMove = (data: OnEventData['move']) => {
         const userId = this.getUserId()

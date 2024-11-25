@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io'
 import { BaseController } from './base'
-import { OnEventName } from '../types/on'
+import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import userService from '../../service/users'
 import { EmitEventData } from '../types/emit'
@@ -25,18 +25,19 @@ class OutgameController extends BaseController {
     }
     register() {
         this.socket.on<OnEventName>('room.enter', this.handleRoomEnter)
-        // this.getSocket().on<OnEventName>('room.leave', this.handleRoomLeave)
+        this.getSocket().on<OnEventName>('room.leave', this.handleRoomLeave)
     }
 
-    // disconnect() {
-    //     const userId = this.getUserId()
-    //     const room = roomService.leaveRoom(userId)
-    //     userService.removeUser(userId)
-    //     if (room) {
-    //         // user가 존재하던 room
-    //         this.broadcastRoomState(room)
-    //     }
-    // }
+    disconnect() {
+        console.log('[disconnect] outgame')
+
+        const userId = this.getUserId()
+        const room = roomService.leaveRoom(userId)
+        if (room) {
+            // user가 존재하던 room
+            this.broadcastRoomState(room)
+        }
+    }
 
     private broadcastRoomState = (room: Room) => {
         const data = getRoomStateDto(room)
@@ -44,6 +45,7 @@ class OutgameController extends BaseController {
     }
 
     private handleRoomEnter = (): Room => {
+        this.logger('========== room.join ========== ')
         const userId = this.getUserId()
         const player = userService.findUserById(userId)
         const room = roomService.joinRoom(player)
@@ -59,12 +61,13 @@ class OutgameController extends BaseController {
         return room
     }
 
-    // handleRoomLeave = (args: OnEventData['room.leave']) => {
-    //     this.logger('room.leave', args)
-    //     const userId = this.socket.id
-    //     const room = roomService.leaveRoom(userId)
-    //     this.broadcastRoomState(room)
-    // }
+    handleRoomLeave = (args: OnEventData['room.leave']) => {
+        this.logger('room.leave', args)
+        const userId = this.getUserId()
+        const room = roomService.leaveRoom(userId)
+        console.log(`[${userId}]room`, room)
+        this.broadcastRoomState(room)
+    }
 }
 
 export default OutgameController
