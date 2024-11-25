@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser'
 import routes from './routes'
 import { initSocket } from './socket'
 import { Server } from 'socket.io'
-import { connectDB } from './db/mongoose/schemas'
+import { connectMongoDB } from './db/mongoose'
 
 const port = process.env.PORT
 const corsOption: CorsOptions = { origin: '*' }
@@ -18,7 +18,7 @@ app.use(cookieParser())
 app.use(express.json())
 app.use('/user', routes.user)
 
-connectDB()
+connectMongoDB()
     .then(() => console.log('[1] DB Connected'))
     .then(() => {
         const server = app.listen(port, () => {

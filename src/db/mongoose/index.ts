@@ -6,6 +6,6 @@ const dbName = process.env.MONGO_DB_DATABASE
 
 const uri = `mongodb+srv://${dbUserName}:${dbPassword}@express-practice.q33pr.mongodb.net/${dbName}`
 
-const connectDB = () => mongoose.connect(uri)
+const connectMongoDB = () => mongoose.connect(uri)
 
-export { connectDB }
+export { connectMongoDB }
