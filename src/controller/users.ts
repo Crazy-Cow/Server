@@ -3,6 +3,8 @@ import {
     CreateUserRequest,
     CreateUserResponse,
     GetRandomNickNameResponse,
+    GuestInRequest,
+    GuestInResponse,
     SignInRequest,
     SignInResponse,
     SignUpRequest,
@@ -16,6 +18,7 @@ import {
 } from '../utils/error'
 import util from '../service/users.util'
 import userRepository from '../db/mongoose/repository/user'
+import guestRepository from '../db/redis/respository/guest'
 import { generateAccessToken } from '../utils/jwt'
 
 export const getRandomNicknameController = (
@@ -60,7 +63,42 @@ export const createUserController = (
     }
 }
 
-export const guestInUserController = () => {}
+export const guestInUserController = async (
+    req: Request<object, object, GuestInRequest>,
+    res: Response<GuestInResponse | ErrorResponse>
+) => {
+    const { nickName } = req.body
+
+    if (!nickName) {
+        res.status(400).json(createErrorRes({ msg: '[nickName] 필드 확인' }))
+        return
+    }
+
+    const duplicatedInGuest = await guestRepository.checkDupNick(nickName)
+    if (duplicatedInGuest) {
+        res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
+        return
+    }
+
+    const duplicatedInUser = await userRepository.checkDupNick({ nickName })
+    if (duplicatedInUser) {
+        res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
+        return
+    }
+    const user = userService.createUser(nickName)
+
+    const accessToken = generateAccessToken({
+        userId: user.userId,
+        nickName: user.nickName,
+        isGuest: false,
+    })
+
+    guestRepository.addNick(accessToken)
+
+    res.status(200).json({
+        accessToken,
+    })
+}
 
 export const signInUserController = async (
     req: Request<object, object, SignInRequest>,
@@ -84,7 +122,10 @@ export const signInUserController = async (
     const accessToken = generateAccessToken({
         userId: user.id,
         nickName: user.nickName,
+        isGuest: false,
     })
+
+    // TODO: Add userPool
 
     res.status(200).json({
         accessToken,
@@ -101,8 +142,15 @@ export const signUpUserController = async (
         res.status(400).json(createErrorRes({ msg: '비밀번호/확인 불일치' }))
         return
     }
-    const duplicated = await userRepository.checkDupNick(nickName)
-    if (duplicated) {
+
+    const duplicatedInGuest = await guestRepository.checkDupNick(nickName)
+    if (duplicatedInGuest) {
+        res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
+        return
+    }
+
+    const duplicatedInUser = await userRepository.checkDupNick({ nickName })
+    if (duplicatedInUser) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
     }

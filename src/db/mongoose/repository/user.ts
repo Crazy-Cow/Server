@@ -11,9 +11,9 @@ const create = async (props: { nickName: string; password: string }) => {
     await user.save()
 }
 
-const checkDupNick = async (nickName: string) => {
-    console.log('TODO: check 닉네임 중복', nickName)
-    return false
+const checkDupNick = async (props: { nickName: string }) => {
+    const user = await UserModel.findOne({ nickName: props.nickName })
+    return Boolean(user)
 }
 
 const findOne = async (props: { nickName: string; password: string }) => {
