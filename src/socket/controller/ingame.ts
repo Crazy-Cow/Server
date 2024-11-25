@@ -1,10 +1,25 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
-import { Character } from '../../game/objects/player'
+import { Character, Position } from '../../game/objects/player'
 import userService from '../../service/users'
 
+const MAX_SPEED = 10
+
+function isValidVelocity(velocity: Position): boolean {
+    const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
+    return speed <= MAX_SPEED && velocity.y <= MAX_SPEED && velocity.y >= -35
+}
+
 function handleMove(character: Character, data: OnEventData['move']) {
+    if (!isValidVelocity(data.character.velocity)) {
+        character.position = {
+            x: character.position.x + (character.velocity.x * 1) / 60,
+            y: character.position.y + (character.velocity.y * 1) / 60,
+            z: character.position.z + (character.velocity.z * 1) / 60,
+        }
+        return
+    }
     character.shift = data.shift
     character.position = data.character.position
     character.velocity = data.character.velocity
