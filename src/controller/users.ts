@@ -82,7 +82,7 @@ export const signInUserController = async (
     }
 
     const accessToken = generateAccessToken({
-        id: user.id,
+        userId: user.id,
         nickName: user.nickName,
     })
 
