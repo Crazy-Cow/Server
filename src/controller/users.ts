@@ -20,6 +20,7 @@ import util from '../service/users.util'
 import userRepository from '../db/mongoose/repository/user'
 import guestRepository from '../db/redis/respository/guest'
 import { generateAccessToken } from '../utils/jwt'
+import userService2 from '../service2/users'
 
 export const getRandomNicknameController = (
     _,
@@ -74,14 +75,8 @@ export const guestInUserController = async (
         return
     }
 
-    const duplicatedInGuest = await guestRepository.checkDupNick(nickName)
-    if (duplicatedInGuest) {
-        res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
-        return
-    }
-
-    const duplicatedInUser = await userRepository.checkDupNick({ nickName })
-    if (duplicatedInUser) {
+    const duplicated = await userService2.checkDupNick(nickName)
+    if (duplicated) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
     }
@@ -143,14 +138,8 @@ export const signUpUserController = async (
         return
     }
 
-    const duplicatedInGuest = await guestRepository.checkDupNick(nickName)
-    if (duplicatedInGuest) {
-        res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
-        return
-    }
-
-    const duplicatedInUser = await userRepository.checkDupNick({ nickName })
-    if (duplicatedInUser) {
+    const duplicated = await userService2.checkDupNick(nickName)
+    if (duplicated) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
     }
