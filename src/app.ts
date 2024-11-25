@@ -8,6 +8,7 @@ import routes from './routes'
 import { initSocket } from './socket'
 import { Server } from 'socket.io'
 import { connectMongoDB } from './db/mongoose'
+import { connectRedisDB } from './db/redis'
 
 const port = process.env.PORT
 const corsOption: CorsOptions = { origin: '*' }
@@ -18,16 +19,24 @@ app.use(cookieParser())
 app.use(express.json())
 app.use('/user', routes.user)
 
-connectMongoDB()
-    .then(() => console.log('[1] DB Connected'))
-    .then(() => {
+async function startServer() {
+    try {
+        await connectRedisDB()
+        console.log('[1] RedisDB Connected')
+
+        await connectMongoDB()
+        console.log('[2] MongoDB Connected')
+
         const server = app.listen(port, () => {
-            console.log(`[2] Server runs at <http://localhost>:${port}`)
+            console.log('Server Ready!!')
+            console.log(`Server runs at <http://localhost>:${port}`)
         })
 
         const io = new Server(server, { cors: corsOption })
         initSocket(io)
-    })
-    .catch((err) => {
-        console.error('[Error] Server runs failed:', err)
-    })
+    } catch (err) {
+        console.error('[Error] Server run failed:', err)
+    }
+}
+
+startServer()
