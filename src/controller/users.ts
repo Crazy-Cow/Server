@@ -32,6 +32,7 @@ export const getRandomNicknameController = (
     })
 }
 
+// (시작) will be deprecated ============
 export const createUserController = (
     req: Request<object, object, CreateUserRequest>,
     res: Response<CreateUserResponse | ErrorResponse>
@@ -63,6 +64,7 @@ export const createUserController = (
         handleToCatchInternalServerError(res, err as ErrorResponse)
     }
 }
+// (끝) will be deprecated ============
 
 export const guestInUserController = async (
     req: Request<object, object, GuestInRequest>,
@@ -119,8 +121,6 @@ export const signInUserController = async (
         nickName: user.nickName,
         isGuest: false,
     })
-
-    // TODO: Add userPool
 
     res.status(200).json({
         accessToken,
