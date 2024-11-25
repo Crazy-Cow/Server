@@ -54,9 +54,13 @@ class OutgameController extends BaseController {
 
         if (room.state === 'playing') {
             console.log('게임 시작!')
-
-            this.broadcast(room.roomId, 'game.start', { players: room.players })
-            this.ingameCtrl.handleStartGame(room)
+            this.broadcast(room.roomId, 'game.ready', undefined)
+            setTimeout(() => {
+                this.broadcast(room.roomId, 'game.start', {
+                    players: room.players,
+                })
+                this.ingameCtrl.handleStartGame(room)
+            }, 3000)
         }
         return room
     }
