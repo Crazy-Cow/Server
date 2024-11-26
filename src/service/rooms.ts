@@ -117,7 +117,6 @@ class RoomPool {
                 return this.waitingRoom
             }
         }
-        console.log('TODO: 해당하지 않음')
     }
 
     deleteGameRoom(room: Room) {
@@ -148,7 +147,6 @@ class RoomService {
     }
 
     async getGameRoomIdByUserId(userId: string) {
-        // TODO: save when load game
         return gameRoomRepository.getGameRoomId(userId)
     }
 

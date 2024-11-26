@@ -57,7 +57,6 @@ class OutgameController extends BaseController {
             this.broadcast(room.roomId, 'game.ready', undefined)
             await room.loadGame() // TODO: 딜레이 있으면 3초 기다림 없어도 됨
             setTimeout(() => {
-                console.log('game.start')
                 this.broadcast(room.roomId, 'game.start', {
                     players: room.players,
                 })
@@ -71,7 +70,6 @@ class OutgameController extends BaseController {
         this.logger('room.leave', args)
         const userId = this.getUserId()
         const room = roomService.leaveRoom(userId)
-        console.log(`[${userId}]room`, room)
         this.broadcastRoomState(room)
     }
 }
