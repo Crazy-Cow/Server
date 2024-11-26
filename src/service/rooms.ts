@@ -1,8 +1,25 @@
-import { Player } from './users'
 import util from './rooms.util'
 import { CommonMap, TailTagMap } from '../game/maps'
 import { MapStartLoopType } from 'game/maps/common'
 import gameRoomRepository from '../db/redis/respository/game-room'
+
+type PlayerProps = {
+    userId: string
+    nickName: string
+    isGuest: boolean
+}
+
+export class Player {
+    userId: string
+    nickName: string
+    isGuest: boolean
+
+    constructor({ userId, nickName, isGuest }: PlayerProps) {
+        this.userId = userId
+        this.nickName = nickName
+        this.isGuest = isGuest
+    }
+}
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 

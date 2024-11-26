@@ -1,24 +1,6 @@
 import userRepository from '../db/mongoose/repository/user'
 import guestRepository from '../db/redis/respository/guest'
 
-type PlayerProps = {
-    userId: string
-    nickName: string
-    isGuest: boolean
-}
-
-export class Player {
-    userId: string
-    nickName: string
-    isGuest: boolean
-
-    constructor({ userId, nickName, isGuest }: PlayerProps) {
-        this.userId = userId
-        this.nickName = nickName
-        this.isGuest = isGuest
-    }
-}
-
 class UserService {
     private static instance: UserService
 
@@ -31,10 +13,6 @@ class UserService {
 
     findUser(nickName: string, password: string) {
         return userRepository.findOne({ nickName, password })
-    }
-
-    createPlayer(props: PlayerProps) {
-        return new Player(props)
     }
 
     addUser(nickName: string, password: string) {

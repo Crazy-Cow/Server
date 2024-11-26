@@ -1,4 +1,4 @@
-import { Player } from '../../service/users'
+import { Player } from '../../service/rooms'
 import { Socket } from 'socket.io'
 import { EmitEventName } from 'socket/types/emit'
 import { OnEventData } from 'socket/types/on'
