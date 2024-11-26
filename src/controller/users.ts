@@ -87,7 +87,7 @@ export const guestInUserController = async (
         isGuest: true,
     })
 
-    await userService2.addNick(accessToken)
+    await userService2.addGuestNick(accessToken)
 
     res.status(200).json({
         accessToken,

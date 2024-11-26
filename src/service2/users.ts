@@ -19,7 +19,7 @@ class UserService2 {
         return userRepository.create({ nickName, password })
     }
 
-    addNick(token: string) {
+    addGuestNick(token: string) {
         return guestRepository.addNick(token)
     }
 
