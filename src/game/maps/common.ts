@@ -167,6 +167,13 @@ export class CommonMap {
         })
     }
 
+    private resetEventkey(): void {
+        this.characters.forEach((character) => {
+            character.steal = false
+            character.skill = false
+        })
+    }
+
     startGameLoop({ handleGameState, handleGameOver }: MapStartLoopType) {
         this.loopIdToReduceTime = setInterval(() => {
             this.remainRunningTime -= 1
@@ -183,6 +190,7 @@ export class CommonMap {
 
             const gameState = this.convertGameState()
             handleGameState(gameState)
+            this.resetEventkey()
         }, 1000 * updateInterval)
     }
 
