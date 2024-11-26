@@ -28,7 +28,7 @@ export type MapStartLoopType = {
 }
 
 export class CommonMap {
-    private updateInterval = 1 / 10 // FPS
+    private updateInterval = 1 / 5 // FPS
     private remainRunningTime = 0
     private loopIdToReduceTime?: NodeJS.Timeout
     private loopIdToUpdateGameState?: NodeJS.Timeout
