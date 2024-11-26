@@ -11,6 +11,10 @@ function isValidVelocity(velocity: Position): boolean {
 }
 
 function handleMove(character: Character, data: OnEventData['move']) {
+    if (!data) {
+        console.error('data 없음', data)
+    }
+
     if (!isValidVelocity(data.character.velocity)) {
         character.position = {
             x: character.position.x + (character.velocity.x * 1) / 60,
