@@ -11,11 +11,11 @@ export const encryptPassword = async (password) => {
     }
 }
 
-export const comparePasswords = async (password, hashedPassword) => {
+export const comparePassword = async (password, hashedPassword) => {
     try {
         const result = await bcrypt.compare(password, hashedPassword)
         return result
     } catch (error) {
-        throw new Error('[Error] comparePasswords')
+        throw new Error('[Error] comparePassword')
     }
 }
