@@ -22,15 +22,9 @@ function isValidVelocity(velocity: Position): boolean {
 function handleMove(character: Character, data: OnEventData['move']) {
     if (!isValidVelocity(data.character.velocity)) {
         character.position = {
-            x:
-                character.position.x +
-                (character.velocity.x * 1) / updateInterval,
-            y:
-                character.position.y +
-                (character.velocity.y * 1) / updateInterval,
-            z:
-                character.position.z +
-                (character.velocity.z * 1) / updateInterval,
+            x: character.position.x + character.velocity.x * 1 * updateInterval,
+            y: character.position.y + character.velocity.y * 1 * updateInterval,
+            z: character.position.z + character.velocity.z * 1 * updateInterval,
         }
         return
     }
