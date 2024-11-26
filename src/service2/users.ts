@@ -11,6 +11,18 @@ class UserService2 {
         return this.instance
     }
 
+    findUser(nickName: string, password: string) {
+        return userRepository.findOne({ nickName, password })
+    }
+
+    addUser(nickName: string, password: string) {
+        return userRepository.create({ nickName, password })
+    }
+
+    addNick(token: string) {
+        return guestRepository.addNick(token)
+    }
+
     async checkDupNick(nickName: string) {
         const duplicatedInGuest = await guestRepository.checkDupNick(nickName)
         if (duplicatedInGuest) return true
