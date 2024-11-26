@@ -10,45 +10,39 @@ export type Directions = {
 export class Character {
     id: string
     nickName: string
+    charType: number
     position: Position
-    bodyColor: string
-    hairColor: string
-    bellyColor: string
+    charColor: string
     velocity: Position
     giftCnt: number
-
-    isOnGround: boolean
-    shift: boolean
+    steal: boolean
     isBeingStolen: boolean
     isSteal: boolean
+    skill: boolean
     constructor({
         id,
         nickName,
+        charType,
         position,
         color,
     }: {
         id: string
         nickName: string
+        charType: number
         position: Position
         color: string
     }) {
         this.id = id
         this.nickName = nickName
+        this.charType = charType
         this.position = position
-        this.bodyColor = color
-        this.hairColor = color
-        this.bellyColor = 'white'
+        this.charColor = color
         this.velocity = { x: 0, y: 0, z: 0 }
-        this.isOnGround = true
         this.giftCnt = 0
-        this.shift = false
+        this.steal = false
         this.isBeingStolen = false
         this.isSteal = false
-    }
-
-    private generateRandomHexColor(): string {
-        const color = Math.floor(Math.random() * 16777215).toString(16)
-        return '#' + color.padStart(6, '0')
+        this.skill = false
     }
 
     setGiftCnt(giftCnt: number) {

@@ -1,7 +1,7 @@
 import { Character } from '../objects/player'
 import { CommonMap } from './common'
 
-const TAIL_STEAL_DISTANCE = 5
+const TAIL_STEAL_DISTANCE = 8
 
 export class TailTagMap extends CommonMap {
     init() {
@@ -44,7 +44,7 @@ export class TailTagMap extends CommonMap {
             character.isBeingStolen = false
             character.isSteal = false
 
-            if (character.shift) this.handleCatch(character)
+            if (character.steal) this.handleCatch(character)
         })
     }
 }

@@ -18,8 +18,11 @@ const GROUND_SIZE = {
 
 const MIN_DISTANCE = 3
 
-const MAX_GROUND = 71
+const MAX_GROUND = 80
 const MAX_HEIGHT = 33
+
+const charType = 1
+// Todo: 플레이시 받음
 
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
@@ -80,7 +83,7 @@ export class CommonMap {
     }
 
     checkDupColor(color: string) {
-        return this.characters.some((other) => other.hairColor == color)
+        return this.characters.some((other) => other.charColor == color)
     }
 
     findCharacter(id: string) {
@@ -95,7 +98,13 @@ export class CommonMap {
             color = this.generateRandomHexColor()
         }
 
-        const character = new Character({ id, position, nickName, color })
+        const character = new Character({
+            id,
+            position,
+            charType,
+            nickName,
+            color,
+        })
         this.characters.push(character)
     }
 
@@ -109,15 +118,15 @@ export class CommonMap {
             characters: this.characters.map((char) => ({
                 id: char.id,
                 nickName: char.nickName,
+                charType: char.charType,
                 position: char.position,
-                bodyColor: char.bodyColor,
-                hairColor: char.hairColor,
-                bellyColor: char.bellyColor,
+                charColor: char.charColor,
                 velocity: char.velocity,
                 giftCnt: char.giftCnt,
                 isBeingStolen: char.isBeingStolen,
                 isSteal: char.isSteal,
-                shift: char.shift,
+                steal: char.steal,
+                skill: char.skill,
             })),
         }
     }
