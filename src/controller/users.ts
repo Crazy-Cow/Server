@@ -16,7 +16,7 @@ import {
     ErrorResponse,
     handleToCatchInternalServerError,
 } from '../utils/error'
-import util from '../service/users.util'
+import util from '../service2/users.util'
 import { generateAccessToken } from '../utils/jwt'
 import userService2 from '../service2/users'
 

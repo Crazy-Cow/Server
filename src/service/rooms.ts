@@ -1,5 +1,5 @@
 import userService, { User } from './users'
-import util from './rooms.util'
+import util from '../service2/rooms.util'
 import { CommonMap, TailTagMap } from '../game/maps'
 import { MapStartLoopType } from 'game/maps/common'
 
