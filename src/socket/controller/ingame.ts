@@ -35,6 +35,8 @@ function handleMove(character: Character, data: OnEventData['move']) {
 }
 
 class IngameController extends BaseController {
+    private stealQueue: { characterId: string }[] = []
+
     register() {
         // TODO this.gameMap이랑 연관
         this.socket.on<OnEventName>('move', this.handleMove)
@@ -52,6 +54,9 @@ class IngameController extends BaseController {
         if (gameMap) {
             const character = gameMap.findCharacter(userId)
             handleMove(character, data)
+            if (data.steal) {
+                this.stealQueue.push({ characterId: character.id })
+            }
         } else {
             console.error('palyer가 게임 실행중이 아니에요')
         }
@@ -61,6 +66,16 @@ class IngameController extends BaseController {
         room.loadGame()
         room.startGameLoop({
             handleGameState: (data) => {
+                // stealQueue 처리
+                while (this.stealQueue.length > 0) {
+                    const stealEvent = this.stealQueue.shift()
+                    const character = room.gameMap.findCharacter(
+                        stealEvent.characterId
+                    )
+                    if (character) {
+                        room.gameMap.handleCatch(character)
+                    }
+                }
                 this.broadcast(room.roomId, 'game.state', data)
             },
             handleGameOver: (data) => {
