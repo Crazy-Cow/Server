@@ -10,13 +10,23 @@ const GROUND_POS = {
     z: 0,
 }
 
-const GROUND_SIZE = {
-    x: 20,
-    y: 0,
-    z: 20,
-}
-
-const MIN_DISTANCE = 3
+const PREDEFINED_POSITIONS: Position[] = [
+    { x: -4, y: 1, z: 4 },
+    { x: 7, y: 1, z: -7 },
+    { x: 14, y: 1, z: 12 },
+    { x: 12, y: 1, z: 33 },
+    { x: 36, y: 1, z: 20 },
+    { x: 45, y: 1, z: -10 },
+    { x: 8, y: 1, z: -30 },
+    { x: -32, y: 1, z: -32 },
+    { x: -40, y: 1, z: -1 },
+    { x: -52, y: 1, z: 28 },
+    { x: -17.3, y: 8, z: 2.85 },
+    { x: -12, y: 1, z: 57 },
+    { x: -1, y: 1, z: -64 },
+    { x: -16, y: 1, z: 27 },
+    { x: -31, y: 1, z: 22 },
+]
 
 const MAX_GROUND = 80
 const MAX_HEIGHT = 33
@@ -36,6 +46,7 @@ export class CommonMap {
     private remainRunningTime = 0
     private loopIdToReduceTime?: NodeJS.Timeout
     private loopIdToUpdateGameState?: NodeJS.Timeout
+    private availablePositions: Position[] = [...PREDEFINED_POSITIONS]
 
     characters: Character[] = []
 
@@ -46,28 +57,13 @@ export class CommonMap {
     init() {}
 
     private generateRandomPosition(): Position {
-        // TODO: 안겹치게 생성되도록
-        let position: Position
-        do {
-            position = {
-                x: GROUND_POS.x + Math.random() * GROUND_SIZE.x,
-                y: GROUND_POS.y + 2,
-                z: GROUND_POS.z + Math.random() * GROUND_SIZE.z,
-            }
-        } while (!this.isCollisionPosition(position))
-
-        return position
-    }
-
-    private isCollisionPosition(newPos: Position): boolean {
-        // 기존 캐릭터 위치들과의 충돌 검사
-        for (const character of this.characters) {
-            const distance = this.calculateDistance(newPos, character.position)
-            if (distance < MIN_DISTANCE ** 2) {
-                return false
-            }
+        if (this.availablePositions.length === 0) {
+            throw new Error('할당할 수 있는 위치 더 이상 없')
         }
-        return true
+
+        const index = Math.floor(Math.random() * this.availablePositions.length)
+        const position = this.availablePositions.splice(index, 1)[0]
+        return position
     }
 
     public calculateDistance(pos1: Position, pos2: Position): number {
