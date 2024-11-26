@@ -42,7 +42,7 @@ class OutgameController extends BaseController {
         this.broadcast(room.roomId, 'room.changeState', data)
     }
 
-    private handleRoomEnter = (): Room => {
+    private handleRoomEnter = async () => {
         this.logger('========== room.join ========== ')
         const player = this.getPlayer()
         const room = roomService2.joinRoom(player)
@@ -55,7 +55,9 @@ class OutgameController extends BaseController {
         if (room.state === 'playing') {
             console.log('게임 시작!')
             this.broadcast(room.roomId, 'game.ready', undefined)
+            await room.loadGame() // TODO: 딜레이 있으면 3초 기다림 없어도 됨
             setTimeout(() => {
+                console.log('game.start')
                 this.broadcast(room.roomId, 'game.start', {
                     players: room.players,
                 })
