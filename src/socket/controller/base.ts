@@ -1,11 +1,20 @@
+import { Player } from '../../service2/users'
 import { Socket } from 'socket.io'
 import { EmitEventName } from 'socket/types/emit'
 import { OnEventData } from 'socket/types/on'
 
 export abstract class BaseController {
     socket: Socket
+    player: Player
+    roomId: string
+
     constructor({ socket }: { socket: Socket }) {
         this.socket = socket
+        const userId = socket.data.clientId
+        const nickName = socket.data.nickName
+        const isGuest = socket.data.isGuest
+        this.player = new Player({ userId, nickName, isGuest })
+        this.roomId = socket.data.roomId
     }
     abstract register(): void
     abstract disconnect(): void
@@ -20,6 +29,18 @@ export abstract class BaseController {
 
     getUserId(): string {
         return this.socket.data.clientId
+    }
+
+    getPlayer(): Player {
+        return this.player
+    }
+
+    getRoomId() {
+        return this.roomId
+    }
+
+    updateRoomId(roomId: string) {
+        this.roomId = roomId
     }
 
     broadcast(roomId: string, emitMessage: EmitEventName, data: unknown) {

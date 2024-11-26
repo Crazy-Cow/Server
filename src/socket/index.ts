@@ -1,14 +1,13 @@
 import { Server, Socket } from 'socket.io'
 import { OnEventData, OnEventName } from './types/on'
 import { IngameController, OutgameController } from './controller'
-import userService from '../service/users'
 import { verifyToken } from '../utils/jwt'
+import roomService2 from '../service2/rooms'
 
 type SocketAccessToken = string
 
 class SocketImplement {
     socket: Socket
-
     outgameCtrl: OutgameController
     ingameCtrl: IngameController
 
@@ -45,12 +44,17 @@ export function initSocket(io: Server) {
     io.use((socket, next) => {
         // (시작) will be deprecated ============
         socket.data.clientId = socket.handshake.auth.clientId
+        socket.data.nickName = socket.handshake.auth.clientId
+        socket.data.isGuest = true
+        socket.data.roomId = undefined
         // (끝) will be deprecated ============
 
         const accessToken: SocketAccessToken = socket.handshake.auth.accessToken
         if (accessToken) {
-            const { userId } = verifyToken(accessToken)
+            const { userId, nickName, isGuest } = verifyToken(accessToken)
             socket.data.clientId = userId
+            socket.data.nickName = nickName
+            socket.data.isGuest = isGuest
         } else {
             // TODO: 만료 시 에러 처리
         }
@@ -62,16 +66,13 @@ export function initSocket(io: Server) {
         next()
     })
 
-    io.use((socket, next) => {
+    io.use(async (socket, next) => {
         const userId = socket.data.clientId
-
-        const player = userService.findUserById(userId)
-        if (!player) {
-            return next(new Error('로비 입장 필요'))
-        }
-        if (player.roomId) {
-            console.log('reconnect')
-            socket.join(player.roomId)
+        const roomId = await roomService2.getGameRoomIdByUserId(userId)
+        if (roomId) {
+            console.log('게임중 - reconnect')
+            socket.join(roomId)
+            socket.data.roomId = roomId
         }
         next()
     })
