@@ -26,7 +26,6 @@ export class TailTagMap extends CommonMap {
 
                 if (distance <= TAIL_STEAL_DISTANCE) {
                     other.isBeingStolen = true // 다른 캐릭터를 훔쳐지고 있는 상태로 설정
-                    character.isSteal = true
                     // 선물를 훔치는 로직
                     character.giftCnt += 1
                     other.giftCnt -= 1
@@ -42,7 +41,6 @@ export class TailTagMap extends CommonMap {
 
         this.characters.forEach((character) => {
             character.isBeingStolen = false
-            character.isSteal = false
 
             if (character.steal) this.handleCatch(character)
         })

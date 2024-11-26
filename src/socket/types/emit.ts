@@ -41,7 +41,6 @@ export type SocketEmitEvtDataGameState = {
         giftCnt: Character['giftCnt']
         steal: Character['steal']
         isBeingStolen: Character['isBeingStolen']
-        isSteal: Character['isSteal']
         skill: Character['skill']
     }[]
 }

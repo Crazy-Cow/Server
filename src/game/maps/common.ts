@@ -125,7 +125,6 @@ export class CommonMap {
                 velocity: char.velocity,
                 giftCnt: char.giftCnt,
                 isBeingStolen: char.isBeingStolen,
-                isSteal: char.isSteal,
                 steal: char.steal,
                 skill: char.skill,
             })),

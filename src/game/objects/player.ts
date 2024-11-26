@@ -17,7 +17,6 @@ export class Character {
     giftCnt: number
     steal: boolean
     isBeingStolen: boolean
-    isSteal: boolean
     skill: boolean
     constructor({
         id,
@@ -41,7 +40,6 @@ export class Character {
         this.giftCnt = 0
         this.steal = false
         this.isBeingStolen = false
-        this.isSteal = false
         this.skill = false
     }
 
