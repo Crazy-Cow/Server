@@ -63,7 +63,7 @@ export class CommonMap {
         // 기존 캐릭터 위치들과의 충돌 검사
         for (const character of this.characters) {
             const distance = this.calculateDistance(newPos, character.position)
-            if (distance < MIN_DISTANCE) {
+            if (distance < MIN_DISTANCE ** 2) {
                 return false
             }
         }
@@ -75,7 +75,7 @@ export class CommonMap {
         const dy = pos2.y - pos1.y
         const dz = pos2.z - pos1.z
 
-        return Math.sqrt(dx * dx + dy * dy + dz * dz)
+        return dx * dx + dy * dy + dz * dz
     }
 
     private generateRandomHexColor(): string {
