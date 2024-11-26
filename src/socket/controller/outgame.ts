@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io'
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
-import roomService2, { Room } from '../../service2/rooms'
+import roomService, { Room } from '../../service/rooms'
 import { EmitEventData } from '../types/emit'
 import IngameController from './ingame'
 
@@ -31,7 +31,7 @@ class OutgameController extends BaseController {
         console.log('[disconnect] outgame')
 
         const userId = this.getUserId()
-        const room = roomService2.leaveRoom(userId)
+        const room = roomService.leaveRoom(userId)
         if (room) {
             this.broadcastRoomState(room)
         }
@@ -45,7 +45,7 @@ class OutgameController extends BaseController {
     private handleRoomEnter = async () => {
         this.logger('========== room.join ========== ')
         const player = this.getPlayer()
-        const room = roomService2.joinRoom(player)
+        const room = roomService.joinRoom(player)
 
         this.socket.join(room.roomId)
         this.updateRoomId(room.roomId)
@@ -70,7 +70,7 @@ class OutgameController extends BaseController {
     handleRoomLeave = (args: OnEventData['room.leave']) => {
         this.logger('room.leave', args)
         const userId = this.getUserId()
-        const room = roomService2.leaveRoom(userId)
+        const room = roomService.leaveRoom(userId)
         console.log(`[${userId}]room`, room)
         this.broadcastRoomState(room)
     }

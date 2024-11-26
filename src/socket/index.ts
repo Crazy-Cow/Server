@@ -2,7 +2,7 @@ import { Server, Socket } from 'socket.io'
 import { OnEventData, OnEventName } from './types/on'
 import { IngameController, OutgameController } from './controller'
 import { verifyToken } from '../utils/jwt'
-import roomService2 from '../service2/rooms'
+import roomService from '../service/rooms'
 
 type SocketAccessToken = string
 
@@ -68,7 +68,7 @@ export function initSocket(io: Server) {
 
     io.use(async (socket, next) => {
         const userId = socket.data.clientId
-        const roomId = await roomService2.getGameRoomIdByUserId(userId)
+        const roomId = await roomService.getGameRoomIdByUserId(userId)
         if (roomId) {
             console.log('게임중 - reconnect')
             socket.join(roomId)

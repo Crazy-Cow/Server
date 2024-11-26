@@ -1,4 +1,4 @@
-import { RoomState } from '../../service2/rooms'
+import { RoomState } from '../../service/rooms'
 import { Character } from '../../game/objects/player'
 
 export type EmitEventName =

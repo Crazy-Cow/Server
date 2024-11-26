@@ -1,6 +1,6 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
-import roomService2, { Room } from '../../service2/rooms'
+import roomService, { Room } from '../../service/rooms'
 import { Character, Position } from '../../game/objects/player'
 
 const MAX_SPEED = 10
@@ -42,7 +42,7 @@ class IngameController extends BaseController {
     private handleMove = (data: OnEventData['move']) => {
         const userId = this.getUserId()
         const roomId = this.getRoomId()
-        const room = roomService2.findGameRoomById(roomId)
+        const room = roomService.findGameRoomById(roomId)
         const gameMap = room?.gameMap
         if (gameMap) {
             const character = gameMap.findCharacter(userId)

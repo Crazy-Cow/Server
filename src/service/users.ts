@@ -19,12 +19,12 @@ export class Player {
     }
 }
 
-class UserService2 {
-    private static instance: UserService2
+class UserService {
+    private static instance: UserService
 
-    public static getInstance(): UserService2 {
+    public static getInstance(): UserService {
         if (!this.instance) {
-            this.instance = new UserService2()
+            this.instance = new UserService()
         }
         return this.instance
     }
@@ -56,6 +56,6 @@ class UserService2 {
     }
 }
 
-const userService2 = UserService2.getInstance()
+const userService = UserService.getInstance()
 
-export default userService2
+export default userService

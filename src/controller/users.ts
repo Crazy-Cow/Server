@@ -11,9 +11,9 @@ import {
 } from './users.type'
 import StatusCode from '../constants/statusCode'
 import { createError as createErrorRes, ErrorResponse } from '../utils/error'
-import util from '../service2/users.util'
+import util from '../service/users.util'
 import { generateAccessToken } from '../utils/jwt'
-import userService2 from '../service2/users'
+import userService from '../service/users'
 
 export const getRandomNicknameController = (
     _,
@@ -37,7 +37,7 @@ export const createUserController = async (
         return
     }
 
-    const duplicated = await userService2.checkDupNick(nickName)
+    const duplicated = await userService.checkDupNick(nickName)
     if (duplicated) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
@@ -49,7 +49,7 @@ export const createUserController = async (
         isGuest: true,
     })
 
-    await userService2.addGuestNick(accessToken)
+    await userService.addGuestNick(accessToken)
 
     res.status(200).json({
         userId: nickName,
@@ -68,7 +68,7 @@ export const guestInUserController = async (
         return
     }
 
-    const duplicated = await userService2.checkDupNick(nickName)
+    const duplicated = await userService.checkDupNick(nickName)
     if (duplicated) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
@@ -80,7 +80,7 @@ export const guestInUserController = async (
         isGuest: true,
     })
 
-    await userService2.addGuestNick(accessToken)
+    await userService.addGuestNick(accessToken)
 
     res.status(200).json({
         accessToken,
@@ -100,7 +100,7 @@ export const signInUserController = async (
         return
     }
 
-    const user = await userService2.findUser(nickName, password)
+    const user = await userService.findUser(nickName, password)
     if (!user) {
         res.status(400).json(createErrorRes({ msg: '존재하지 않는 유저' }))
         return
@@ -128,13 +128,13 @@ export const signUpUserController = async (
         return
     }
 
-    const duplicated = await userService2.checkDupNick(nickName)
+    const duplicated = await userService.checkDupNick(nickName)
     if (duplicated) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
     }
 
-    await userService2.addUser(nickName, password)
+    await userService.addUser(nickName, password)
     res.status(201).end()
 }
 
