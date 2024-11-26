@@ -4,7 +4,6 @@ import { IngameController, OutgameController } from './controller'
 import userService from '../service/users'
 import { verifyToken } from '../utils/jwt'
 
-type SocketClientId = string
 type SocketAccessToken = string
 
 class SocketImplement {
@@ -45,18 +44,18 @@ class SocketImplement {
 export function initSocket(io: Server) {
     io.use((socket, next) => {
         // (시작) will be deprecated ============
-        let clientId: SocketClientId = socket.handshake.auth.clientId
+        socket.data.clientId = socket.handshake.auth.clientId
         // (끝) will be deprecated ============
 
         const accessToken: SocketAccessToken = socket.handshake.auth.accessToken
         if (accessToken) {
             const { userId } = verifyToken(accessToken)
-            clientId = userId
+            socket.data.clientId = userId
         } else {
             // TODO: 만료 시 에러 처리
         }
 
-        if (!clientId) {
+        if (!socket.data.clientId) {
             return next(new Error('[clientId] required'))
         }
 

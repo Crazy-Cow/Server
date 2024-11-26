@@ -2,15 +2,18 @@ import jwt from 'jsonwebtoken'
 
 const JWT_SECRET = process.env.JWT_SECRET
 
-export const generateAccessToken = (user: {
-    userId: number
+export const generateAccessToken = ({
+    userId,
+    nickName,
+    isGuest,
+}: {
+    userId: string
     nickName: string
+    isGuest: boolean
 }) => {
-    return jwt.sign(
-        { userId: user.userId, nickName: user.nickName },
-        JWT_SECRET,
-        { expiresIn: '24h' }
-    )
+    return jwt.sign({ userId, nickName, isGuest }, JWT_SECRET, {
+        expiresIn: '24h',
+    })
 }
 
 export const verifyToken = (token: string) => {
