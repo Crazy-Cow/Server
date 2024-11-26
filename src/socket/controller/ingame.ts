@@ -3,7 +3,7 @@ import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import { Character, Position } from '../../game/objects/player'
 import userService from '../../service/users'
-
+import { updateInterval } from 'game/maps/common'
 const MAX_SPEED = 10
 
 function isValidVelocity(velocity: Position): boolean {
@@ -22,9 +22,15 @@ function isValidVelocity(velocity: Position): boolean {
 function handleMove(character: Character, data: OnEventData['move']) {
     if (!isValidVelocity(data.character.velocity)) {
         character.position = {
-            x: character.position.x + (character.velocity.x * 1) / 5,
-            y: character.position.y + (character.velocity.y * 1) / 5,
-            z: character.position.z + (character.velocity.z * 1) / 5,
+            x:
+                character.position.x +
+                (character.velocity.x * 1) / updateInterval,
+            y:
+                character.position.y +
+                (character.velocity.y * 1) / updateInterval,
+            z:
+                character.position.z +
+                (character.velocity.z * 1) / updateInterval,
         }
         return
     }
@@ -43,8 +49,6 @@ class IngameController extends BaseController {
     disconnect() {
         console.log('[disconnect] ingame - 세션 유지')
     }
-
-    private handle
 
     private handleMove = (data: OnEventData['move']) => {
         const userId = this.getUserId()

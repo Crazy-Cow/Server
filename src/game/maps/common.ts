@@ -21,6 +21,8 @@ const MIN_DISTANCE = 3
 const MAX_GROUND = 80
 const MAX_HEIGHT = 33
 
+export const updateInterval = 1 / 5
+
 const charType = 1
 // Todo: 플레이시 받음
 
@@ -31,7 +33,6 @@ export type MapStartLoopType = {
 }
 
 export class CommonMap {
-    private updateInterval = 1 / 5 // FPS
     private remainRunningTime = 0
     private loopIdToReduceTime?: NodeJS.Timeout
     private loopIdToUpdateGameState?: NodeJS.Timeout
@@ -182,7 +183,7 @@ export class CommonMap {
 
             const gameState = this.convertGameState()
             handleGameState(gameState)
-        }, 1000 * this.updateInterval)
+        }, 1000 * updateInterval)
     }
 
     stopGameLoop() {
