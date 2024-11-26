@@ -54,9 +54,9 @@ class IngameController extends BaseController {
             handleGameState: (data) => {
                 this.broadcast(room.roomId, 'game.state', data)
             },
-            handleGameOver: () => {
+            handleGameOver: (data) => {
                 console.log('게임 끝!')
-                this.broadcast(room.roomId, 'game.over', undefined)
+                this.broadcast(room.roomId, 'game.over', data)
             },
         })
     }
