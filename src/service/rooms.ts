@@ -112,7 +112,7 @@ class RoomPool {
 
     leaveRoom(userId: string) {
         for (const player of this.waitingRoom.players) {
-            if (player.userId == userId) {
+            if (player.userId === userId) {
                 this.waitingRoom.removePlayer(userId)
                 return this.waitingRoom
             }
