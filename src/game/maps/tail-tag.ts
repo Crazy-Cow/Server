@@ -4,12 +4,18 @@ import { CommonMap } from './common'
 const TAIL_STEAL_DISTANCE = 6
 
 export class TailTagMap extends CommonMap {
+    private stealQueue: { characterId: string }[] = []
+
     init() {
         super.init()
 
         for (let i = 0; i < this.characters.length; i++) {
             this.characters[i].setGiftCnt(1)
         }
+    }
+
+    addStealQueue(characterId: string) {
+        this.stealQueue.push({ characterId })
     }
 
     handleCatch(character: Character) {
@@ -42,6 +48,14 @@ export class TailTagMap extends CommonMap {
 
     updateGameState(): void {
         super.updateGameState()
+
+        while (this.stealQueue.length > 0) {
+            const stealEvent = this.stealQueue.shift()
+            const character = this.findCharacter(stealEvent.characterId)
+            if (character) {
+                this.handleCatch(character)
+            }
+        }
 
         this.characters.forEach((character) => {
             character.isBeingStolen = false

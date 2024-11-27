@@ -149,8 +149,8 @@ export class CommonMap {
     }
 
     updateGameState() {
-        // TODO: 검증로직
         this.characters.forEach((character) => {
+            // 검증로직
             if (!this.isValidPosition(character.position)) {
                 character.velocity = { x: 0, y: 0, z: 0 }
                 character.position = {

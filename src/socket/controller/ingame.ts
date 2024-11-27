@@ -1,9 +1,10 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
-import { Character, Position } from '../../game/objects/player'
+import { Position } from '../../game/objects/player'
 import userService from '../../service/users'
 import { updateInterval } from '../../game/maps/common'
+import { TailTagMap } from '../../game/maps'
 const MAX_SPEED = 10
 
 function isValidVelocity(velocity: Position): boolean {
@@ -19,7 +20,17 @@ function isValidVelocity(velocity: Position): boolean {
 //     character.skill = data.character.skill
 // }
 
-function handleMove(character: Character, data: OnEventData['move']) {
+function handleMove(
+    characterId: string,
+    gameMap: TailTagMap,
+    data: OnEventData['move']
+) {
+    const character = gameMap.findCharacter(characterId)
+
+    if (data.steal) {
+        this.gameMap.addStealQueue(characterId)
+    }
+
     if (!isValidVelocity(data.character.velocity)) {
         character.position = {
             x: character.position.x + character.velocity.x * 1 * updateInterval,
@@ -35,8 +46,6 @@ function handleMove(character: Character, data: OnEventData['move']) {
 }
 
 class IngameController extends BaseController {
-    private stealQueue: { characterId: string }[] = []
-
     register() {
         // TODO this.gameMap이랑 연관
         this.socket.on<OnEventName>('move', this.handleMove)
@@ -52,11 +61,7 @@ class IngameController extends BaseController {
         const room = roomService.findGameRoomById(player.roomId)
         const gameMap = room?.gameMap
         if (gameMap) {
-            const character = gameMap.findCharacter(userId)
-            handleMove(character, data)
-            if (data.steal) {
-                this.stealQueue.push({ characterId: character.id })
-            }
+            handleMove(userId, gameMap, data)
         } else {
             console.error('palyer가 게임 실행중이 아니에요')
         }
@@ -66,16 +71,6 @@ class IngameController extends BaseController {
         room.loadGame()
         room.startGameLoop({
             handleGameState: (data) => {
-                // stealQueue 처리
-                while (this.stealQueue.length > 0) {
-                    const stealEvent = this.stealQueue.shift()
-                    const character = room.gameMap.findCharacter(
-                        stealEvent.characterId
-                    )
-                    if (character) {
-                        room.gameMap.handleCatch(character)
-                    }
-                }
                 this.broadcast(room.roomId, 'game.state', data)
             },
             handleGameOver: (data) => {
