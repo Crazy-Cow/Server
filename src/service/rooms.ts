@@ -1,7 +1,7 @@
 import userService, { User } from './users'
 import util from './rooms.util'
 import { TailTagMap } from '../game/maps'
-import { MapStartLoopType } from 'game/maps/common'
+import { MapStartLoopType } from '../game/maps/common'
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
