@@ -3,7 +3,7 @@ import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import { Character, Position } from '../../game/objects/player'
 import userService from '../../service/users'
-import { updateInterval } from 'game/maps/common'
+import { updateInterval } from '../../game/maps/common'
 const MAX_SPEED = 10
 
 function isValidVelocity(velocity: Position): boolean {
