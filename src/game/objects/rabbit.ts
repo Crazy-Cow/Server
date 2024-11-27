@@ -1,7 +1,16 @@
 // rabbit.ts
-import { Character } from './player'
+import { Character, Position } from './player'
+import { CharacterType } from '../maps/common'
 
 export class RabbitCharacter extends Character {
+    constructor(params: {
+        id: string
+        nickName: string
+        position: Position
+        color: string
+    }) {
+        super({ ...params, charType: CharacterType.RABBIT })
+    }
     getMaxSpeed(): number {
         return 10 // 기본 속도
     }

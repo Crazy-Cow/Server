@@ -30,7 +30,7 @@ const PREDEFINED_POSITIONS: Position[] = [
     { x: -31, y: 1, z: 22 },
 ]
 
-enum CharacterType {
+export enum CharacterType {
     RABBIT = 1,
     SANTA = 2,
 }
@@ -114,7 +114,6 @@ export class CommonMap {
                 character = new RabbitCharacter({
                     id,
                     nickName,
-                    charType,
                     position,
                     color,
                 })
@@ -123,7 +122,6 @@ export class CommonMap {
                 character = new SantaCharacter({
                     id,
                     nickName,
-                    charType,
                     position,
                     color,
                 })
