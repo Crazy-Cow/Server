@@ -1,3 +1,7 @@
+import { SocketEmitEvtDataGameLogSteal } from 'socket/types/emit'
+import eventLogRepository, {
+    StealEvent,
+} from '../../db/redis/respository/event-log'
 import { Character } from '../objects/player'
 import { CommonMap } from './common'
 
@@ -5,6 +9,7 @@ const TAIL_STEAL_DISTANCE = 6
 
 export class TailTagMap extends CommonMap {
     private stealQueue: { characterId: string }[] = []
+    private eventLogRepository = eventLogRepository
 
     init() {
         super.init()
@@ -12,6 +17,21 @@ export class TailTagMap extends CommonMap {
         for (let i = 0; i < this.characters.length; i++) {
             this.characters[i].setGiftCnt(1)
         }
+    }
+
+    private handleStealSuccess(props: Omit<StealEvent, 'roomId'>) {
+        // TODO: 비동기
+        this.eventLogRepository.addSteal({ ...props, roomId: this.getRoomId() })
+
+        const actor: Character = this.findCharacter(props.actorId)
+        const victim: Character = this.findCharacter(props.victimId)
+
+        const data: SocketEmitEvtDataGameLogSteal = {
+            actor: { id: props.actorId, nickName: actor.nickName },
+            victim: { id: props.victimId, nickName: victim.nickName },
+        }
+
+        this.broadcast('game.log.steal', data)
     }
 
     addStealQueue(characterId: string) {
@@ -43,6 +63,11 @@ export class TailTagMap extends CommonMap {
             closestCharacter.isBeingStolen = true
             character.giftCnt += 1
             closestCharacter.giftCnt -= 1
+
+            this.handleStealSuccess({
+                actorId: character.id,
+                victimId: closestCharacter.id,
+            })
         }
     }
 

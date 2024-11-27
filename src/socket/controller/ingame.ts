@@ -71,6 +71,7 @@ class IngameController extends BaseController {
     }
 
     handleStartGame = (room: Room) => {
+        room.gameMap.registerSocket(this.getSocket())
         room.startGameLoop({
             handleGameState: (data) => {
                 this.broadcast(room.roomId, 'game.state', data)

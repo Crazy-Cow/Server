@@ -30,13 +30,15 @@ export class Room {
     state: RoomState = 'initial'
     maxPlayerCnt: number
     maxWaitingTime: number
-    gameMap = new TailTagMap({ remainRunningTime: 10 * 60 })
+    gameMap: TailTagMap
 
     constructor({ maxPlayerCnt = 2 }: { maxPlayerCnt?: number }) {
-        this.roomId = util.generateRoomId()
+        const roomId = util.generateRoomId()
+        this.roomId = roomId
         this.createdAt = new Date()
         this.state = 'waiting'
         this.maxPlayerCnt = maxPlayerCnt
+        this.gameMap = new TailTagMap({ roomId, remainRunningTime: 10 * 60 })
     }
 
     getPlayerCnt = () => {

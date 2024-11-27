@@ -1,3 +1,7 @@
+/**
+ * (TTL) Guest 닉네임 만료 관리
+ */
+
 import { verifyToken } from '../../../utils/jwt'
 import { redisClient } from '..'
 

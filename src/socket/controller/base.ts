@@ -1,4 +1,4 @@
-import { Player } from '../../service/rooms'
+import roomService, { Player } from '../../service/rooms'
 import { Socket } from 'socket.io'
 import { EmitEventName } from 'socket/types/emit'
 import { OnEventData } from 'socket/types/on'
@@ -15,6 +15,12 @@ export abstract class BaseController {
         const isGuest = socket.data.isGuest
         this.player = new Player({ userId, nickName, isGuest })
         this.roomId = socket.data.roomId
+
+        if (this.roomId) {
+            // 재접속 시 재연결
+            const room = roomService.findGameRoomById(this.roomId)
+            room.gameMap.registerSocket(this.getSocket())
+        }
     }
     abstract register(): void
     abstract disconnect(): void
