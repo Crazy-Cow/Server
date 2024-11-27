@@ -123,6 +123,7 @@ export class CommonMap {
                 isBeingStolen: char.isBeingStolen,
                 steal: char.steal,
                 skill: char.skill,
+                protect: char.protect,
             })),
         }
     }
@@ -166,6 +167,10 @@ export class CommonMap {
         this.characters.forEach((character) => {
             character.steal = false
             character.skill = false
+            character.isBeingStolen = false
+            if (character.protect > 0) {
+                character.protect -= 1
+            }
         })
     }
 
