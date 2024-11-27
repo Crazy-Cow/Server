@@ -7,6 +7,8 @@ export type OnEventName =
     | 'room.enter' // 빠른 시작
     | 'room.leave' // 대기실 나가기
     | 'move'
+// | 'steal'
+// | 'skill'
 
 type OnEventDataMap = {
     reconnect: undefined
@@ -15,15 +17,16 @@ type OnEventDataMap = {
     'room.enter': undefined
     'room.leave': undefined
     move: {
-        // TODO: 시간정보 delta, datetime 정보 발생 시점
-        shift: boolean
+        steal: boolean
+        skill: boolean
         character: {
             id: string
             position: Position
             velocity: Position
-            isOnGround: boolean
         }
     }
+    // steal: { character: { steal: boolean } }
+    // skill: { character: { skill: boolean } }
 }
 
 export type OnEventData = {

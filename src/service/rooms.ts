@@ -1,7 +1,7 @@
 import util from './rooms.util'
-import { CommonMap, TailTagMap } from '../game/maps'
-import { MapStartLoopType } from 'game/maps/common'
 import gameRoomRepository from '../db/redis/respository/game-room'
+import { TailTagMap } from '../game/maps'
+import { MapStartLoopType } from '../game/maps/common'
 
 type PlayerProps = {
     userId: string
@@ -30,7 +30,7 @@ export class Room {
     state: RoomState = 'initial'
     maxPlayerCnt: number
     maxWaitingTime: number
-    gameMap: CommonMap = new TailTagMap({ remainRunningTime: 10 * 60 })
+    gameMap = new TailTagMap({ remainRunningTime: 10 * 60 })
 
     constructor({ maxPlayerCnt = 2 }: { maxPlayerCnt?: number }) {
         this.roomId = util.generateRoomId()
