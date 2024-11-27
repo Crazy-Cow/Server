@@ -1,8 +1,10 @@
 import {
+    EmitEventName,
     SocketEmitEvtDataGameOver,
     SocketEmitEvtDataGameState,
 } from 'socket/types/emit'
 import { Character, Position } from '../objects/player'
+import { Socket } from 'socket.io'
 
 const GROUND_POS = {
     x: 0,
@@ -36,13 +38,15 @@ export const updateInterval = 1 / 5
 const charType = 1
 // Todo: 플레이시 받음
 
-export type MapInitialType = { remainRunningTime: number }
+export type MapInitialType = { roomId: string; remainRunningTime: number }
 export type MapStartLoopType = {
     handleGameState: (data: SocketEmitEvtDataGameState) => void
     handleGameOver: (data: SocketEmitEvtDataGameOver) => void
 }
 
 export class CommonMap {
+    private roomId = ''
+    private socket: Socket
     private remainRunningTime = 0
     private loopIdToReduceTime?: NodeJS.Timeout
     private loopIdToUpdateGameState?: NodeJS.Timeout
@@ -50,11 +54,28 @@ export class CommonMap {
 
     characters: Character[] = []
 
-    constructor({ remainRunningTime }: MapInitialType) {
+    constructor({ roomId, remainRunningTime }: MapInitialType) {
+        this.roomId = roomId
         this.remainRunningTime = remainRunningTime
     }
 
     init() {}
+
+    getRoomId() {
+        return this.roomId
+    }
+
+    registerSocket(socket: Socket) {
+        this.socket = socket
+    }
+
+    broadcast(emitMessage: EmitEventName, data: unknown) {
+        // self
+        this.socket.emit<EmitEventName>(emitMessage, data)
+        // the other
+        const roomId = this.getRoomId()
+        this.socket.to(roomId).emit<EmitEventName>(emitMessage, data)
+    }
 
     private generateRandomPosition(): Position {
         if (this.availablePositions.length === 0) {

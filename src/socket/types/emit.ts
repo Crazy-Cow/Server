@@ -6,6 +6,7 @@ export type EmitEventName =
     | 'game.ready' // 게임 곧 시작
     | 'game.start' // 게임 시작
     | 'game.state' // v2 게임 상태
+    | 'game.log.steal' // 로그 - 스틸
     | 'game.over' // 게임 종료
 
 type EmitEventDataMap = {
@@ -18,6 +19,7 @@ type EmitEventDataMap = {
     'game.ready': undefined
     'game.start': undefined
     'game.state': SocketEmitEvtDataGameState
+    'game.log.steal': SocketEmitEvtDataGameLogSteal
     'game.over': SocketEmitEvtDataGameOver
 }
 
@@ -44,4 +46,9 @@ export type SocketEmitEvtDataGameState = {
         skill: Character['skill']
         protect: Character['protect']
     }[]
+}
+
+export type SocketEmitEvtDataGameLogSteal = {
+    actor: { id: string; nickName: string }
+    victim: { id: string; nickName: string }
 }
