@@ -1,3 +1,7 @@
+/**
+ * (Cache) 인게임 유저 세션 관리 (재접속 시 room re-join 되도록)
+ */
+
 import { redisClient } from '..'
 
 const COMMON_KEY = 'user-room'
