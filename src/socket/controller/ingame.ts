@@ -28,7 +28,7 @@ function handleMove(
     const character = gameMap.findCharacter(characterId)
 
     if (data.steal) {
-        this.gameMap.addStealQueue(characterId)
+        gameMap.addStealQueue(characterId)
     }
 
     if (!isValidVelocity(data.character.velocity)) {
