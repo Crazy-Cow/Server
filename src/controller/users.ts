@@ -9,18 +9,11 @@ import {
     SignInResponse,
     SignUpRequest,
 } from './users.type'
-import userService from '../service/users'
 import StatusCode from '../constants/statusCode'
-import {
-    createError as createErrorRes,
-    ErrorResponse,
-    handleToCatchInternalServerError,
-} from '../utils/error'
+import { createError as createErrorRes, ErrorResponse } from '../utils/error'
 import util from '../service/users.util'
-import userRepository from '../db/mongoose/repository/user'
-import guestRepository from '../db/redis/respository/guest'
 import { generateAccessToken } from '../utils/jwt'
-import userService2 from '../service2/users'
+import userService from '../service/users'
 
 export const getRandomNicknameController = (
     _,
@@ -33,36 +26,34 @@ export const getRandomNicknameController = (
 }
 
 // (시작) will be deprecated ============
-export const createUserController = (
+export const createUserController = async (
     req: Request<object, object, CreateUserRequest>,
     res: Response<CreateUserResponse | ErrorResponse>
 ) => {
     const { nickName } = req.body
 
     if (!nickName) {
-        res.status(StatusCode.BadRequest).json(
-            createErrorRes({ msg: '[nickName] is required' })
-        )
+        res.status(400).json(createErrorRes({ msg: '[nickName] 필드 확인' }))
         return
     }
 
-    try {
-        if (userService.checkDuplicatedNickName(nickName)) {
-            res.status(StatusCode.Conflict).json(
-                createErrorRes({ msg: '중복된 닉네임입니다' })
-            )
-            return
-        }
-
-        const user = userService.createUser(nickName)
-        if (user) {
-            res.status(StatusCode.Created).json({ userId: user.userId })
-        } else {
-            throw new Error('유저 생성 실패')
-        }
-    } catch (err) {
-        handleToCatchInternalServerError(res, err as ErrorResponse)
+    const duplicated = await userService.checkDupNick(nickName)
+    if (duplicated) {
+        res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
+        return
     }
+
+    const accessToken = generateAccessToken({
+        userId: nickName, // fyi. 게스트의 경우 unique id 관리가 애매함
+        nickName: nickName,
+        isGuest: true,
+    })
+
+    await userService.addGuestNick(accessToken)
+
+    res.status(200).json({
+        userId: nickName,
+    })
 }
 // (끝) will be deprecated ============
 
@@ -77,20 +68,19 @@ export const guestInUserController = async (
         return
     }
 
-    const duplicated = await userService2.checkDupNick(nickName)
+    const duplicated = await userService.checkDupNick(nickName)
     if (duplicated) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
     }
-    const user = userService.createUser(nickName)
 
     const accessToken = generateAccessToken({
-        userId: user.userId,
-        nickName: user.nickName,
-        isGuest: false,
+        userId: nickName, // fyi. 게스트의 경우 unique id 관리가 애매함
+        nickName: nickName,
+        isGuest: true,
     })
 
-    guestRepository.addNick(accessToken)
+    await userService.addGuestNick(accessToken)
 
     res.status(200).json({
         accessToken,
@@ -110,7 +100,7 @@ export const signInUserController = async (
         return
     }
 
-    const user = await userRepository.findOne({ nickName, password })
+    const user = await userService.findUser(nickName, password)
     if (!user) {
         res.status(400).json(createErrorRes({ msg: '존재하지 않는 유저' }))
         return
@@ -138,13 +128,13 @@ export const signUpUserController = async (
         return
     }
 
-    const duplicated = await userService2.checkDupNick(nickName)
+    const duplicated = await userService.checkDupNick(nickName)
     if (duplicated) {
         res.status(400).json(createErrorRes({ msg: '중복된 닉네임' }))
         return
     }
 
-    await userRepository.create({ nickName, password })
+    await userService.addUser(nickName, password)
     res.status(201).end()
 }
 

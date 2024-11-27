@@ -1,53 +1,7 @@
-export class User {
-    userId: string
-    nickName: string
-    roomId: string
-
-    constructor(userId: string, nickName: string) {
-        this.userId = userId
-        this.nickName = nickName
-    }
-
-    updateRoomId = (roomId: string) => {
-        this.roomId = roomId
-    }
-    resetRoomId = () => {
-        this.roomId = undefined
-    }
-}
-
-class UserPool {
-    users: User[] = []
-
-    getUsers() {
-        return this.users
-    }
-
-    findUserById(userId: string): User | undefined {
-        return this.users.find((user) => user.userId === userId)
-    }
-
-    addUser(user: User) {
-        this.users.push(user)
-    }
-
-    removeUser(userId: string) {
-        this.users = this.users.filter((user) => user.userId !== userId)
-    }
-
-    checkDuplicatedNickName(nickName: string) {
-        if (this.users.some((user) => user.nickName === nickName)) return true
-    }
-}
+import userRepository from '../db/mongoose/repository/user'
+import guestRepository from '../db/redis/respository/guest'
 
 class UserService {
-    private userPool: UserPool
-    private idCounter: number = 1
-
-    private constructor() {
-        this.userPool = new UserPool()
-    }
-
     private static instance: UserService
 
     public static getInstance(): UserService {
@@ -57,29 +11,26 @@ class UserService {
         return this.instance
     }
 
-    private generateUserId(): string {
-        const userId = `user-${this.idCounter}`
-        this.idCounter += 1
-        return userId
+    findUser(nickName: string, password: string) {
+        return userRepository.findOne({ nickName, password })
     }
 
-    findUserById(userId: string) {
-        return this.userPool.findUserById(userId)
+    addUser(nickName: string, password: string) {
+        return userRepository.create({ nickName, password })
     }
 
-    createUser(nickName: string) {
-        const userId = this.generateUserId()
-        const user = new User(userId, nickName)
-        this.userPool.addUser(user)
-        return user
+    addGuestNick(token: string) {
+        return guestRepository.addNick(token)
     }
 
-    removeUser(userId: string) {
-        this.userPool.removeUser(userId)
-    }
+    async checkDupNick(nickName: string) {
+        const duplicatedInGuest = await guestRepository.checkDupNick(nickName)
+        if (duplicatedInGuest) return true
 
-    checkDuplicatedNickName(nickName: string) {
-        return this.userPool.checkDuplicatedNickName(nickName)
+        const duplicatedInUser = await userRepository.checkDupNick({ nickName })
+        if (duplicatedInUser) return true
+
+        return false
     }
 }
 

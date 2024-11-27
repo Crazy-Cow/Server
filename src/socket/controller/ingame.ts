@@ -2,9 +2,9 @@ import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import { Position } from '../../game/objects/player'
-import userService from '../../service/users'
 import { updateInterval } from '../../game/maps/common'
 import { TailTagMap } from '../../game/maps'
+
 const MAX_SPEED = 10
 
 function isValidVelocity(velocity: Position): boolean {
@@ -25,6 +25,9 @@ function handleMove(
     gameMap: TailTagMap,
     data: OnEventData['move']
 ) {
+    if (!data) {
+        console.error('data 없음', data)
+    }
     const character = gameMap.findCharacter(characterId)
 
     if (data.steal) {
@@ -57,8 +60,8 @@ class IngameController extends BaseController {
 
     private handleMove = (data: OnEventData['move']) => {
         const userId = this.getUserId()
-        const player = userService.findUserById(userId)
-        const room = roomService.findGameRoomById(player.roomId)
+        const roomId = this.getRoomId()
+        const room = roomService.findGameRoomById(roomId)
         const gameMap = room?.gameMap
         if (gameMap) {
             handleMove(userId, gameMap, data)
@@ -68,7 +71,6 @@ class IngameController extends BaseController {
     }
 
     handleStartGame = (room: Room) => {
-        room.loadGame()
         room.startGameLoop({
             handleGameState: (data) => {
                 this.broadcast(room.roomId, 'game.state', data)

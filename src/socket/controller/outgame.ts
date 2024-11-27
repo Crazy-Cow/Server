@@ -2,7 +2,6 @@ import { Socket } from 'socket.io'
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
-import userService from '../../service/users'
 import { EmitEventData } from '../types/emit'
 import IngameController from './ingame'
 
@@ -34,7 +33,6 @@ class OutgameController extends BaseController {
         const userId = this.getUserId()
         const room = roomService.leaveRoom(userId)
         if (room) {
-            // user가 존재하던 room
             this.broadcastRoomState(room)
         }
     }
@@ -44,17 +42,20 @@ class OutgameController extends BaseController {
         this.broadcast(room.roomId, 'room.changeState', data)
     }
 
-    private handleRoomEnter = (): Room => {
+    private handleRoomEnter = async () => {
         this.logger('========== room.join ========== ')
-        const userId = this.getUserId()
-        const player = userService.findUserById(userId)
+        const player = this.getPlayer()
         const room = roomService.joinRoom(player)
+
         this.socket.join(room.roomId)
+        this.updateRoomId(room.roomId)
+        this.ingameCtrl.updateRoomId(room.roomId)
         this.broadcastRoomState(room)
 
         if (room.state === 'playing') {
             console.log('게임 시작!')
             this.broadcast(room.roomId, 'game.ready', undefined)
+            await room.loadGame() // TODO: 딜레이 있으면 3초 기다림 없어도 됨
             setTimeout(() => {
                 this.broadcast(room.roomId, 'game.start', {
                     players: room.players,
@@ -69,7 +70,6 @@ class OutgameController extends BaseController {
         this.logger('room.leave', args)
         const userId = this.getUserId()
         const room = roomService.leaveRoom(userId)
-        console.log(`[${userId}]room`, room)
         this.broadcastRoomState(room)
     }
 }

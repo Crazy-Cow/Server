@@ -1,13 +1,31 @@
-import userService, { User } from './users'
 import util from './rooms.util'
+import gameRoomRepository from '../db/redis/respository/game-room'
 import { TailTagMap } from '../game/maps'
 import { MapStartLoopType } from '../game/maps/common'
+
+type PlayerProps = {
+    userId: string
+    nickName: string
+    isGuest: boolean
+}
+
+export class Player {
+    userId: string
+    nickName: string
+    isGuest: boolean
+
+    constructor({ userId, nickName, isGuest }: PlayerProps) {
+        this.userId = userId
+        this.nickName = nickName
+        this.isGuest = isGuest
+    }
+}
 
 export type RoomState = 'initial' | 'waiting' | 'playing' | 'gameOver'
 
 export class Room {
     roomId: string
-    players: User[] = []
+    players: Player[] = []
     createdAt: Date
     state: RoomState = 'initial'
     maxPlayerCnt: number
@@ -18,7 +36,6 @@ export class Room {
         this.roomId = util.generateRoomId()
         this.createdAt = new Date()
         this.state = 'waiting'
-
         this.maxPlayerCnt = maxPlayerCnt
     }
 
@@ -26,9 +43,8 @@ export class Room {
         return this.players.length
     }
 
-    addPlayer = (player: User) => {
+    addPlayer = (player: Player) => {
         this.players.push(player)
-        player.updateRoomId(this.roomId)
     }
 
     removePlayer = (userId: string) => {
@@ -36,7 +52,6 @@ export class Room {
 
         if (player) {
             this.players = this.players.filter((user) => user.userId !== userId)
-            player.resetRoomId()
         }
     }
 
@@ -53,12 +68,13 @@ export class Room {
         return this.getPlayerCnt() >= this.maxPlayerCnt
     }
 
-    loadGame() {
-        for (const user of this.players) {
+    async loadGame() {
+        for (const player of this.players) {
             this.gameMap.addCharacter({
-                id: user.userId,
-                nickName: user.nickName,
+                id: player.userId,
+                nickName: player.nickName,
             })
+            await gameRoomRepository.setGameRoomId(player.userId, this.roomId)
         }
 
         this.gameMap.init()
@@ -81,9 +97,9 @@ class RoomPool {
         return this.waitingRoom.isFull()
     }
 
-    joinRoom(user: User) {
+    joinRoom(player: Player) {
         const prevWaitingRoom = this.waitingRoom
-        this.waitingRoom.addPlayer(user)
+        this.waitingRoom.addPlayer(player)
 
         if (this.waitingRoom.canStartGame()) {
             this.waitingRoom.state = 'playing'
@@ -95,13 +111,11 @@ class RoomPool {
     }
 
     leaveRoom(userId: string) {
-        const player = userService.findUserById(userId)
-
-        if (!player) return
-
-        if (player.roomId === this.waitingRoom.roomId) {
-            this.waitingRoom.removePlayer(userId)
-            return this.waitingRoom
+        for (const player of this.waitingRoom.players) {
+            if (player.userId === userId) {
+                this.waitingRoom.removePlayer(userId)
+                return this.waitingRoom
+            }
         }
     }
 
@@ -132,11 +146,15 @@ class RoomService {
         return this.instance
     }
 
+    async getGameRoomIdByUserId(userId: string) {
+        return gameRoomRepository.getGameRoomId(userId)
+    }
+
     findGameRoomById(roomId: string): Room {
         return this.roomPool.findGameRoomById(roomId)
     }
 
-    joinRoom(player: User): Room {
+    joinRoom(player: Player): Room {
         return this.roomPool.joinRoom(player)
     }
 
