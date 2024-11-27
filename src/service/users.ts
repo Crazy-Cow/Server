@@ -1,5 +1,3 @@
-import util from './users.util'
-
 export class User {
     userId: string
     nickName: string
@@ -20,7 +18,6 @@ export class User {
 
 class UserPool {
     users: User[] = []
-    tempNicknames: Map<string, string> = new Map()
 
     getUsers() {
         return this.users
@@ -40,14 +37,6 @@ class UserPool {
 
     checkDuplicatedNickName(nickName: string) {
         if (this.users.some((user) => user.nickName === nickName)) return true
-    }
-
-    addTempNickname(userId: string, nickName: string) {
-        this.tempNicknames.set(userId, nickName)
-    }
-
-    removeTempNickname(userId: string) {
-        this.tempNicknames.delete(userId)
     }
 }
 
@@ -81,29 +70,16 @@ class UserService {
     createUser(nickName: string) {
         const userId = this.generateUserId()
         const user = new User(userId, nickName)
-        this.userPool.removeTempNickname(userId)
         this.userPool.addUser(user)
         return user
     }
 
     removeUser(userId: string) {
         this.userPool.removeUser(userId)
-        this.userPool.removeTempNickname(userId)
     }
 
     checkDuplicatedNickName(nickName: string) {
         return this.userPool.checkDuplicatedNickName(nickName)
-    }
-
-    createTempNickname(userId: string): string {
-        let nickName = util.generateGuestNickName()
-
-        while (this.userPool.checkDuplicatedNickName(nickName)) {
-            nickName = util.generateGuestNickName()
-        }
-
-        this.userPool.addTempNickname(userId, nickName)
-        return nickName
     }
 }
 
