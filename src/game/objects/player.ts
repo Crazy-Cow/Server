@@ -7,7 +7,7 @@ export type Directions = {
     right: boolean
 }
 
-export class Character {
+export abstract class Character {
     id: string
     nickName: string
     charType: number
@@ -45,7 +45,21 @@ export class Character {
         this.protect = 0
     }
 
+    abstract getMaxSpeed(): number
+
+    isValidVelocity(velocity: Position): boolean {
+        const maxSpeed = this.getMaxSpeed()
+        const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
+        return speed <= maxSpeed && velocity.y <= 10 && velocity.y >= -40
+    }
+
     setGiftCnt(giftCnt: number) {
         this.giftCnt = giftCnt
+    }
+
+    update() {
+        if (this.protect > 0) {
+            this.protect -= 1
+        }
     }
 }

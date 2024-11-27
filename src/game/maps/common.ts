@@ -3,6 +3,8 @@ import {
     SocketEmitEvtDataGameState,
 } from 'socket/types/emit'
 import { Character, Position } from '../objects/player'
+import { RabbitCharacter } from '../objects/rabbit'
+import { SantaCharacter } from '../objects/santa'
 
 const GROUND_POS = {
     x: 0,
@@ -28,13 +30,15 @@ const PREDEFINED_POSITIONS: Position[] = [
     { x: -31, y: 1, z: 22 },
 ]
 
+enum CharacterType {
+    RABBIT = 1,
+    SANTA = 2,
+}
+
 const MAX_GROUND = 80
 const MAX_HEIGHT = 33
 
 export const updateInterval = 1 / 5
-
-const charType = 1
-// Todo: 플레이시 받음
 
 export type MapInitialType = { remainRunningTime: number }
 export type MapStartLoopType = {
@@ -87,7 +91,15 @@ export class CommonMap {
         return this.characters.find((char) => char.id === id)
     }
 
-    addCharacter({ id, nickName }: { id: string; nickName: string }) {
+    addCharacter({
+        id,
+        nickName,
+        charType,
+    }: {
+        id: string
+        nickName: string
+        charType: CharacterType
+    }) {
         const position = this.generateRandomPosition()
         let color = this.generateRandomHexColor()
 
@@ -95,13 +107,32 @@ export class CommonMap {
             color = this.generateRandomHexColor()
         }
 
-        const character = new Character({
-            id,
-            position,
-            charType,
-            nickName,
-            color,
-        })
+        let character: Character
+
+        switch (charType) {
+            case CharacterType.RABBIT:
+                character = new RabbitCharacter({
+                    id,
+                    nickName,
+                    charType,
+                    position,
+                    color,
+                })
+                break
+            case CharacterType.SANTA:
+                character = new SantaCharacter({
+                    id,
+                    nickName,
+                    charType,
+                    position,
+                    color,
+                })
+                break
+            // 추가 캐릭터 타입 처리...
+            default:
+                throw new Error('Unknown character type')
+        }
+
         this.characters.push(character)
     }
 
@@ -147,6 +178,7 @@ export class CommonMap {
 
     updateGameState() {
         this.characters.forEach((character) => {
+            character.update()
             // 검증로직
             if (!this.isValidPosition(character.position)) {
                 character.velocity = { x: 0, y: 0, z: 0 }
@@ -168,9 +200,6 @@ export class CommonMap {
             character.steal = false
             character.skill = false
             character.isBeingStolen = false
-            if (character.protect > 0) {
-                character.protect -= 1
-            }
         })
     }
 
