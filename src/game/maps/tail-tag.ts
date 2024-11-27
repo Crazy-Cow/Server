@@ -1,4 +1,8 @@
-import { SocketEmitEvtDataGameLogSteal } from 'socket/types/emit'
+import {
+    SocketEmitEvtDataGameLogSteal,
+    SocketEmitEvtDataGameLogStealCombo,
+    StealComboType,
+} from '../../socket/types/emit'
 import eventLogRepository, {
     StealEvent,
 } from '../../db/redis/respository/event-log'
@@ -20,11 +24,23 @@ export class TailTagMap extends CommonMap {
     }
 
     private handleStealSuccess(props: Omit<StealEvent, 'roomId'>) {
-        // TODO: 비동기
-        this.eventLogRepository.addSteal({ ...props, roomId: this.getRoomId() })
-
         const actor: Character = this.findCharacter(props.actorId)
         const victim: Character = this.findCharacter(props.victimId)
+
+        this.eventLogRepository // FYI. 비동기
+            .addSteal({ ...props, roomId: this.getRoomId() })
+            .then(({ comboMessage }) => {
+                if (comboMessage) {
+                    const data: SocketEmitEvtDataGameLogStealCombo = {
+                        actor: {
+                            id: props.actorId,
+                            nickName: actor.nickName,
+                            combo: comboMessage as StealComboType,
+                        },
+                    }
+                    this.broadcast('game.log.steal-combo', data)
+                }
+            })
 
         const data: SocketEmitEvtDataGameLogSteal = {
             actor: { id: props.actorId, nickName: actor.nickName },
