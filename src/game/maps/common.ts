@@ -168,7 +168,9 @@ export class CommonMap {
             character.steal = false
             character.skill = false
             character.isBeingStolen = false
-            character.protect -= 1
+            if (character.protect > 0) {
+                character.protect -= 1
+            }
         })
     }
 
