@@ -19,7 +19,9 @@ export abstract class BaseController {
         if (this.roomId) {
             // 재접속 시 재연결
             const room = roomService.findGameRoomById(this.roomId)
-            room.gameMap.registerSocket(this.getSocket())
+            if (room) {
+                room.gameMap.registerSocket(this.getSocket())
+            }
         }
     }
     abstract register(): void
