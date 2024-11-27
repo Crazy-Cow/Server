@@ -43,7 +43,11 @@ export class TailTagMap extends CommonMap {
         let minDistance = Infinity
 
         for (const other of this.characters) {
-            if (character.id !== other.id && other.giftCnt >= 1) {
+            if (
+                character.id !== other.id &&
+                other.giftCnt >= 1 &&
+                other.protect < 1
+            ) {
                 const distance = super.calculateDistance(
                     character.position,
                     other.position
@@ -61,8 +65,11 @@ export class TailTagMap extends CommonMap {
         // 가장 가까운 캐릭터로부터 선물 훔치기
         if (closestCharacter) {
             closestCharacter.isBeingStolen = true
-            character.giftCnt += 1
+            closestCharacter.protect = 10
             closestCharacter.giftCnt -= 1
+            closestCharacter.velocity = { x: 0, y: 0, z: 0 }
+            character.giftCnt += 1
+            character.protect = 8
 
             this.handleStealSuccess({
                 actorId: character.id,
@@ -81,9 +88,5 @@ export class TailTagMap extends CommonMap {
                 this.handleCatch(character)
             }
         }
-
-        this.characters.forEach((character) => {
-            character.isBeingStolen = false
-        })
     }
 }

@@ -18,6 +18,7 @@ export class Character {
     steal: boolean
     isBeingStolen: boolean
     skill: boolean
+    protect: number
     constructor({
         id,
         nickName,
@@ -41,6 +42,7 @@ export class Character {
         this.steal = false
         this.isBeingStolen = false
         this.skill = false
+        this.protect = 0
     }
 
     setGiftCnt(giftCnt: number) {
