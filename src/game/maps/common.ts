@@ -161,19 +161,7 @@ export class CommonMap {
     convertGameState(): SocketEmitEvtDataGameState {
         return {
             remainRunningTime: this.remainRunningTime,
-            characters: this.characters.map((char) => ({
-                id: char.id,
-                nickName: char.nickName,
-                charType: char.charType,
-                position: char.position,
-                charColor: char.charColor,
-                velocity: char.velocity,
-                giftCnt: char.giftCnt,
-                isBeingStolen: char.isBeingStolen,
-                steal: char.steal,
-                skill: char.skill,
-                protect: char.protect,
-            })),
+            characters: this.characters.map((char) => char.getClientData()),
         }
     }
 
@@ -216,7 +204,6 @@ export class CommonMap {
     private resetEventkey(): void {
         this.characters.forEach((character) => {
             character.steal = false
-            character.skill = false
             character.isBeingStolen = false
         })
     }

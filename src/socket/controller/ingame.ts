@@ -35,9 +35,11 @@ function handleMove(
         return
     }
     character.steal = data.steal
-    character.skill = data.skill
     character.position = data.character.position
     character.velocity = data.character.velocity
+    if (data.skill) {
+        character.isSkillInput = true
+    }
 }
 
 class IngameController extends BaseController {

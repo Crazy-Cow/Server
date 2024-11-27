@@ -1,5 +1,5 @@
 import { RoomState } from '../../service/rooms'
-import { Character } from '../../game/objects/player'
+import { Position } from '../../game/objects/player'
 
 export type EmitEventName =
     | 'room.changeState' // 대기실 상태 변경
@@ -34,17 +34,18 @@ export type SocketEmitEvtDataGameOver = {
 export type SocketEmitEvtDataGameState = {
     remainRunningTime: number
     characters: {
-        id: Character['id']
-        nickName: Character['nickName']
-        charType: Character['charType']
-        position: Character['position']
-        charColor: Character['charColor']
-        velocity: Character['velocity']
-        giftCnt: Character['giftCnt']
-        steal: Character['steal']
-        isBeingStolen: Character['isBeingStolen']
-        skill: Character['skill']
-        protect: Character['protect']
+        id: string
+        nickName: string
+        charType: number
+        position: Position
+        charColor: string
+        velocity: Position
+        giftCnt: number
+        isBeingStolen: boolean
+        steal: boolean
+        isSkillActive: boolean
+        protect: number
+        currentSkillCooldown?: number
     }[]
 }
 
