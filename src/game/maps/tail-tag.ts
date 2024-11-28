@@ -80,10 +80,10 @@ export class TailTagMap extends CommonMap {
 
         // 가장 가까운 캐릭터로부터 선물 훔치기
         if (closestCharacter) {
-            closestCharacter.isBeingStolen = true
+            closestCharacter.stolen = true
+            closestCharacter.eventBlock = 2
             closestCharacter.protect = 10
             closestCharacter.giftCnt -= 1
-            closestCharacter.velocity = { x: 0, y: 0, z: 0 }
             character.giftCnt += 1
             character.protect = 8
 

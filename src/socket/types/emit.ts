@@ -1,5 +1,5 @@
 import { RoomState } from '../../service/rooms'
-import { Character } from '../../game/objects/player'
+import { Position } from '../../game/objects/player'
 
 export type EmitEventName =
     | 'room.changeState' // 대기실 상태 변경
@@ -36,17 +36,20 @@ export type SocketEmitEvtDataGameOver = {
 export type SocketEmitEvtDataGameState = {
     remainRunningTime: number
     characters: {
-        id: Character['id']
-        nickName: Character['nickName']
-        charType: Character['charType']
-        position: Character['position']
-        charColor: Character['charColor']
-        velocity: Character['velocity']
-        giftCnt: Character['giftCnt']
-        steal: Character['steal']
-        isBeingStolen: Character['isBeingStolen']
-        skill: Character['skill']
-        protect: Character['protect']
+        id: string
+        nickName: string
+        charType: number
+        position: Position
+        charColor: string
+        velocity: Position
+        giftCnt: number
+        stealMotion: boolean // punch 모션 출력용
+        stolenMotion: boolean // duck 모션 출력용
+        protectMotion: number // 0 이하면 해제 | 유저 무적상태 표시
+        eventBlock: number // 0 이하면 해제 | 유저의 이벤트 입력을 차단
+        isSkillActive: boolean // 스킬 활성화 상태
+        totalSkillCooldown?: number // 전체 쿨 타임
+        currentSkillCooldown?: number // 스킬의 남은 쿨타임
     }[]
 }
 

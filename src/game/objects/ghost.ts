@@ -1,9 +1,8 @@
-// santa.ts
 import { Character, Position } from './player'
 import { CharacterType } from '../maps/common'
 import { updateInterval } from '../maps/common'
 
-export class SantaCharacter extends Character {
+export class GhostCharacter extends Character {
     private skillCooldownTime: number = 15 / updateInterval // 스킬 쿨다운 시간 (초)
     private skillDurationTime: number = 5 / updateInterval // 스킬 지속 시간 (초)
     private currentSkillCooldown: number = 0 // 현재 남은 쿨다운 시간
@@ -14,11 +13,11 @@ export class SantaCharacter extends Character {
         position: Position
         color: string
     }) {
-        super({ ...params, charType: CharacterType.SANTA })
+        super({ ...params, charType: CharacterType.GHOST })
     }
 
     getMaxSpeed(): number {
-        return this.isSkillActive ? 31 : 16 // 스킬 사용 시 속도 증가
+        return 16 // 스킬 사용 시 속도 증가
     }
 
     useSkill() {
