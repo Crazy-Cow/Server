@@ -1,6 +1,6 @@
 import { createError } from './index.util'
 import logComboStealRepository from './combo-steal'
-import { LogCategory, StealLogProps } from './index.type'
+import { ComboStealLogProps, LogCategory, StealLogProps } from './index.type'
 import logEventRepository from './event'
 import { getLogGRCKey } from './index.util'
 import { redisClient } from '../../../../db/redis'
@@ -40,7 +40,15 @@ const handleSteal = async (
         if (comboCnt == 2) comboMessage = 'double'
         else if (comboCnt == 3) comboMessage = 'triple'
 
-        // TODO: Add category: 'event'
+        if (comboMessage) {
+            const data: ComboStealLogProps = {
+                actorId,
+                combo: comboMessage,
+                roomId,
+                timeStamp: props.timeStamp,
+            }
+            await logEventRepository.addEvent('combo-steal', data)
+        }
 
         return { comboMessage }
     } catch (err) {

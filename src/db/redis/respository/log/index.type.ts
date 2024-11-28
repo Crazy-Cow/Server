@@ -1,3 +1,5 @@
+import { StealComboType } from 'socket/types/emit'
+
 export type LogCategory = 'event' | 'steal' | 'combo-steal'
 
 export type CommonLogProps = {
@@ -11,5 +13,6 @@ export type StealLogProps = CommonLogProps & {
 }
 
 export type ComboStealLogProps = CommonLogProps & {
-    // TODO
+    actorId: string
+    combo: StealComboType
 }
