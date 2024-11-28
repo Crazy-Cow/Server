@@ -1,3 +1,4 @@
+import { CharacterType } from 'game/maps/common'
 import { Position } from '../../game/objects/player'
 
 export type OnEventName =
@@ -14,7 +15,7 @@ type OnEventDataMap = {
     reconnect: undefined
     connection: undefined
     disconnect: string // reason
-    'room.enter': undefined
+    'room.enter': SocketOnEvtDataRoomEnter
     'room.leave': undefined
     move: {
         steal: boolean
@@ -27,6 +28,10 @@ type OnEventDataMap = {
     }
     // steal: { character: { steal: boolean } }
     // skill: { character: { skill: boolean } }
+}
+
+export type SocketOnEvtDataRoomEnter = {
+    charType: CharacterType
 }
 
 export type OnEventData = {

@@ -1,7 +1,7 @@
 import util from './rooms.util'
 import gameRoomRepository from '../db/redis/respository/game-room'
 import { TailTagMap } from '../game/maps'
-import { MapStartLoopType } from '../game/maps/common'
+import { CharacterType, MapStartLoopType } from '../game/maps/common'
 
 type PlayerProps = {
     userId: string
@@ -13,11 +13,16 @@ export class Player {
     userId: string
     nickName: string
     isGuest: boolean
+    charType: CharacterType
 
     constructor({ userId, nickName, isGuest }: PlayerProps) {
         this.userId = userId
         this.nickName = nickName
         this.isGuest = isGuest
+    }
+
+    updateCharType(charType) {
+        this.charType = charType
     }
 }
 
@@ -75,7 +80,7 @@ export class Room {
             this.gameMap.addCharacter({
                 id: player.userId,
                 nickName: player.nickName,
-                charType: 1,
+                charType: player.charType,
             })
             await gameRoomRepository.setGameRoomId(player.userId, this.roomId)
         }
