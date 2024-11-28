@@ -7,6 +7,7 @@ export type EmitEventName =
     | 'game.start' // 게임 시작
     | 'game.state' // v2 게임 상태
     | 'game.log.steal' // 로그 - 스틸
+    | 'game.log.steal-combo' // 로그 - 스틸 콤보
     | 'game.over' // 게임 종료
 
 type EmitEventDataMap = {
@@ -20,6 +21,7 @@ type EmitEventDataMap = {
     'game.start': undefined
     'game.state': SocketEmitEvtDataGameState
     'game.log.steal': SocketEmitEvtDataGameLogSteal
+    'game.log.steal-combo': SocketEmitEvtDataGameLogStealCombo
     'game.over': SocketEmitEvtDataGameOver
 }
 
@@ -51,4 +53,9 @@ export type SocketEmitEvtDataGameState = {
 export type SocketEmitEvtDataGameLogSteal = {
     actor: { id: string; nickName: string }
     victim: { id: string; nickName: string }
+}
+
+export type StealComboType = 'double' | 'triple'
+export type SocketEmitEvtDataGameLogStealCombo = {
+    actor: { id: string; nickName: string; combo: StealComboType }
 }
