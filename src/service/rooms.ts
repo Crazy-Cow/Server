@@ -75,6 +75,7 @@ export class Room {
             this.gameMap.addCharacter({
                 id: player.userId,
                 nickName: player.nickName,
+                charType: 1,
             })
             await gameRoomRepository.setGameRoomId(player.userId, this.roomId)
         }

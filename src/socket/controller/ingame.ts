@@ -1,16 +1,8 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
-import { Position } from '../../game/objects/player'
 import { updateInterval } from '../../game/maps/common'
 import { TailTagMap } from '../../game/maps'
-
-const MAX_SPEED = 10
-
-function isValidVelocity(velocity: Position): boolean {
-    const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
-    return speed <= MAX_SPEED && velocity.y <= MAX_SPEED && velocity.y >= -40
-}
 
 // function handleSteal(character: Character, data: OnEventData['steal']) {
 //     character.steal = data.character.steal
@@ -34,7 +26,7 @@ function handleMove(
         gameMap.addStealQueue(characterId)
     }
 
-    if (!isValidVelocity(data.character.velocity)) {
+    if (!character.isValidVelocity(data.character.velocity)) {
         character.position = {
             x: character.position.x + character.velocity.x * 1 * updateInterval,
             y: character.position.y + character.velocity.y * 1 * updateInterval,
