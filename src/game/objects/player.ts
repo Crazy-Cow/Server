@@ -16,10 +16,12 @@ export abstract class Character {
     velocity: Position
     giftCnt: number
     steal: boolean
-    isBeingStolen: boolean
+    stolen: boolean
+    eventBlock: number
     protect: number
     isSkillActive: boolean // 스킬 활성화 상태
     isSkillInput: boolean // 스킬 사용 입력
+    direction: Position
     constructor({
         id,
         nickName,
@@ -41,10 +43,12 @@ export abstract class Character {
         this.velocity = { x: 0, y: 0, z: 0 }
         this.giftCnt = 0
         this.steal = false
-        this.isBeingStolen = false
+        this.stolen = false
+        this.eventBlock = 0
         this.protect = 0
         this.isSkillActive = false
         this.isSkillInput = false
+        this.direction = { x: 0, y: 0, z: 1 }
     }
 
     getClientData() {
@@ -56,10 +60,11 @@ export abstract class Character {
             charColor: this.charColor,
             velocity: this.velocity,
             giftCnt: this.giftCnt,
-            isBeingStolen: this.isBeingStolen,
-            steal: this.steal,
+            eventBlock: this.eventBlock,
+            stealMotion: this.steal,
+            stolenMotion: this.stolen,
             isSkillActive: this.isSkillActive,
-            protect: this.protect,
+            protectMotion: this.protect,
         }
     }
 
@@ -71,6 +76,11 @@ export abstract class Character {
         return speed <= maxSpeed && velocity.y <= 10 && velocity.y >= -40
     }
 
+    getMovementDirection(velocity: Position): Position {
+        const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
+        return { x: velocity.x / speed, y: 0, z: velocity.z / speed }
+    }
+
     setGiftCnt(giftCnt: number) {
         this.giftCnt = giftCnt
     }
@@ -78,6 +88,9 @@ export abstract class Character {
     update() {
         if (this.protect > 0) {
             this.protect -= 1
+        }
+        if (this.eventBlock > 0) {
+            this.eventBlock -= 1
         }
     }
 }

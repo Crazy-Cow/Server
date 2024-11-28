@@ -7,6 +7,7 @@ import { Character, Position } from '../objects/player'
 import { RabbitCharacter } from '../objects/rabbit'
 import { SantaCharacter } from '../objects/santa'
 import { Socket } from 'socket.io'
+import { GhostCharacter } from 'game/objects/ghost'
 
 const GROUND_POS = {
     x: 0,
@@ -35,6 +36,7 @@ const PREDEFINED_POSITIONS: Position[] = [
 export enum CharacterType {
     RABBIT = 1,
     SANTA = 2,
+    GHOST = 3,
 }
 
 const MAX_GROUND = 80
@@ -146,6 +148,14 @@ export class CommonMap {
                     color,
                 })
                 break
+            case CharacterType.GHOST:
+                character = new GhostCharacter({
+                    id,
+                    nickName,
+                    position,
+                    color,
+                })
+                break
             // 추가 캐릭터 타입 처리...
             default:
                 throw new Error('Unknown character type')
@@ -203,8 +213,8 @@ export class CommonMap {
 
     private resetEventkey(): void {
         this.characters.forEach((character) => {
+            character.stolen = false
             character.steal = false
-            character.isBeingStolen = false
         })
     }
 

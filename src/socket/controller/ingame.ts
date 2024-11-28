@@ -37,6 +37,7 @@ function handleMove(
     character.steal = data.steal
     character.position = data.character.position
     character.velocity = data.character.velocity
+    character.direction = character.getMovementDirection(character.velocity)
     if (data.skill) {
         character.isSkillInput = true
     }

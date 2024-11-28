@@ -41,11 +41,13 @@ export type SocketEmitEvtDataGameState = {
         charColor: string
         velocity: Position
         giftCnt: number
-        isBeingStolen: boolean
-        steal: boolean
-        isSkillActive: boolean
-        protect: number
-        currentSkillCooldown?: number
+        stealMotion: boolean // punch 모션 출력용
+        stolenMotion: boolean // duck 모션 출력용
+        protectMotion: number // 0 이하면 해제 | 유저 무적상태 표시
+        eventBlock: number // 0 이하면 해제 | 유저의 이벤트 입력을 차단
+        isSkillActive: boolean // 스킬 활성화 상태
+        totalSkillCooldown?: number // 전체 쿨 타임
+        currentSkillCooldown?: number // 스킬의 남은 쿨타임
     }[]
 }
 
