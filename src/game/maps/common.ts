@@ -7,7 +7,7 @@ import { Character, Position } from '../objects/player'
 import { RabbitCharacter } from '../objects/rabbit'
 import { SantaCharacter } from '../objects/santa'
 import { Socket } from 'socket.io'
-import { GhostCharacter } from 'game/objects/ghost'
+import { GhostCharacter } from '../objects/ghost'
 
 const GROUND_POS = {
     x: 0,
