@@ -59,13 +59,16 @@ const addSteal = async (
         const roomId = props.roomId
         const actorId = props.actorId
         const timeStamp = Date.now()
+
+        const comboCount = await acquireCombo({ roomId, userId: props.actorId })
+        await resetCombo({ roomId, userId: props.victimId })
+
         const data: CommonEvent & StealEvent = {
             ...props,
             action: 'steal',
             timeStamp,
         }
         const serialized = JSON.stringify(data)
-
         await redisClient.rPush(
             createRoomKey({ roomId, category: 'event' }),
             serialized
@@ -76,9 +79,6 @@ const addSteal = async (
             actorId,
             1
         )
-
-        await resetCombo({ roomId, userId: props.victimId })
-        const comboCount = await acquireCombo({ roomId, userId: props.actorId })
 
         let comboMessage = ''
         if (comboCount == 2) comboMessage = 'double'
