@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io'
 import { BaseController } from './base'
-import { OnEventData, OnEventName } from '../types/on'
+import { OnEventData, OnEventName, SocketOnEvtDataRoomEnter } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import { EmitEventData } from '../types/emit'
 import IngameController from './ingame'
@@ -42,9 +42,12 @@ class OutgameController extends BaseController {
         this.broadcast(room.roomId, 'room.changeState', data)
     }
 
-    private handleRoomEnter = async () => {
+    private handleRoomEnter = async ({
+        charType,
+    }: SocketOnEvtDataRoomEnter) => {
         this.logger('========== room.join ========== ')
         const player = this.getPlayer()
+        player.updateCharType(charType)
         const room = roomService.joinRoom(player)
 
         this.socket.join(room.roomId)
