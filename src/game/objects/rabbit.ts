@@ -7,6 +7,7 @@ import {
     teleportDistanse,
 } from './player'
 import { CharacterType, updateInterval } from '../maps/common'
+import scaledObjects from '../utils/mapObjects'
 
 export class RabbitCharacter extends Character {
     private skillPreparationTime: number = 1 / updateInterval // 스킬 시전시간
@@ -49,7 +50,27 @@ export class RabbitCharacter extends Character {
     }
 
     private modifyValidPosition(position: Position): Position {
-        // Toto : 맵 오브젝트 위치랑 겹치면 감지해야할거같음
+        for (const obj of scaledObjects) {
+            const min = obj.boundingBox.min
+            const max = obj.boundingBox.max
+
+            if (
+                position.x >= min.x &&
+                position.x <= max.x &&
+                position.y >= min.y &&
+                position.y <= max.y &&
+                position.z >= min.z &&
+                position.z <= max.z
+            ) {
+                // 겹치는 오브젝트가 있으면 위치를 조정
+                const adjustedPosition: Position = {
+                    x: position.x,
+                    y: max.y + 3, // max.y보다 3만큼 위로 이동
+                    z: position.z,
+                }
+                return adjustedPosition
+            }
+        }
         return position
     }
 
