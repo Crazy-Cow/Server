@@ -1,11 +1,6 @@
 // rabbit.ts
-import {
-    Character,
-    Position,
-    baseSpeed,
-    itemEventBlock,
-    teleportDistanse,
-} from './player'
+import { Character, Position } from './player'
+import { CHARACTER } from './player.constant'
 import { CharacterType, updateInterval } from '../maps/common'
 
 export class RabbitCharacter extends Character {
@@ -26,7 +21,7 @@ export class RabbitCharacter extends Character {
         })
     }
     getMaxSpeed(): number {
-        return baseSpeed // 기본 속도
+        return CHARACTER.BASE_SPEED // 기본 속도
     }
 
     useSkill() {
@@ -62,12 +57,12 @@ export class RabbitCharacter extends Character {
         if (this.isSkillActive) {
             this.eventBlock = this.skillPreparationTime
             // 스턴 걸리면 스킬 시전 취소 (선물뺏기 제외)
-            if (this.eventBlock > itemEventBlock) {
+            if (this.eventBlock > CHARACTER.ITEM_EVENT_BLOCK) {
                 this.isSkillActive = false
             } else {
                 this.currentSkillPreparationTime -= 1
                 if (this.currentSkillPreparationTime <= 0) {
-                    this.teleportForward(teleportDistanse)
+                    this.teleportForward(CHARACTER.TELEPORT_DISTANCE)
                     this.isSkillActive = false
                     this.currentSkillPreparationTime = 0
                 }
