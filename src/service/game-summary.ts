@@ -19,10 +19,10 @@ class GameSummaryService {
         tripleCombos: number
     }): GetGamePersonalSummaryResponse['summary'] {
         return [
-            { label: '선물 보유 수', value: props.gifts, img: 'TODO' },
-            { label: '스틸 누적 수', value: props.accSteals, img: 'TODO' },
-            { label: '더블 콤보 수', value: props.doubleCombos, img: 'TODO' },
-            { label: '트리플 콤보 수', value: props.tripleCombos, img: 'TODO' },
+            { label: '선물 보유 수', value: props.gifts },
+            { label: '스틸 누적 수', value: props.accSteals },
+            { label: '더블 콤보 수', value: props.doubleCombos },
+            { label: '트리플 콤보 수', value: props.tripleCombos },
         ]
     }
 
@@ -44,9 +44,17 @@ class GameSummaryService {
         return this.convertPersonalSummary(data)
     }
 
-    async getPersonalBadges(roomId: string, userId: string) {
+    async getPersonalBadges(
+        roomId: string,
+        userId: string
+    ): Promise<GetGamePersonalSummaryResponse['badges']> {
         console.log('TODO: getPersonalBadges', roomId, userId)
-        return []
+        return [
+            {
+                label: '높이 날기 선수',
+                img: 'https://github.com/user-attachments/assets/e4f79980-2203-40f1-a898-3f3fa498abd2',
+            },
+        ]
     }
 }
 

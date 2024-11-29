@@ -4,12 +4,8 @@ export type GetGamePersonalSummaryRequest = {
 }
 
 export type GetGamePersonalSummaryResponse = {
-    badges: Array<{ img: string }>
-    summary: Array<{
-        label: string
-        value: number
-        img: string
-    }>
+    badges: Array<{ label: string; img: string }>
+    summary: Array<{ label: string; value: number }>
 }
 
 // export type GetGameTotalSummaryRequest = {}
