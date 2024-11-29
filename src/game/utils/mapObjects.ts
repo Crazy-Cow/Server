@@ -1,5 +1,4 @@
-import * as fs from 'fs'
-import * as path from 'path'
+import { mapObjects } from '../data/mapObjects'
 
 export interface RawBoundingBox {
     min: [number, number, number]
@@ -20,13 +19,6 @@ export interface MapObject {
     name: string
     boundingBox: BoundingBox
 }
-
-// 파일 경로 설정
-const mapObjectsFilePath = path.join(__dirname, '../data/mapObjects.json')
-
-// 파일 읽기 및 파싱
-const mapObjectsData = fs.readFileSync(mapObjectsFilePath, 'utf-8')
-const mapObjects = JSON.parse(mapObjectsData)
 
 // 필요한 오브젝트 필터링 및 스케일링
 const relevantObjects = mapObjects.filter((obj: RawMapObject) => {
