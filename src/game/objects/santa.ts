@@ -1,5 +1,6 @@
 // santa.ts
-import { Character, Position, baseSpeed, itemEventBlock } from './player'
+import { Character, Position } from './player'
+import { CHARACTER } from './player.constant'
 import { CharacterType, updateInterval } from '../maps/common'
 
 export class SantaCharacter extends Character {
@@ -20,7 +21,9 @@ export class SantaCharacter extends Character {
     }
 
     getMaxSpeed(): number {
-        return this.isSkillActive ? baseSpeed * 2 - 1 : baseSpeed // 스킬 사용 시 속도 증가
+        return this.isSkillActive
+            ? CHARACTER.SANTA_MAX_SPEED
+            : CHARACTER.BASE_SPEED // 스킬 사용 시 속도 증가
     }
 
     useSkill() {
@@ -37,7 +40,7 @@ export class SantaCharacter extends Character {
         super.update()
         if (this.isSkillActive) {
             // 스턴을 길게 걸리면 스킬 종료 (선물뺏기는 당해도 스킬 안끊김)
-            if (this.eventBlock > itemEventBlock) {
+            if (this.eventBlock > CHARACTER.ITEM_EVENT_BLOCK) {
                 this.isSkillActive = false
                 this.currentSkillDuration = 0
             }

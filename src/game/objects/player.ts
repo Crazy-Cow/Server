@@ -7,12 +7,6 @@ export type Directions = {
     right: boolean
 }
 
-const baseSpeed = 13
-const itemEventBlock = 6
-const teleportDistanse = 30
-
-export { baseSpeed, itemEventBlock, teleportDistanse }
-
 export abstract class Character {
     id: string
     nickName: string

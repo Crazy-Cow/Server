@@ -1,0 +1,11 @@
+const BASE_SPEED = 13
+const ITEM_EVENT_BLOCK = 6
+const TELEPORT_DISTANCE = 30
+const SANTA_MAX_SPEED = 26
+export const CHARACTER = {
+    BASE_SPEED,
+    ITEM_EVENT_BLOCK,
+    TELEPORT_DISTANCE,
+    SANTA_MAX_SPEED,
+}
+export default CHARACTER
