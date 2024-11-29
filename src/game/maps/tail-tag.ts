@@ -1,19 +1,17 @@
 import {
     SocketEmitEvtDataGameLogSteal,
     SocketEmitEvtDataGameLogStealCombo,
-    StealComboType,
 } from '../../socket/types/emit'
-import eventLogRepository, {
-    StealEvent,
-} from '../../db/redis/respository/event-log'
 import { Character } from '../objects/player'
 import { CommonMap } from './common'
+import { StealLogProps } from 'db/redis/respository/log/index.type'
+import logRepository from '../../db/redis/respository/log'
 
 const TAIL_STEAL_DISTANCE = 6
 
 export class TailTagMap extends CommonMap {
     private stealQueue: { characterId: string }[] = []
-    private eventLogRepository = eventLogRepository
+    private logRepository = logRepository
 
     init() {
         super.init()
@@ -23,19 +21,22 @@ export class TailTagMap extends CommonMap {
         }
     }
 
-    private handleStealSuccess(props: Omit<StealEvent, 'roomId'>) {
+    private handleStealSuccess(
+        props: Omit<StealLogProps, 'roomId' | 'timeStamp'>
+    ) {
         const actor: Character = this.findCharacter(props.actorId)
         const victim: Character = this.findCharacter(props.victimId)
+        const timeStamp = Date.now()
 
-        this.eventLogRepository // FYI. 비동기
-            .addSteal({ ...props, roomId: this.getRoomId() })
+        this.logRepository // FYI. 비동기
+            .handleSteal({ ...props, roomId: this.getRoomId(), timeStamp })
             .then(({ comboMessage }) => {
                 if (comboMessage) {
                     const data: SocketEmitEvtDataGameLogStealCombo = {
                         actor: {
-                            id: props.actorId,
+                            id: actor.id,
                             nickName: actor.nickName,
-                            combo: comboMessage as StealComboType,
+                            combo: comboMessage,
                         },
                     }
                     this.broadcast('game.log.steal-combo', data)
