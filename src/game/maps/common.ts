@@ -231,8 +231,8 @@ export class CommonMap {
             }
         }, 1000)
 
-        this.loopIdToUpdateGameState = setInterval(() => {
-            this.updateGameState()
+        this.loopIdToUpdateGameState = setInterval(async () => {
+            await this.updateGameState()
 
             const gameState = this.convertGameState()
             handleGameState(gameState)
