@@ -1,4 +1,4 @@
-import { StealComboType } from 'socket/types/emit'
+import { EmitEventData, StealComboType } from 'socket/types/emit'
 
 export type LogCategory =
     | 'event'
@@ -6,6 +6,7 @@ export type LogCategory =
     | 'combo-steal-double'
     | 'combo-steal-triple'
     | 'combo-steal-tmp'
+    | 'move'
 
 export type CommonLogProps = {
     roomId: string
@@ -20,4 +21,9 @@ export type StealLogProps = CommonLogProps & {
 export type ComboStealLogProps = CommonLogProps & {
     actorId: string
     combo: StealComboType
+}
+
+export type MoveLogProps = CommonLogProps & {
+    userId: string
+    data: EmitEventData['game.state']
 }

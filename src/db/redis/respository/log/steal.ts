@@ -56,7 +56,7 @@ const handleSteal = async (
 
         return { comboMessage }
     } catch (err) {
-        createError('addSteal', err)
+        createError('handleSteal', err)
     }
 }
 

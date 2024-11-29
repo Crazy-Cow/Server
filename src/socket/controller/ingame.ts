@@ -3,6 +3,7 @@ import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import { updateInterval } from '../../game/maps/common'
 import { TailTagMap } from '../../game/maps'
+import logRepository from '../../db/redis/respository/log'
 
 // function handleSteal(character: Character, data: OnEventData['steal']) {
 //     character.steal = data.character.steal
@@ -69,7 +70,14 @@ class IngameController extends BaseController {
         room.gameMap.registerSocket(this.getSocket())
         room.startGameLoop({
             handleGameState: (data) => {
+                const timeStamp = Date.now()
                 this.broadcast(room.roomId, 'game.state', data)
+                logRepository.handleMove({
+                    roomId: room.roomId,
+                    userId: this.getUserId(),
+                    timeStamp,
+                    data,
+                })
             },
             handleGameOver: (data) => {
                 console.log('게임 끝!')
