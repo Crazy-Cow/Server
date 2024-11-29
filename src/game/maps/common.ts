@@ -176,7 +176,7 @@ export class CommonMap {
     }
 
     // (will be deprecated)
-    findWinner(): SocketEmitEvtDataGameOver {
+    findWinner(): SocketEmitEvtDataGameOver['winner'] {
         let winner = this.characters[0]
 
         for (const character of this.characters) {
@@ -185,7 +185,7 @@ export class CommonMap {
             }
         }
 
-        return { winner: { nickName: winner.nickName } }
+        return { nickName: winner.nickName }
     }
     // (will be deprecated)
 
@@ -226,8 +226,11 @@ export class CommonMap {
 
             if (this.isGameOver()) {
                 this.stopGameLoop()
-                const data = this.findWinner()
-                handleGameOver(data)
+                const winner = this.findWinner()
+                handleGameOver({
+                    winner,
+                    roomId: this.getRoomId(),
+                })
             }
         }, 1000)
 
