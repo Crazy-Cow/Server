@@ -17,6 +17,12 @@ export const getGamePersonalSummaryController = async (
         return
     }
 
+    const player = gameSummaryService.getPlayerInfo(roomId, userId)
+    if (!player) {
+        res.status(400).json(createError({ msg: 'no player data' }))
+        return
+    }
+
     const summary = await gameSummaryService.getPersonalSummary(roomId, userId)
     if (!summary) {
         res.status(404).json(createError({ msg: 'no game data' }))
@@ -25,6 +31,12 @@ export const getGamePersonalSummaryController = async (
     const badges = await gameSummaryService.getPersonalBadges(roomId, userId)
 
     const response: GetGamePersonalSummaryResponse = {
+        character: {
+            id: player.id,
+            nickName: player.nickName,
+            charType: player.charType,
+            charColor: player.charColor,
+        },
         badges,
         summary,
     }

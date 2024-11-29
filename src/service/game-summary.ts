@@ -25,13 +25,16 @@ class GameSummaryService {
             { label: '트리플 콤보 수', value: props.tripleCombos },
         ]
     }
+    getPlayerInfo(roomId: string, userId: string) {
+        const room = roomService.findGameRoomById(roomId)
+        if (!room || !room.gameMap) return null
+        const player = room.gameMap.findCharacter(userId)
+        return player
+    }
 
     async getPersonalSummary(roomId: string, userId: string) {
         // TODO: 예외처리) game.state = 'game.over' 확인 필요
-        const room = roomService.findGameRoomById(roomId)
-        if (!room || !room.gameMap) return null
-
-        const player = room.gameMap.findCharacter(userId)
+        const player = this.getPlayerInfo(roomId, userId)
         if (!player) return null
 
         const gifts = player.giftCnt
