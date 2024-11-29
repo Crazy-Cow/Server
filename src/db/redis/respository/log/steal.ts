@@ -8,14 +8,18 @@ import { StealComboType } from 'socket/types/emit'
 
 const category: LogCategory = 'steal'
 
-// TODO: API 플레이 요약
-const increaseSteal = async ({
-    roomId,
-    actorId,
-}: {
-    roomId: string
-    actorId: string
-}) => redisClient.hIncrBy(getLogGRCKey({ roomId, category }), actorId, 1)
+const increaseSteal = async (roomId: string, userId: string) =>
+    redisClient.hIncrBy(getLogGRCKey({ roomId, category }), userId, 1)
+
+const getLogAccSteal = async (roomId: string, userId: string) => {
+    const cntStr = await redisClient.hGet(
+        getLogGRCKey({ roomId, category }),
+        userId
+    )
+    const cnt = Number(cntStr)
+    if (isNaN(cnt)) return 0
+    return cnt
+}
 
 const handleSteal = async (
     props: StealLogProps
@@ -32,7 +36,7 @@ const handleSteal = async (
 
         await logComboStealRepository.resetCombo({ roomId, userId: victimId })
 
-        await increaseSteal({ roomId, actorId })
+        await increaseSteal(roomId, actorId)
 
         await logEventRepository.addEvent(category, props)
 
@@ -58,6 +62,7 @@ const handleSteal = async (
 
 const logStealRepository = {
     handleSteal,
+    getLogAccSteal,
 }
 
 export default logStealRepository
