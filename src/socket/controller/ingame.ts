@@ -3,7 +3,9 @@ import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import { updateInterval } from '../../game/maps/common'
 import { TailTagMap } from '../../game/maps'
-import logRepository from '../../db/redis/respository/log'
+import { EmitEventData } from 'socket/types/emit'
+import logMoveRepository from '../../db/redis/respository/log/move'
+import { MoveLogProps } from '../../db/redis/respository/log/index.type'
 
 // function handleSteal(character: Character, data: OnEventData['steal']) {
 //     character.steal = data.character.steal
@@ -45,9 +47,38 @@ function handleMove(
 }
 
 class IngameController extends BaseController {
-    register() {
+    logs: EmitEventData['game.state'][] = []
+    logIdx = -1
+
+    stopEmitLog() {
+        return this.logs.length < this.logIdx
+    }
+
+    upAndGetLogIdx() {
+        this.logIdx += 1
+        return this.logIdx
+    }
+
+    async register() {
         // TODO this.gameMap이랑 연관
         this.socket.on<OnEventName>('move', this.handleMove)
+
+        const mockRoomId = '1732859015109-5em4m9wkacq'
+        const mockUserId = '아기자기한 도토리 7556'
+
+        console.log(`[${Date.now()}] data load 중....`)
+        const serializedLogs = await logMoveRepository.loadMove(
+            mockRoomId,
+            mockUserId
+        )
+
+        this.logs = serializedLogs.map((json) => {
+            const log: MoveLogProps = JSON.parse(json)
+            const data: MoveLogProps['data'] = log.data
+            return data
+        })
+
+        console.log(`[${Date.now()}] data load 완료`)
     }
 
     disconnect() {
@@ -69,15 +100,22 @@ class IngameController extends BaseController {
     handleStartGame = (room: Room) => {
         room.gameMap.registerSocket(this.getSocket())
         room.startGameLoop({
-            handleGameState: (data) => {
-                const timeStamp = Date.now()
-                this.broadcast(room.roomId, 'game.state', data)
-                logRepository.handleMove({
-                    roomId: room.roomId,
-                    userId: this.getUserId(),
-                    timeStamp,
-                    data,
-                })
+            // input: data
+            handleGameState: () => {
+                const idx = this.upAndGetLogIdx()
+                const data = this.logs[idx]
+                if (!this.stopEmitLog()) {
+                    this.broadcast(room.roomId, 'game.state', data)
+                }
+
+                //!: if(saveMode)
+                // const timeStamp = Date.now()
+                // logRepository.handleMove({
+                //     roomId: room.roomId,
+                //     userId: this.getUserId(),
+                //     timeStamp,
+                //     data,
+                // })
             },
             handleGameOver: (data) => {
                 console.log('게임 끝!')

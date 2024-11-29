@@ -21,10 +21,10 @@ class SocketImplement {
         this.register()
     }
 
-    private register = () => {
+    private register = async () => {
         this.socket.on<OnEventName>('disconnect', this.handleDisconnect)
         this.outgameCtrl.register()
-        this.ingameCtrl.register()
+        await this.ingameCtrl.register()
     }
 
     private handleDisconnect = (reason: OnEventData['disconnect']) => {

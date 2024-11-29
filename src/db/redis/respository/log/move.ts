@@ -16,8 +16,20 @@ const handleMove = async (props: MoveLogProps) => {
     }
 }
 
+const loadMove = async (roomId: string, userId: string) => {
+    try {
+        const key = getLogGRCUKey({ roomId, userId, category })
+        const serializedLogs = await redisClient.lRange(key, 0, -1)
+
+        return serializedLogs
+    } catch (err) {
+        createError('loadMove', err)
+    }
+}
+
 const logMoveRepository = {
     handleMove,
+    loadMove,
 }
 
 export default logMoveRepository
