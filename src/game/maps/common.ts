@@ -175,6 +175,7 @@ export class CommonMap {
         }
     }
 
+    // (will be deprecated)
     findWinner(): SocketEmitEvtDataGameOver {
         let winner = this.characters[0]
 
@@ -186,6 +187,7 @@ export class CommonMap {
 
         return { winner: { nickName: winner.nickName } }
     }
+    // (will be deprecated)
 
     private isValidPosition(position: Position): boolean {
         const pos = Math.sqrt(position.x ** 2 + position.z ** 2)

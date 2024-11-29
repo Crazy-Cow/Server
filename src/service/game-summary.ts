@@ -1,6 +1,10 @@
-import { GetGamePersonalSummaryResponse } from 'controller/games.type'
+import {
+    GetGamePersonalSummaryResponse,
+    GetGameTotalSummaryResponse,
+} from 'controller/games.type'
 import logRepository from '../db/redis/respository/log'
 import roomService from './rooms'
+import { Character } from 'game/objects/player'
 
 class GameSummaryService {
     private static instance: GameSummaryService
@@ -25,6 +29,7 @@ class GameSummaryService {
             { label: '트리플 콤보 수', value: props.tripleCombos },
         ]
     }
+
     getPlayerInfo(roomId: string, userId: string) {
         const room = roomService.findGameRoomById(roomId)
         if (!room || !room.gameMap) return null
@@ -58,6 +63,38 @@ class GameSummaryService {
                 img: 'https://github.com/user-attachments/assets/e4f79980-2203-40f1-a898-3f3fa498abd2',
             },
         ]
+    }
+
+    private findWinner(characters: Character[]) {
+        let winner = characters[0]
+
+        for (const character of characters) {
+            if (character.giftCnt > winner.giftCnt) {
+                winner = character
+            }
+        }
+
+        return winner
+    }
+
+    private convertTotalSummary(
+        character: Character
+    ): GetGameTotalSummaryResponse['character'] {
+        return {
+            id: character.id,
+            nickName: character.nickName,
+            charColor: character.charColor,
+            charType: character.charType,
+        }
+    }
+
+    async getTotalSummary(roomId: string) {
+        const room = roomService.findGameRoomById(roomId)
+        if (!room || !room.gameMap) return null
+        const winner = this.findWinner(room.gameMap.characters)
+        if (!winner) return null
+
+        return this.convertTotalSummary(winner)
     }
 }
 

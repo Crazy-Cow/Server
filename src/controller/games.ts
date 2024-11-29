@@ -2,6 +2,7 @@ import { Response } from 'express'
 import {
     GetGamePersonalSummaryRequest,
     GetGamePersonalSummaryResponse,
+    GetGameTotalSummaryResponse,
 } from './games.type'
 import { createError, ErrorResponse } from '../utils/error'
 import gameSummaryService from '../service/game-summary'
@@ -44,6 +45,22 @@ export const getGamePersonalSummaryController = async (
     res.json(response)
 }
 
-export const getGameTotalSummaryController = () => {
-    return
+export const getGameTotalSummaryController = async (
+    req,
+    res: Response<GetGameTotalSummaryResponse | ErrorResponse>
+) => {
+    const { roomId } = req.query as GetGamePersonalSummaryRequest
+
+    if (!roomId) {
+        res.status(400).json(createError({ msg: '[roomId] required' }))
+        return
+    }
+
+    const character = await gameSummaryService.getTotalSummary(roomId)
+    if (!character) {
+        res.status(400).json(createError({ msg: 'no player data' }))
+        return
+    }
+
+    res.json({ character })
 }
