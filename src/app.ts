@@ -18,6 +18,7 @@ app.use(cors(corsOption))
 app.use(cookieParser())
 app.use(express.json())
 app.use('/user', routes.user)
+app.use('/game', routes.game)
 
 async function startServer() {
     try {

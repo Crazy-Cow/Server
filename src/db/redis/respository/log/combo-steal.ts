@@ -25,6 +25,28 @@ async function saveCombo(props: {
     }
 }
 
+async function getDoubleCombos(roomId: string, userId: string) {
+    const cntStr = await redisClient.hGet(
+        getLogGRCUKey({ roomId, userId, category: 'combo-steal-double' }),
+        userId
+    )
+
+    const cnt = Number(cntStr)
+    if (isNaN(cnt)) return 0
+    return cnt
+}
+
+async function getTripleCombos(roomId: string, userId: string) {
+    const cntStr = await redisClient.hGet(
+        getLogGRCUKey({ roomId, userId, category: 'combo-steal-triple' }),
+        userId
+    )
+
+    const cnt = Number(cntStr)
+    if (isNaN(cnt)) return 0
+    return cnt
+}
+
 const notSaveCategory: LogCategory = 'combo-steal-tmp'
 const COMBO_EXPIRE_SEC = 10
 
@@ -58,6 +80,8 @@ async function resetCombo(props: { roomId: string; userId: string }) {
 const logComboStealRepository = {
     acquireCombo,
     resetCombo,
+    getDoubleCombos,
+    getTripleCombos,
 }
 
 export default logComboStealRepository
