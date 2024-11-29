@@ -175,6 +175,7 @@ export class CommonMap {
         }
     }
 
+    // (will be deprecated)
     findWinner(): SocketEmitEvtDataGameOver {
         let winner = this.characters[0]
 
@@ -186,6 +187,7 @@ export class CommonMap {
 
         return { winner: { nickName: winner.nickName } }
     }
+    // (will be deprecated)
 
     private isValidPosition(position: Position): boolean {
         const pos = Math.sqrt(position.x ** 2 + position.z ** 2)
@@ -229,8 +231,8 @@ export class CommonMap {
             }
         }, 1000)
 
-        this.loopIdToUpdateGameState = setInterval(() => {
-            this.updateGameState()
+        this.loopIdToUpdateGameState = setInterval(async () => {
+            await this.updateGameState()
 
             const gameState = this.convertGameState()
             handleGameState(gameState)

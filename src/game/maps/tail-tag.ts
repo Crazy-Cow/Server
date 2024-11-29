@@ -21,14 +21,15 @@ export class TailTagMap extends CommonMap {
         }
     }
 
-    private handleStealSuccess(
+    private async handleStealSuccess(
         props: Omit<StealLogProps, 'roomId' | 'timeStamp'>
     ) {
         const actor: Character = this.findCharacter(props.actorId)
         const victim: Character = this.findCharacter(props.victimId)
         const timeStamp = Date.now()
 
-        this.logRepository // FYI. 비동기
+        console.log('[start] steal', Date.now())
+        await this.logRepository // FYI. 비동기
             .handleSteal({ ...props, roomId: this.getRoomId(), timeStamp })
             .then(({ comboMessage }) => {
                 if (comboMessage) {
@@ -47,7 +48,7 @@ export class TailTagMap extends CommonMap {
             actor: { id: props.actorId, nickName: actor.nickName },
             victim: { id: props.victimId, nickName: victim.nickName },
         }
-
+        console.log('[end] steal', Date.now())
         this.broadcast('game.log.steal', data)
     }
 
@@ -55,7 +56,7 @@ export class TailTagMap extends CommonMap {
         this.stealQueue.push({ characterId })
     }
 
-    handleCatch(character: Character) {
+    async handleCatch(character: Character) {
         let closestCharacter: Character = null
         let minDistance = Infinity
 
@@ -88,21 +89,21 @@ export class TailTagMap extends CommonMap {
             character.giftCnt += 1
             character.protect = 8
 
-            this.handleStealSuccess({
+            await this.handleStealSuccess({
                 actorId: character.id,
                 victimId: closestCharacter.id,
             })
         }
     }
 
-    updateGameState(): void {
+    async updateGameState() {
         super.updateGameState()
 
         while (this.stealQueue.length > 0) {
             const stealEvent = this.stealQueue.shift()
             const character = this.findCharacter(stealEvent.characterId)
             if (character) {
-                this.handleCatch(character)
+                await this.handleCatch(character)
             }
         }
     }

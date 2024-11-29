@@ -11,6 +11,10 @@ export type GetGamePersonalSummaryResponse = {
     summary: Array<{ label: string; value: number }>
 }
 
-// export type GetGameTotalSummaryRequest = {}
+export type GetGameTotalSummaryRequest = {
+    roomId: string
+}
 
-// export type GetGameTotalSummaryResponse = {}
+export type GetGameTotalSummaryResponse = {
+    character: Pick<Character, 'id' | 'charType' | 'charColor' | 'nickName'>
+}
