@@ -43,7 +43,7 @@ export class Room {
         this.createdAt = new Date()
         this.state = 'waiting'
         this.maxPlayerCnt = maxPlayerCnt
-        this.gameMap = new TailTagMap({ roomId, remainRunningTime: 10 * 60 })
+        this.gameMap = new TailTagMap({ roomId, remainRunningTime: 1 * 60 })
     }
 
     getPlayerCnt = () => {
