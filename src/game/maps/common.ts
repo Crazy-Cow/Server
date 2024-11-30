@@ -39,7 +39,7 @@ export enum CharacterType {
     GHOST = 3,
 }
 
-const MAX_GROUND = 80
+const MAX_GROUND = 85
 const MAX_HEIGHT = 33
 export const updateInterval = 1 / 5
 
