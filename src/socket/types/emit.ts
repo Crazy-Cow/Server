@@ -1,5 +1,6 @@
 import { RoomState } from '../../service/rooms'
 import { Position } from '../../game/objects/player'
+import { CharacterType } from '../../game/maps/common'
 
 export type EmitEventName =
     | 'room.changeState' // 대기실 상태 변경
@@ -39,7 +40,7 @@ export type SocketEmitEvtDataGameState = {
     characters: {
         id: string
         nickName: string
-        charType: number
+        charType: CharacterType
         position: Position
         charColor: string
         velocity: Position

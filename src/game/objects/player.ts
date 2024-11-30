@@ -22,18 +22,24 @@ export abstract class Character {
     isSkillActive: boolean // 스킬 활성화 상태
     isSkillInput: boolean // 스킬 사용 입력
     direction: Position
+    currentSkillCooldown: number
+    totalSkillCooldown: number
     constructor({
         id,
         nickName,
         charType,
         position,
         color,
+        currentSkillCooldown,
+        totalSkillCooldown,
     }: {
         id: string
         nickName: string
         charType: number
         position: Position
         color: string
+        currentSkillCooldown: number
+        totalSkillCooldown: number
     }) {
         this.id = id
         this.nickName = nickName
@@ -49,6 +55,8 @@ export abstract class Character {
         this.isSkillActive = false
         this.isSkillInput = false
         this.direction = { x: 0, y: 0, z: 1 }
+        this.currentSkillCooldown = currentSkillCooldown
+        this.totalSkillCooldown = totalSkillCooldown
     }
 
     getClientData() {
@@ -65,6 +73,8 @@ export abstract class Character {
             stolenMotion: this.stolen,
             isSkillActive: this.isSkillActive,
             protectMotion: this.protect,
+            currentSkillCooldown: this.currentSkillCooldown,
+            totalSkillCooldown: this.totalSkillCooldown,
         }
     }
 
