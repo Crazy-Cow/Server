@@ -31,7 +31,6 @@ export type EmitEventData = {
 }
 
 export type SocketEmitEvtDataGameOver = {
-    winner: { nickName: string } // TODO: deprecated
     roomId: string
 }
 
