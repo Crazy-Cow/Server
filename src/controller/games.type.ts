@@ -17,4 +17,5 @@ export type GetGameTotalSummaryRequest = {
 
 export type GetGameTotalSummaryResponse = {
     character: Pick<Character, 'id' | 'charType' | 'charColor' | 'nickName'>
+    summary: Array<{ label: string; value: number }>
 }

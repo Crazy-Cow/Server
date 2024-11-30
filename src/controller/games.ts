@@ -56,11 +56,11 @@ export const getGameTotalSummaryController = async (
         return
     }
 
-    const character = await gameSummaryService.getTotalSummary(roomId)
-    if (!character) {
+    const result = await gameSummaryService.getTotalSummary(roomId)
+    if (!result) {
         res.status(400).json(createError({ msg: 'no player data' }))
         return
     }
 
-    res.json({ character })
+    res.json(result)
 }
