@@ -5,7 +5,7 @@ import { CharacterType, updateInterval } from '../maps/common'
 import scaledObjects from '../utils/mapObjects'
 
 export class RabbitCharacter extends Character {
-    private skillPreparationTime: number = 1 / updateInterval // 스킬 시전시간
+    private skillPreparationTime: number = 1 // 스킬 시전시간
     private currentSkillPreparationTime: number = 0 // 현재 남은 시전시간
 
     constructor(params: {
@@ -82,10 +82,10 @@ export class RabbitCharacter extends Character {
                 this.isSkillActive = false
             } else {
                 this.currentSkillPreparationTime -= 1
-                if (this.currentSkillPreparationTime <= 0) {
+                if (this.currentSkillPreparationTime === 0) {
                     this.teleportForward(CHARACTER.TELEPORT_DISTANCE)
+                } else if (this.currentSkillPreparationTime <= -1) {
                     this.isSkillActive = false
-                    this.currentSkillPreparationTime = 0
                 }
             }
         }
