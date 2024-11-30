@@ -6,6 +6,8 @@ import { CharacterType, updateInterval } from '../maps/common'
 export class SantaCharacter extends Character {
     private skillDurationTime: number = 5 / updateInterval // 스킬 지속 시간 (초)
     private currentSkillDuration: number = 0 // 현재 남은 스킬 지속 시간
+    private bonusSpeed: number = 0 // 부스터 아이템을 먹었을때 추가속도
+
     constructor(params: {
         id: string
         nickName: string
@@ -17,13 +19,14 @@ export class SantaCharacter extends Character {
             charType: CharacterType.SANTA,
             currentSkillCooldown: 0,
             totalSkillCooldown: 15 / updateInterval,
+            speed: CHARACTER.SANTA_BASE_SPEED,
         })
     }
 
     getMaxSpeed(): number {
         return this.isSkillActive
-            ? CHARACTER.SANTA_MAX_SPEED
-            : CHARACTER.BASE_SPEED // 스킬 사용 시 속도 증가
+            ? CHARACTER.SANTA_MAX_SPEED + this.bonusSpeed
+            : CHARACTER.SANTA_BASE_SPEED + this.bonusSpeed // 스킬 사용 시 속도 증가
     }
 
     useSkill() {

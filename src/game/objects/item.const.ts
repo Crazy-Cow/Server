@@ -1,0 +1,17 @@
+const BOOST_PROB = 1
+const SHIELD_PROB = 1
+const THUNDER_PROB = 1
+const GIFT_PROB = 1
+const TOTAL_PROB = BOOST_PROB + SHIELD_PROB + THUNDER_PROB + GIFT_PROB
+const ITEM_PICKUP_DISTANCE = 5
+
+export const ITEM = {
+    BOOST_PROB,
+    SHIELD_PROB,
+    THUNDER_PROB,
+    GIFT_PROB,
+    TOTAL_PROB,
+    ITEM_PICKUP_DISTANCE,
+}
+
+export default ITEM

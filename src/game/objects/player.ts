@@ -1,3 +1,5 @@
+import { ItemType } from './item'
+
 export type Position = { x: number; y: number; z: number }
 
 export type Directions = {
@@ -24,6 +26,8 @@ export abstract class Character {
     direction: Position
     currentSkillCooldown: number
     totalSkillCooldown: number
+    speed: number
+    items: ItemType[] // character가 보유한 아이템
     constructor({
         id,
         nickName,
@@ -32,6 +36,7 @@ export abstract class Character {
         color,
         currentSkillCooldown,
         totalSkillCooldown,
+        speed,
     }: {
         id: string
         nickName: string
@@ -40,6 +45,7 @@ export abstract class Character {
         color: string
         currentSkillCooldown: number
         totalSkillCooldown: number
+        speed: number
     }) {
         this.id = id
         this.nickName = nickName
@@ -57,6 +63,8 @@ export abstract class Character {
         this.direction = { x: 0, y: 0, z: 1 }
         this.currentSkillCooldown = currentSkillCooldown
         this.totalSkillCooldown = totalSkillCooldown
+        this.speed = speed
+        this.items = []
     }
 
     getClientData() {
@@ -75,13 +83,15 @@ export abstract class Character {
             protectMotion: this.protect,
             currentSkillCooldown: this.currentSkillCooldown,
             totalSkillCooldown: this.totalSkillCooldown,
+            speed: this.speed,
+            items: this.items,
         }
     }
 
     abstract getMaxSpeed(): number
 
     isValidVelocity(velocity: Position): boolean {
-        const maxSpeed = this.getMaxSpeed()
+        const maxSpeed = this.getMaxSpeed() + 1
         const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
         return speed <= maxSpeed && velocity.y <= 10 && velocity.y >= -40
     }
