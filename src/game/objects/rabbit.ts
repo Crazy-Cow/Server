@@ -6,7 +6,6 @@ import scaledObjects from '../utils/mapObjects'
 export class RabbitCharacter extends Character {
     private skillPreparationTime: number = 1 // 스킬 시전시간
     private currentSkillPreparationTime: number = 0 // 현재 남은 시전시간
-    private bonusSpeed: number = 0 // 부스터 아이템을 먹었을때 추가속도
 
     constructor(params: {
         id: string
@@ -21,9 +20,6 @@ export class RabbitCharacter extends Character {
             totalSkillCooldown: 10 / updateInterval,
             speed: CHARACTER.RABBIT_BASE_SPEED,
         })
-    }
-    getMaxSpeed(): number {
-        return this.bonusSpeed + CHARACTER.RABBIT_BASE_SPEED // 기본 속도
     }
 
     useSkill() {

@@ -209,6 +209,20 @@ export class CommonMap {
         }, 15000)
     }
 
+    handleItemUse(character: Character) {
+        const userItem = character.items[0]
+        if (userItem === ItemType.THUNDER) {
+            this.applyThunderEffect(character)
+        }
+    }
+    private applyThunderEffect(caster: Character) {
+        for (const other of this.characters) {
+            if (other.id !== caster.id) {
+                other.thunderEffect.push(2 / updateInterval) // 2초 시전 시간
+            }
+        }
+    }
+
     private generateRandomPosition(): Position {
         if (this.availablePositions.length === 0) {
             throw new Error('할당할 수 있는 위치 더 이상 없')
