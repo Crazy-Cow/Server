@@ -65,36 +65,103 @@ class GameSummaryService {
         ]
     }
 
-    private findWinner(characters: Character[]) {
-        let winner = characters[0]
+    private async getWinnerGameRecord(roomId: string, characters: Character[]) {
+        // Step 1: giftCnt를 기준으로 캐릭터들을 그룹화
+        const groupedByGiftCnt: { [giftCnt: number]: Character[] } = {}
 
+        // 각 캐릭터의 `giftCnt`를 기준으로 그룹화
         for (const character of characters) {
-            if (character.giftCnt > winner.giftCnt) {
-                winner = character
+            const giftCnt = character.giftCnt
+            if (!groupedByGiftCnt[giftCnt]) {
+                groupedByGiftCnt[giftCnt] = []
+            }
+            groupedByGiftCnt[giftCnt].push(character)
+        }
+
+        // Step 2: 가장 큰 giftCnt를 찾음
+        const maxGiftCnt = Math.max(
+            ...Object.keys(groupedByGiftCnt).map(Number)
+        )
+
+        // Step 3: 가장 큰 giftCnt를 가진 캐릭터들만 추출
+        const candidates = groupedByGiftCnt[maxGiftCnt]
+
+        // Step 4: 후보들끼리 `tripleCombos`, `doubleCombos`, `accSteals`를 순차적으로 비교
+        const promises = candidates.map(async (character) => {
+            const gifts = character.giftCnt
+            const accSteals = await logRepository.getLogAccSteal(
+                roomId,
+                character.id
+            )
+            const doubleCombos = await logRepository.getDoubleCombos(
+                roomId,
+                character.id
+            )
+            const tripleCombos = await logRepository.getTripleCombos(
+                roomId,
+                character.id
+            )
+
+            return { character, gifts, accSteals, doubleCombos, tripleCombos }
+        })
+
+        // Step 5: 각 후보들의 비교를 비동기적으로 처리
+        const gameRecords = await Promise.all(promises)
+
+        // Step 6: 첫 번째 캐릭터를 초기 winner로 설정
+        let winnerRecord = gameRecords[0]
+
+        // Step 7: 이후 후보들끼리 비교
+        for (const record of gameRecords) {
+            const { accSteals, doubleCombos, tripleCombos } = record
+
+            if (tripleCombos > winnerRecord.tripleCombos) {
+                winnerRecord = record
+            } else if (tripleCombos === winnerRecord.tripleCombos) {
+                if (doubleCombos > winnerRecord.doubleCombos) {
+                    winnerRecord = record
+                } else if (doubleCombos === winnerRecord.doubleCombos) {
+                    if (accSteals > winnerRecord.accSteals) {
+                        winnerRecord = record
+                    }
+                }
             }
         }
 
-        return winner
+        return winnerRecord
     }
 
-    private convertTotalSummary(
+    private convertTotalSummary({
+        character,
+        ...rest
+    }: {
         character: Character
-    ): GetGameTotalSummaryResponse['character'] {
+        gifts: number
+        accSteals: number
+        doubleCombos: number
+        tripleCombos: number
+    }): GetGameTotalSummaryResponse {
         return {
-            id: character.id,
-            nickName: character.nickName,
-            charColor: character.charColor,
-            charType: character.charType,
+            character: {
+                id: character.id,
+                nickName: character.nickName,
+                charColor: character.charColor,
+                charType: character.charType,
+            },
+            summary: this.convertPersonalSummary({ ...rest }),
         }
     }
 
     async getTotalSummary(roomId: string) {
         const room = roomService.findGameRoomById(roomId)
         if (!room || !room.gameMap) return null
-        const winner = this.findWinner(room.gameMap.characters)
-        if (!winner) return null
 
-        return this.convertTotalSummary(winner)
+        const winnerRecord = await this.getWinnerGameRecord(
+            room.roomId,
+            room.gameMap.characters
+        )
+
+        return this.convertTotalSummary(winnerRecord)
     }
 }
 
