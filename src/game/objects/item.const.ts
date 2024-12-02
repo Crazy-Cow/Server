@@ -5,6 +5,7 @@ const GIFT_PROB = 1
 const TOTAL_PROB = BOOST_PROB + SHIELD_PROB + THUNDER_PROB + GIFT_PROB
 const ITEM_PICKUP_DISTANCE = 5
 const SPEED_UP = 4
+const ITEM_HEIGHT = 5
 
 export const ITEM = {
     BOOST_PROB,
@@ -14,6 +15,7 @@ export const ITEM = {
     TOTAL_PROB,
     ITEM_PICKUP_DISTANCE,
     SPEED_UP,
+    ITEM_HEIGHT,
 }
 
 export default ITEM

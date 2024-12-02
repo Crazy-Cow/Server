@@ -134,7 +134,7 @@ export class CommonMap {
         while (!isValidPosition) {
             // x, z 좌표는 맵의 범위 내에서 랜덤하게 생성 (예: -MAX_GROUND ~ MAX_GROUND)
             const x = (Math.random() - 0.5) * (MAX_GROUND - 10)
-            const y = (Math.random() + 0.1) * 10 //  1 ~ 11 사이
+            const y = (Math.random() + 0.1) * ITEM.ITEM_HEIGHT //  1 ~ 11 사이
             const z = (Math.random() - 0.5) * (MAX_GROUND - 10)
 
             position = { x, y, z }
