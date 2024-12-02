@@ -313,7 +313,7 @@ export class CommonMap {
         return {
             remainRunningTime: this.remainRunningTime,
             characters: this.characters.map((char) => char.getClientData()),
-            items: this.items.map((item) => ({
+            mapItems: this.items.map((item) => ({
                 id: item.id,
                 type: item.type,
                 position: item.position,
