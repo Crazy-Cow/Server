@@ -319,20 +319,6 @@ export class CommonMap {
         }
     }
 
-    // (will be deprecated)
-    findWinner(): SocketEmitEvtDataGameOver['winner'] {
-        let winner = this.characters[0]
-
-        for (const character of this.characters) {
-            if (character.giftCnt > winner.giftCnt) {
-                winner = character
-            }
-        }
-
-        return { nickName: winner.nickName }
-    }
-    // (will be deprecated)
-
     private isValidPosition(position: Position): boolean {
         const pos = Math.sqrt(position.x ** 2 + position.z ** 2)
         return pos <= MAX_GROUND && position.y >= GROUND_POS.y
@@ -371,9 +357,7 @@ export class CommonMap {
 
             if (this.isGameOver()) {
                 this.stopGameLoop()
-                const winner = this.findWinner()
                 handleGameOver({
-                    winner,
                     roomId: this.getRoomId(),
                 })
             }
