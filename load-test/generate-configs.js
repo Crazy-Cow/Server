@@ -20,28 +20,44 @@ const numberOfConfigs = 2;  // 테스트용 2개의 config 파일 생성
 for (let i = 0; i < numberOfConfigs; i++) {
   const clientId = `user-${i + 1}`;
 
-  // config.yml 내용
   const configContent = `
-config:
-  target: 'http://localhost:8000'
-  phases:
-    - duration: 10  # 테스트 지속 시간
-      arrivalCount: 1  # 각 config에서 1명의 유저
-  engines:
-    socketio-v3:
-      auth:
-        clientId: '${clientId}'  # 동적으로 생성된 clientId를 사용
-
-scenarios:
-  - name: '유저 입장'
-    engine: socketio-v3
-    flow:
-      - emit:
-          channel: 'room.enter'
-          data:
-            charType: 1
-      - think: 9  # 첫 번째 유저 입장 후 대기
+  config:
+    target: 'http://localhost:8000'
+    engines:
+      socketio-v3:
+        auth:
+          clientId: '${clientId}'  # 동적으로 생성된 clientId를 사용
+  
+  scenarios:
+    - name: '유저 입장'
+      engine: socketio-v3
+      flow:
+        - emit:
+            channel: 'room.enter'
+            data:
+              charType: 1
+        - think: 1  # room.enter 발송 후 잠시 대기
+        - loop:
+            - emit:
+                channel: 'move'
+                data:
+                  steal: false
+                  skill: false
+                  character:
+                    id: '${clientId}'  # 동적으로 할당된 clientId
+                    position:
+                      x: 0
+                      y: 0
+                      z: 0
+                    velocity:
+                      x: 1
+                      y: 1
+                      z: 1
+            - think: 0.2  # 5FPS
+          count: 300  # 60초 동안 5fps
+        - think: 0
   `;
+
 
   // config-1.yml, config-2.yml 파일 생성
   fs.writeFileSync(path.join(configFolder, `${i + 1}.yml`), configContent);
