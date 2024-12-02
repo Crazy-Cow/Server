@@ -99,7 +99,7 @@ export abstract class Character {
     abstract getMaxSpeed(): number
 
     isValidVelocity(velocity: Position): boolean {
-        const maxSpeed = this.getMaxSpeed()
+        const maxSpeed = this.getMaxSpeed() + 1
         const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
         return speed <= maxSpeed && velocity.y <= 10 && velocity.y >= -40
     }
