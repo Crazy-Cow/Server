@@ -20,6 +20,7 @@ type OnEventDataMap = {
     move: {
         steal: boolean
         skill: boolean
+        item: boolean
         character: {
             id: string
             position: Position

@@ -8,6 +8,9 @@ import { RabbitCharacter } from '../objects/rabbit'
 import { SantaCharacter } from '../objects/santa'
 import { Socket } from 'socket.io'
 import { GhostCharacter } from '../objects/ghost'
+import { Item, ItemType } from '../objects/item'
+import scaledObjects from '../utils/mapObjects'
+import ITEM from '../objects/item.const'
 
 const GROUND_POS = {
     x: 0,
@@ -58,13 +61,16 @@ export class CommonMap {
     private availablePositions: Position[] = [...PREDEFINED_POSITIONS]
 
     characters: Character[] = []
+    items: Item[] = []
 
     constructor({ roomId, remainRunningTime }: MapInitialType) {
         this.roomId = roomId
         this.remainRunningTime = remainRunningTime
     }
 
-    init() {}
+    init() {
+        this.spawnInitialItems()
+    }
 
     getRoomId() {
         return this.roomId
@@ -80,6 +86,139 @@ export class CommonMap {
         // the other
         const roomId = this.getRoomId()
         this.socket.to(roomId).emit<EmitEventName>(emitMessage, data)
+    }
+
+    private spawnInitialItems() {
+        for (let i = 0; i < 5; i++) {
+            this.spawnNewItem()
+        }
+    }
+
+    private spawnNewItem() {
+        const id = this.generateItemId()
+        const type = this.getRandomItemType()
+        const position = this.getRandomItemPosition()
+
+        const item = new Item(id, type, position)
+        this.items.push(item)
+    }
+
+    private generateItemId(): string {
+        return `item-${Date.now()}-${Math.random()}`
+    }
+
+    private getRandomItemType(): ItemType {
+        const randonNum = Math.random()
+        if (randonNum <= ITEM.BOOST_PROB / ITEM.TOTAL_PROB) {
+            return ItemType.BOOST
+        } else if (
+            randonNum <=
+            (ITEM.BOOST_PROB + ITEM.SHIELD_PROB) / ITEM.TOTAL_PROB
+        ) {
+            return ItemType.SHIELD
+        } else if (
+            randonNum <=
+            (ITEM.BOOST_PROB + ITEM.SHIELD_PROB + ITEM.THUNDER_PROB) /
+                ITEM.TOTAL_PROB
+        ) {
+            return ItemType.THUNDER
+        } else {
+            return ItemType.GIFT
+        }
+    }
+
+    private getRandomItemPosition(): Position {
+        let position: Position
+        let isValidPosition = false
+
+        while (!isValidPosition) {
+            // x, z 좌표는 맵의 범위 내에서 랜덤하게 생성 (예: -MAX_GROUND ~ MAX_GROUND)
+            const x = (Math.random() - 0.5) * (MAX_GROUND - 10)
+            const y = (Math.random() + 0.1) * 10 //  1 ~ 11 사이
+            const z = (Math.random() - 0.5) * (MAX_GROUND - 10)
+
+            position = { x, y, z }
+
+            // mapObject와 겹치지 않는지 확인
+            if (this.isValidItemPosition(position)) {
+                isValidPosition = true
+            }
+        }
+
+        return position
+    }
+
+    private isValidItemPosition(position: Position): boolean {
+        // mapObject와 겹치지 않는지 확인하는 로직
+        for (const obj of scaledObjects) {
+            const min = obj.boundingBox.min
+            const max = obj.boundingBox.max
+
+            if (
+                position.x >= min.x &&
+                position.x <= max.x &&
+                position.y >= min.y &&
+                position.y <= max.y &&
+                position.z >= min.z &&
+                position.z <= max.z
+            ) {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private checkItemPickup() {
+        for (const character of this.characters) {
+            if (character.items.length >= 2) {
+                continue // 이미 최대 아이템 소지 중인 경우 건너뜀
+            }
+
+            for (const item of this.items) {
+                const distanceSquared = this.calculateDistance(
+                    character.position,
+                    item.position
+                )
+
+                if (distanceSquared <= ITEM.ITEM_PICKUP_DISTANCE ** 2) {
+                    this.handleItemPickup(character, item)
+                    break // 한 번에 하나의 아이템만 획득
+                }
+            }
+        }
+    }
+
+    private handleItemPickup(character: Character, item: Item) {
+        // 아이템을 플레이어의 인벤토리에 추가
+        character.items.push(item.type)
+
+        // 맵에서 아이템 제거 및 재생성
+        this.respawnItem(item.id)
+    }
+
+    respawnItem(itemId: string) {
+        // 기존 아이템 제거
+        this.items = this.items.filter((item) => item.id !== itemId)
+
+        // 15초 후에 새로운 아이템 생성
+        setTimeout(() => {
+            this.spawnNewItem()
+        }, 15000)
+    }
+
+    handleTunderItemUse(character: Character) {
+        const userItem = character.items[0]
+        if (userItem === ItemType.THUNDER) {
+            this.applyThunderEffect(character)
+        }
+    }
+    private applyThunderEffect(caster: Character) {
+        for (const other of this.characters) {
+            if (other.id !== caster.id) {
+                other.thunderEffect.push(2 / updateInterval) // 2초 시전 시간
+            }
+        }
     }
 
     private generateRandomPosition(): Position {
@@ -172,6 +311,11 @@ export class CommonMap {
         return {
             remainRunningTime: this.remainRunningTime,
             characters: this.characters.map((char) => char.getClientData()),
+            mapItems: this.items.map((item) => ({
+                id: item.id,
+                type: item.type,
+                position: item.position,
+            })),
         }
     }
 
@@ -197,7 +341,7 @@ export class CommonMap {
     updateGameState() {
         this.characters.forEach((character) => {
             character.update()
-            // 검증로직
+            // Todo: 밑의 코드가 맵 유효영역체크인데 함수로 만들면 좋을거같기도
             if (!this.isValidPosition(character.position)) {
                 character.velocity = { x: 0, y: 0, z: 0 }
                 character.position = {
@@ -211,6 +355,7 @@ export class CommonMap {
                 character.position.y = 30
             }
         })
+        this.checkItemPickup()
     }
 
     private resetEventkey(): void {

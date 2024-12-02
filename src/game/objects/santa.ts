@@ -6,6 +6,7 @@ import { CharacterType, updateInterval } from '../maps/common'
 export class SantaCharacter extends Character {
     private skillDurationTime: number = 5 / updateInterval // 스킬 지속 시간 (초)
     private currentSkillDuration: number = 0 // 현재 남은 스킬 지속 시간
+
     constructor(params: {
         id: string
         nickName: string
@@ -17,17 +18,13 @@ export class SantaCharacter extends Character {
             charType: CharacterType.SANTA,
             currentSkillCooldown: 0,
             totalSkillCooldown: 15 / updateInterval,
+            speed: CHARACTER.SANTA_BASE_SPEED,
         })
-    }
-
-    getMaxSpeed(): number {
-        return this.isSkillActive
-            ? CHARACTER.SANTA_MAX_SPEED
-            : CHARACTER.BASE_SPEED // 스킬 사용 시 속도 증가
     }
 
     useSkill() {
         if (this.currentSkillCooldown <= 0) {
+            this.speed += CHARACTER.SANTA_SKILL_SPEED
             this.isSkillActive = true
             this.currentSkillDuration = this.skillDurationTime
             this.currentSkillCooldown = this.totalSkillCooldown
@@ -43,11 +40,13 @@ export class SantaCharacter extends Character {
             if (this.eventBlock > CHARACTER.ITEM_EVENT_BLOCK) {
                 this.isSkillActive = false
                 this.currentSkillDuration = 0
+                this.speed -= CHARACTER.SANTA_SKILL_SPEED
             }
             this.currentSkillDuration -= 1
             if (this.currentSkillDuration <= 0) {
                 this.isSkillActive = false
                 this.currentSkillDuration = 0
+                this.speed -= CHARACTER.SANTA_SKILL_SPEED
             }
         }
 

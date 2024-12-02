@@ -1,6 +1,7 @@
 import { RoomState } from '../../service/rooms'
 import { Position } from '../../game/objects/player'
 import { CharacterType } from '../../game/maps/common'
+import { ItemType } from '../../game/objects/item'
 
 export type EmitEventName =
     | 'room.changeState' // 대기실 상태 변경
@@ -52,7 +53,18 @@ export type SocketEmitEvtDataGameState = {
         isSkillActive: boolean // 스킬 활성화 상태
         totalSkillCooldown?: number // 전체 쿨 타임
         currentSkillCooldown?: number // 스킬의 남은 쿨타임
+        speed: number
+        items: ItemType[] // 캐릭터가 보유한 아이템
+        itemDuration: { boost: number; shield: number } // 본인에게 적용되는 아이템 유지시간
+        thunderEffect: number[] // 번개 맞기전 시전시간
     }[]
+    mapItems: ItemData[]
+}
+
+type ItemData = {
+    id: string
+    type: ItemType
+    position: Position
 }
 
 export type SocketEmitEvtDataGameLogSteal = {

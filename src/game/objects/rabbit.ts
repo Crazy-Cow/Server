@@ -1,4 +1,3 @@
-// rabbit.ts
 import { Character, Position } from './player'
 import { CHARACTER } from './player.constant'
 import { CharacterType, updateInterval } from '../maps/common'
@@ -19,10 +18,8 @@ export class RabbitCharacter extends Character {
             charType: CharacterType.RABBIT,
             currentSkillCooldown: 0,
             totalSkillCooldown: 10 / updateInterval,
+            speed: CHARACTER.RABBIT_BASE_SPEED,
         })
-    }
-    getMaxSpeed(): number {
-        return CHARACTER.BASE_SPEED // 기본 속도
     }
 
     useSkill() {

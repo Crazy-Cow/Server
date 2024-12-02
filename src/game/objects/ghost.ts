@@ -5,6 +5,7 @@ import { CharacterType, updateInterval } from '../maps/common'
 export class GhostCharacter extends Character {
     private skillDurationTime: number = 5 / updateInterval // 스킬 지속 시간 (초)
     private currentSkillDuration: number = 0 // 현재 남은 스킬 지속 시간
+
     constructor(params: {
         id: string
         nickName: string
@@ -16,11 +17,8 @@ export class GhostCharacter extends Character {
             charType: CharacterType.GHOST,
             currentSkillCooldown: 0,
             totalSkillCooldown: 15 / updateInterval,
+            speed: CHARACTER.GHOST_BASE_SPEED,
         })
-    }
-
-    getMaxSpeed(): number {
-        return CHARACTER.BASE_SPEED // 스킬 사용 시 속도 증가
     }
 
     useSkill() {

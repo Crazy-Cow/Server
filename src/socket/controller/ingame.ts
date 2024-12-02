@@ -3,6 +3,7 @@ import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
 import { updateInterval } from '../../game/maps/common'
 import { TailTagMap } from '../../game/maps'
+import { ItemType } from '../../game/objects/item'
 
 // function handleSteal(character: Character, data: OnEventData['steal']) {
 //     character.steal = data.character.steal
@@ -40,6 +41,12 @@ function handleMove(
     character.direction = character.getMovementDirection(character.velocity)
     if (data.skill) {
         character.isSkillInput = true
+    }
+    if (data.item) {
+        if (character.items[0] === ItemType.THUNDER) {
+            gameMap.handleTunderItemUse(character)
+        }
+        character.useItem()
     }
 }
 
