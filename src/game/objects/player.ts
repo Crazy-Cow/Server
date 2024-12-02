@@ -1,5 +1,6 @@
 import { ItemType } from './item'
 import { updateInterval } from '../maps/common'
+import { ITEM } from './item.const'
 
 export type Position = { x: number; y: number; z: number }
 
@@ -121,7 +122,7 @@ export abstract class Character {
         if (this.itemDuration.boost > 0) {
             this.itemDuration.boost -= 1
             if (this.itemDuration.boost <= 0) {
-                this.speed -= 4 // 부스터 효과 종료
+                this.speed -= ITEM.SPEED_UP // 부스터 효과 종료
                 this.itemDuration.boost = 0
             }
         }
@@ -154,9 +155,7 @@ export abstract class Character {
         if (this.items.length === 0) {
             return
         }
-
         const usedItem = this.items.shift() // FIFO 방식으로 아이템 사용
-
         if (usedItem >= 5 && usedItem <= 0) {
             return
         }
@@ -169,7 +168,6 @@ export abstract class Character {
                 this.activateShield()
                 break
             case ItemType.THUNDER:
-                // 번개 아이템은 맵 클래스에서 처리
                 break
             case ItemType.GIFT:
                 this.giftCnt += 1
@@ -181,7 +179,7 @@ export abstract class Character {
 
     private activateBoost() {
         this.itemDuration.boost = 3 / updateInterval // 3초 지속
-        this.speed += 4 // 부스터로 인한 추가 속도 적용
+        this.speed += ITEM.SPEED_UP // 부스터로 인한 추가 속도 적용
     }
 
     private activateShield() {

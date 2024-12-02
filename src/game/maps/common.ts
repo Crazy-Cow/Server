@@ -170,8 +170,6 @@ export class CommonMap {
     }
 
     private checkItemPickup() {
-        const ITEM_PICKUP_DISTANCE = 5 // 아이템 획득 거리
-
         for (const character of this.characters) {
             if (character.items.length >= 2) {
                 continue // 이미 최대 아이템 소지 중인 경우 건너뜀
@@ -183,7 +181,7 @@ export class CommonMap {
                     item.position
                 )
 
-                if (distanceSquared <= ITEM_PICKUP_DISTANCE ** 2) {
+                if (distanceSquared <= ITEM.ITEM_PICKUP_DISTANCE ** 2) {
                     this.handleItemPickup(character, item)
                     break // 한 번에 하나의 아이템만 획득
                 }
@@ -209,7 +207,7 @@ export class CommonMap {
         }, 15000)
     }
 
-    handleItemUse(character: Character) {
+    handleTunderItemUse(character: Character) {
         const userItem = character.items[0]
         if (userItem === ItemType.THUNDER) {
             this.applyThunderEffect(character)

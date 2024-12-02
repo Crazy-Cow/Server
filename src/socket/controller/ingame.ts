@@ -42,10 +42,12 @@ function handleMove(
     if (data.skill) {
         character.isSkillInput = true
     }
-    if (character.items[0] === ItemType.THUNDER) {
-        gameMap.handleItemUse(character)
+    if (data.item) {
+        if (character.items[0] === ItemType.THUNDER) {
+            gameMap.handleTunderItemUse(character)
+        }
+        character.useItem()
     }
-    character.useItem()
 }
 
 class IngameController extends BaseController {
