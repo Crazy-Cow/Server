@@ -21,6 +21,10 @@ export class GhostCharacter extends Character {
         })
     }
 
+    getMaxSpeed(): number {
+        return this.speed
+    }
+
     useSkill() {
         if (this.currentSkillCooldown <= 0) {
             this.isSkillActive = true
