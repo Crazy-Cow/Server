@@ -55,7 +55,7 @@ export type SocketEmitEvtDataGameState = {
         currentSkillCooldown?: number // 스킬의 남은 쿨타임
         speed: number
         items: ItemType[] // 캐릭터가 보유한 아이템
-        itemDuration: { Boost: number; Shield: number } // 본인에게 적용되는 아이템 유지시간
+        itemDuration: { boost: number; shield: number } // 본인에게 적용되는 아이템 유지시간
         thunderEffect: number[] // 번개 맞기전 시전시간
     }[]
     mapItems: ItemData[]

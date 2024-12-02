@@ -29,7 +29,7 @@ export abstract class Character {
     totalSkillCooldown: number
     speed: number
     items: ItemType[] // character가 보유한 아이템
-    itemDuration: { Boost: number; Shield: number } // 아이템 효과 남은 지속 시간
+    itemDuration: { boost: number; shield: number } // 아이템 효과 남은 지속 시간
     thunderEffect: number[] // 번개 시전 시간 목록
     constructor({
         id,
@@ -68,7 +68,7 @@ export abstract class Character {
         this.totalSkillCooldown = totalSkillCooldown
         this.speed = speed
         this.items = []
-        this.itemDuration = { Boost: 0, Shield: 0 }
+        this.itemDuration = { boost: 0, shield: 0 }
         this.thunderEffect = []
     }
 
@@ -118,20 +118,20 @@ export abstract class Character {
             this.eventBlock -= 1
         }
         // 부스터 지속 시간 처리
-        if (this.itemDuration.Boost > 0) {
-            this.itemDuration.Boost -= 1
-            if (this.itemDuration.Boost <= 0) {
+        if (this.itemDuration.boost > 0) {
+            this.itemDuration.boost -= 1
+            if (this.itemDuration.boost <= 0) {
                 this.speed -= 4 // 부스터 효과 종료
-                this.itemDuration.Boost = 0
+                this.itemDuration.boost = 0
             }
         }
 
         // 쉴드 지속 시간 처리
-        if (this.itemDuration.Shield > 0) {
-            this.itemDuration.Shield -= 1
-            if (this.itemDuration.Shield <= 0) {
+        if (this.itemDuration.shield > 0) {
+            this.itemDuration.shield -= 1
+            if (this.itemDuration.shield <= 0) {
                 this.protect = 0 // 쉴드 효과 종료
-                this.itemDuration.Shield = 0
+                this.itemDuration.shield = 0
             }
         }
 
@@ -180,12 +180,12 @@ export abstract class Character {
     }
 
     private activateBoost() {
-        this.itemDuration.Boost = 3 / updateInterval // 3초 지속
+        this.itemDuration.boost = 3 / updateInterval // 3초 지속
         this.speed += 4 // 부스터로 인한 추가 속도 적용
     }
 
     private activateShield() {
-        this.itemDuration.Shield = 3 / updateInterval // 3초 지속
+        this.itemDuration.shield = 3 / updateInterval // 3초 지속
         this.protect = 3 / updateInterval // 보호 상태 적용
     }
 }
