@@ -22,6 +22,10 @@ export class SantaCharacter extends Character {
         })
     }
 
+    getMaxSpeed(): number {
+        return this.speed
+    }
+
     useSkill() {
         if (this.currentSkillCooldown <= 0) {
             this.speed += CHARACTER.SANTA_SKILL_SPEED

@@ -22,6 +22,10 @@ export class RabbitCharacter extends Character {
         })
     }
 
+    getMaxSpeed(): number {
+        return this.speed
+    }
+
     useSkill() {
         if (this.currentSkillCooldown <= 0) {
             this.isSkillActive = true // 스킬 사용 상태 표시 (다른 클라이언트에게 알림)
