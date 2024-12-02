@@ -63,6 +63,8 @@ export function initSocket(io: Server) {
             return next(new Error('[clientId] required'))
         }
 
+        console.log('[connect]', socket.data.clientId)
+
         next()
     })
 

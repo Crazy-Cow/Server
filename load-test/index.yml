@@ -2,11 +2,11 @@ config:
     target: 'http://localhost:8000'
     phases:
         - duration: 10 # N초동안
-          arrivalCount: 2 # 총 테스트할 유저
+          arrivalCount: 1 # 총 테스트할 유저
     engines:
         socketio-v3:
             auth:
-                clientId: 'tester' # TODO: 랜덤하게 생성 필요
+                clientId: '{{ $randomString() }}' # TODO: 랜덤하게 생성 필요
 
 scenarios:
     - name: '유저 입장' # TODO: 입장 후 세션 유지하면서, emit('move') 5fps
