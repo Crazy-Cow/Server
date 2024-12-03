@@ -49,6 +49,10 @@ export abstract class Character {
     items: ItemType[] // character가 보유한 아이템
     itemDuration: { boost: number; shield: number } // 아이템 효과 남은 지속 시간
     thunderEffect: number[] // 번개 시전 시간 목록
+    log: {
+        usedItems: Record<ItemType, number>
+    }
+
     constructor({
         id,
         nickName,
@@ -81,6 +85,14 @@ export abstract class Character {
         this.items = []
         this.itemDuration = { boost: 0, shield: 0 }
         this.thunderEffect = []
+        this.log = {
+            usedItems: {
+                [ItemType.BOOST]: 0,
+                [ItemType.SHIELD]: 0,
+                [ItemType.THUNDER]: 0,
+                [ItemType.GIFT]: 0,
+            },
+        }
     }
 
     getClientData() {
@@ -188,6 +200,8 @@ export abstract class Character {
             return
         }
 
+        this.logUsedItem(usedItem)
+
         switch (usedItem) {
             case ItemType.BOOST:
                 this.activateBoost()
@@ -212,5 +226,9 @@ export abstract class Character {
     private activateShield() {
         this.itemDuration.shield = 3 / updateInterval // 3초 지속
         this.protect = 3 / updateInterval // 보호 상태 적용
+    }
+
+    private logUsedItem(item: ItemType) {
+        this.log[item] += 1
     }
 }

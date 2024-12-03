@@ -11,6 +11,7 @@ import roomService from './rooms'
 import { Character } from 'game/objects/player'
 import { CHARACTER_COLOR_PINK } from '../game/objects/player.constant'
 import { BADGES } from './game-summary.util'
+import { ItemType } from 'game/objects/item'
 
 class GameSummaryService {
     private static instance: GameSummaryService
@@ -237,13 +238,53 @@ class GameSummaryService {
         return columns
     }
 
-    private getBadges(character: Character) {
+    getMostUsedItems(characters: Character[]) {
+        const mostUsedItemUsers: Record<
+            ItemType,
+            { userId: string; count: number }
+        > = {
+            [ItemType.BOOST]: { userId: '', count: 0 },
+            [ItemType.SHIELD]: { userId: '', count: 0 },
+            [ItemType.THUNDER]: { userId: '', count: 0 },
+            [ItemType.GIFT]: { userId: '', count: 0 },
+        }
+
+        characters.forEach((character) => {
+            Object.keys(character.log.usedItems).forEach((item) => {
+                const itemType = Number(item) as ItemType
+                const count = character.log.usedItems[itemType]
+                if (count > mostUsedItemUsers[itemType].count) {
+                    mostUsedItemUsers[itemType] = {
+                        userId: character.id,
+                        count,
+                    }
+                }
+            })
+        })
+
+        return mostUsedItemUsers
+    }
+
+    private getBadges(character: Character, others: Character[]) {
         const badges: BadgeItem[] = []
         if (character.charColor == CHARACTER_COLOR_PINK) {
             badges.push(BADGES['pink-princess'])
         }
 
-        // TODO
+        const mostUsedItemUsers = this.getMostUsedItems(others)
+
+        if (mostUsedItemUsers[ItemType.BOOST].userId === character.id) {
+            badges.push(BADGES['item-boost'])
+        }
+        if (mostUsedItemUsers[ItemType.SHIELD].userId === character.id) {
+            badges.push(BADGES['item-shield'])
+        }
+        if (mostUsedItemUsers[ItemType.THUNDER].userId === character.id) {
+            badges.push(BADGES['item-thunder'])
+        }
+        if (mostUsedItemUsers[ItemType.GIFT].userId === character.id) {
+            badges.push(BADGES['item-gift'])
+        }
 
         return badges
     }
@@ -313,7 +354,7 @@ class GameSummaryService {
             return {
                 rank: index + 1,
                 userId: character.id,
-                badges: this.getBadges(character),
+                badges: this.getBadges(character, characters),
                 charcterType: character.charType,
                 nickName: character.nickName,
                 gifts,
