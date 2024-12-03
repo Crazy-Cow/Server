@@ -8,6 +8,7 @@ type BadgeKey =
     | 'item-shield'
     | 'item-gift'
     | 'pink-princess'
+    | 'fighting'
 
 export const BADGES: Record<BadgeKey, BadgeItem> = {
     'the-highest': {
@@ -37,5 +38,9 @@ export const BADGES: Record<BadgeKey, BadgeItem> = {
     'pink-princess': {
         label: '핑크 공주',
         img: 'https://github.com/user-attachments/assets/b993b462-48bf-4808-9244-e9db299f93fd',
+    },
+    fighting: {
+        label: '노력상',
+        img: 'https://github.com/user-attachments/assets/f3c24c68-2d82-4601-be89-a12905cc1ab7',
     },
 }
