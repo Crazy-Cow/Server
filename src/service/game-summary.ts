@@ -313,6 +313,32 @@ class GameSummaryService {
         return badges
     }
 
+    private get노력ChracterByRecords(
+        gameRecords: {
+            character: Character
+            gifts: number
+            accSteals: number
+            doubleCombos: number
+            tripleCombos: number
+            multipleCombos: number
+        }[]
+    ) {
+        const filtered = gameRecords.filter((record) => record.gifts === 0)
+
+        if (filtered.length === 0) {
+            return null
+        }
+
+        let maxAccStealsUser = filtered[0]
+        for (const record of filtered) {
+            if (record.accSteals > maxAccStealsUser.accSteals) {
+                maxAccStealsUser = record
+            }
+        }
+
+        return maxAccStealsUser.character
+    }
+
     private async getRankGameRecord(roomId: string, gameMap: CommonMap) {
         const characters = gameMap.characters
 
@@ -367,6 +393,8 @@ class GameSummaryService {
             return 0
         })
 
+        const 노력Character = this.get노력ChracterByRecords(gameRecords)
+
         const rows: RankRowItem[] = gameRecords.map((record, index) => {
             const {
                 character,
@@ -377,10 +405,16 @@ class GameSummaryService {
                 multipleCombos,
             } = record
 
+            const badges = this.getBadges(character, gameMap)
+
+            if (노력Character && 노력Character.id === character.id) {
+                badges.push(BADGES.fighting)
+            }
+
             return {
                 rank: index + 1,
                 userId: character.id,
-                badges: this.getBadges(character, gameMap),
+                badges,
                 charcterType: character.charType,
                 nickName: character.nickName,
                 gifts,
