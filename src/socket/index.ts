@@ -62,7 +62,7 @@ export function initSocket(io: Server) {
         if (!socket.data.clientId) {
             return next(new Error('[clientId] required'))
         }
-
+        // console.log('[connect]', socket.data.clientId) // load test
         next()
     })
 

@@ -18,6 +18,7 @@ function handleMove(
     gameMap: TailTagMap,
     data: OnEventData['move']
 ) {
+    // console.log(characterId, 'move') // load test
     if (!data) {
         console.error('data 없음', data)
     }

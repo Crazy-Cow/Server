@@ -10,7 +10,8 @@
         "dev": "nodemon",
         "build": "rimraf ./build && tsc",
         "prd": "npm run build && pm2 start pm2.config.json",
-        "prepare": "husky install .husky"
+        "prepare": "husky install .husky",
+        "load-test": "node load-test/generate-configs.js && ./load-test/run-artillery.sh"
     },
     "lint-staged": {
         "*.{ts,tsx}": [
@@ -38,6 +39,8 @@
         "@types/jest": "^29.5.14",
         "@types/node": "^22.9.0",
         "@typescript-eslint/parser": "^7.18.0",
+        "artillery": "^2.0.21",
+        "artillery-engine-socketio-v3": "^1.2.0",
         "concurrently": "^9.0.1",
         "eslint": "^8.57.1",
         "eslint-config-airbnb-base": "^15.0.0",
