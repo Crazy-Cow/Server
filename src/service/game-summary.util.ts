@@ -6,6 +6,7 @@ type BadgeKey =
     | 'item-boost'
     | 'item-thunder'
     | 'item-shield'
+    | 'item-gift'
     | 'pink-princess'
 
 export const BADGES: Record<BadgeKey, BadgeItem> = {
@@ -14,5 +15,6 @@ export const BADGES: Record<BadgeKey, BadgeItem> = {
     'item-boost': { label: '스피드 레이서', img: 'TODO' },
     'item-thunder': { label: '토르', img: 'TODO' },
     'item-shield': { label: '온실 속의 화초', img: 'TODO' },
+    'item-gift': { label: '누워서 떡먹기', img: 'TODO' },
     'pink-princess': { label: '핑크 공주', img: 'TODO' },
 }
