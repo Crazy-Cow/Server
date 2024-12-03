@@ -45,11 +45,11 @@ export class RabbitCharacter extends Character {
             z: this.position.z + this.direction.z * distance,
         }
         if (mapPositon.isValidXZPosition(newPosition)) {
-            this.position = this.modifyValidPosition(newPosition)
+            this.position = this.repositionNearObjects(newPosition)
         }
     }
 
-    private modifyValidPosition(position: Position): Position {
+    private repositionNearObjects(position: Position): Position {
         let calculatedPosition = position
         for (const obj of scaledObjects) {
             const min = obj.boundingBox.min
@@ -85,7 +85,7 @@ export class RabbitCharacter extends Character {
             this.currentSkillPreparationTime -= 1
             if (this.currentSkillPreparationTime === 0) {
                 this.teleportForward(CHARACTER.TELEPORT_DISTANCE)
-                mapPositon.validPosition(this)
+                mapPositon.repositionInMapBoundary(this)
             } else if (this.currentSkillPreparationTime <= -1) {
                 this.isSkillActive = false
             }

@@ -300,7 +300,7 @@ export class CommonMap {
         // console.time('updateGameState 실행 시간')
         this.characters.forEach((character) => {
             character.update()
-            mapPositon.validPosition(character)
+            mapPositon.repositionInMapBoundary(character)
         })
         this.checkItemPickup()
         // console.timeEnd('updateGameState 실행 시간')

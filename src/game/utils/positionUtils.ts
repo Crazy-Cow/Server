@@ -37,7 +37,7 @@ function isValidYPosition(position: Position): boolean {
     return position.y <= MAX_HEIGHT && position.y >= MIN_HEIGHT
 }
 
-function validPosition(character: Character) {
+function repositionInMapBoundary(character: Character) {
     if (!isValidXZPosition(character.position)) {
         character.velocity = { x: 0, y: character.velocity.y, z: 0 }
         character.position = {
@@ -58,7 +58,7 @@ export const mapPositon = {
     MAX_GROUND,
     MAX_HEIGHT,
     MIN_HEIGHT,
-    validPosition,
+    repositionInMapBoundary,
     isValidXZPosition,
 }
 
