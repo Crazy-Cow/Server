@@ -115,7 +115,11 @@ export abstract class Character {
 
     getMovementDirection(velocity: Position): Position {
         const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
-        return { x: velocity.x / speed, y: 0, z: velocity.z / speed }
+        if (speed > 1) {
+            return { x: velocity.x / speed, y: 0, z: velocity.z / speed }
+        } else {
+            return null
+        }
     }
 
     setGiftCnt(giftCnt: number) {
