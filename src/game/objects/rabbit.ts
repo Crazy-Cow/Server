@@ -1,4 +1,4 @@
-import { Character, Position } from './player'
+import { Character, CharacterCommonProps, Position } from './player'
 import { CHARACTER } from './player.constant'
 import { CharacterType, updateInterval } from '../maps/common'
 import scaledObjects from '../utils/mapObjects'
@@ -7,12 +7,7 @@ export class RabbitCharacter extends Character {
     private skillPreparationTime: number = 1 // 스킬 시전시간
     private currentSkillPreparationTime: number = 0 // 현재 남은 시전시간
 
-    constructor(params: {
-        id: string
-        nickName: string
-        position: Position
-        color: string
-    }) {
+    constructor(params: CharacterCommonProps) {
         super({
             ...params,
             charType: CharacterType.RABBIT,

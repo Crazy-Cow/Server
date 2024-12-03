@@ -3,7 +3,7 @@ import {
     SocketEmitEvtDataGameOver,
     SocketEmitEvtDataGameState,
 } from 'socket/types/emit'
-import { Character, Position } from '../objects/player'
+import { Character, CharacterCommonProps, Position } from '../objects/player'
 import { RabbitCharacter } from '../objects/rabbit'
 import { SantaCharacter } from '../objects/santa'
 import { Socket } from 'socket.io'
@@ -258,32 +258,22 @@ export class CommonMap {
         const color = CHARACTER_COLORS[colorIdx]
 
         let character: Character
+        const initialProps: CharacterCommonProps = {
+            id,
+            nickName,
+            position,
+            color,
+        }
         switch (charType) {
             case CharacterType.RABBIT:
-                character = new RabbitCharacter({
-                    id,
-                    nickName,
-                    position,
-                    color,
-                })
+                character = new RabbitCharacter(initialProps)
                 break
             case CharacterType.SANTA:
-                character = new SantaCharacter({
-                    id,
-                    nickName,
-                    position,
-                    color,
-                })
+                character = new SantaCharacter(initialProps)
                 break
             case CharacterType.GHOST:
-                character = new GhostCharacter({
-                    id,
-                    nickName,
-                    position,
-                    color,
-                })
+                character = new GhostCharacter(initialProps)
                 break
-            // 추가 캐릭터 타입 처리...
             default:
                 throw new Error('Unknown character type')
         }
