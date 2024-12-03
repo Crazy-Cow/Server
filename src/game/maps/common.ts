@@ -345,4 +345,8 @@ export class CommonMap {
             }
         })
     }
+
+    getLogHighestCharacter() {
+        return this.log.highest.character
+    }
 }
