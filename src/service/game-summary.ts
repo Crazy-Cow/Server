@@ -199,34 +199,33 @@ class GameSummaryService {
     // (끝) deprecated
 
     private getRankColumns() {
-        // Step 8: columns 정의
         const columns: RankColumnItem[] = [
-            { field: 'rank', headerName: 'Rank', textAlign: 'center' },
+            { field: 'rank', headerName: '순위', textAlign: 'center' },
             {
                 field: 'charcterType',
-                headerName: 'Character Type',
+                headerName: '캐릭터',
                 textAlign: 'center',
             },
-            { field: 'nickName', headerName: 'Nickname', textAlign: 'center' },
-            { field: 'gifts', headerName: 'Gifts', textAlign: 'center' },
+            { field: 'nickName', headerName: '닉네임', textAlign: 'left' },
+            { field: 'gifts', headerName: '선물', textAlign: 'center' },
             {
                 field: 'multipleCombos',
-                headerName: 'Multiple Combos',
+                headerName: '멀티플 콤보',
                 textAlign: 'center',
             },
             {
                 field: 'tripleCombos',
-                headerName: 'Triple Combos',
+                headerName: '트리플',
                 textAlign: 'center',
             },
             {
                 field: 'doubleCombos',
-                headerName: 'Double Combos',
+                headerName: '더블',
                 textAlign: 'center',
             },
             {
                 field: 'accSteals',
-                headerName: 'Acc Steals',
+                headerName: '누적 스틸',
                 textAlign: 'center',
             },
         ]
