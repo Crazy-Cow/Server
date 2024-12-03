@@ -11,30 +11,7 @@ import { GhostCharacter } from '../objects/ghost'
 import { Item, ItemType } from '../objects/item'
 import scaledObjects from '../utils/mapObjects'
 import ITEM from '../objects/item.const'
-
-const GROUND_POS = {
-    x: 0,
-    y: -1, // y축에서 바닥이 약간 아래로 설정됩니다.
-    z: 0,
-}
-
-const PREDEFINED_POSITIONS: Position[] = [
-    { x: -4, y: 2, z: 4 },
-    { x: 7, y: 2, z: -7 },
-    { x: 14, y: 2, z: 12 },
-    { x: 12, y: 2, z: 33 },
-    { x: 36, y: 2, z: 20 },
-    { x: 45, y: 2, z: -10 },
-    { x: 8, y: 2, z: -30 },
-    { x: -32, y: 2, z: -32 },
-    { x: -40, y: 2, z: -1 },
-    { x: -52, y: 2, z: 28 },
-    { x: -17.3, y: 10, z: 2.85 },
-    { x: -12, y: 2, z: 57 },
-    { x: -1, y: 2, z: -64 },
-    { x: -16, y: 2, z: 27 },
-    { x: -31, y: 2, z: 22 },
-]
+import mapPositon from '../utils/positionUtils'
 
 export enum CharacterType {
     RABBIT = 1,
@@ -42,8 +19,6 @@ export enum CharacterType {
     GHOST = 3,
 }
 
-const MAX_GROUND = 85
-const MAX_HEIGHT = 33
 export const updateInterval = 1 / 5
 
 export type MapInitialType = { roomId: string; remainRunningTime: number }
@@ -58,7 +33,9 @@ export class CommonMap {
     private remainRunningTime = 0
     private loopIdToReduceTime?: NodeJS.Timeout
     private loopIdToUpdateGameState?: NodeJS.Timeout
-    private availablePositions: Position[] = [...PREDEFINED_POSITIONS]
+    private availablePositions: Position[] = [
+        ...mapPositon.PREDEFINED_POSITIONS,
+    ]
 
     characters: Character[] = []
     items: Item[] = []
@@ -133,9 +110,9 @@ export class CommonMap {
 
         while (!isValidPosition) {
             // x, z 좌표는 맵의 범위 내에서 랜덤하게 생성 (예: -MAX_GROUND ~ MAX_GROUND)
-            const x = (Math.random() - 0.5) * (MAX_GROUND - 10)
-            const y = (Math.random() + 0.1) * ITEM.ITEM_HEIGHT //  1 ~ 11 사이
-            const z = (Math.random() - 0.5) * (MAX_GROUND - 10)
+            const x = (Math.random() - 0.5) * (mapPositon.MAX_GROUND - 10)
+            const y = (Math.random() + 0.1) * ITEM.ITEM_MAX_POS_Y
+            const z = (Math.random() - 0.5) * (mapPositon.MAX_GROUND - 10)
 
             position = { x, y, z }
 
@@ -319,28 +296,11 @@ export class CommonMap {
         }
     }
 
-    private isValidPosition(position: Position): boolean {
-        const pos = Math.sqrt(position.x ** 2 + position.z ** 2)
-        return pos <= MAX_GROUND && position.y >= GROUND_POS.y
-    }
-
     updateGameState() {
         // console.time('updateGameState 실행 시간')
         this.characters.forEach((character) => {
             character.update()
-            // Todo: 밑의 코드가 맵 유효영역체크인데 함수로 만들면 좋을거같기도
-            if (!this.isValidPosition(character.position)) {
-                character.velocity = { x: 0, y: 0, z: 0 }
-                character.position = {
-                    x: character.position.x * 0.9,
-                    y: GROUND_POS.y + 2,
-                    z: character.position.z * 0.9,
-                }
-            }
-            if (character.position.y >= MAX_HEIGHT) {
-                character.velocity.y = 0
-                character.position.y = 30
-            }
+            mapPositon.repositionInMapBoundary(character)
         })
         this.checkItemPickup()
         // console.timeEnd('updateGameState 실행 시간')
