@@ -14,6 +14,7 @@ type CharacterExtraProps = {
     currentSkillCooldown: number
     totalSkillCooldown: number
     speed: number
+    basespeed: number
 }
 
 export type Position = { x: number; y: number; z: number }
@@ -42,6 +43,7 @@ export abstract class Character {
     direction: Position
     currentSkillCooldown: number
     totalSkillCooldown: number
+    basespeed: number
     speed: number
     items: ItemType[] // character가 보유한 아이템
     itemDuration: { boost: number; shield: number } // 아이템 효과 남은 지속 시간
@@ -55,6 +57,7 @@ export abstract class Character {
         currentSkillCooldown,
         totalSkillCooldown,
         speed,
+        basespeed,
     }: CharacterCommonProps & CharacterExtraProps) {
         this.id = id
         this.nickName = nickName
@@ -72,6 +75,7 @@ export abstract class Character {
         this.direction = { x: 0, y: 0, z: 1 }
         this.currentSkillCooldown = currentSkillCooldown
         this.totalSkillCooldown = totalSkillCooldown
+        this.basespeed = basespeed
         this.speed = speed
         this.items = []
         this.itemDuration = { boost: 0, shield: 0 }
@@ -119,6 +123,9 @@ export abstract class Character {
     }
 
     update() {
+        const giftSpeedDecrease = this.giftCnt * ITEM.SPEED_DECREASE_FACTOR
+        let calculatedSpeed = this.basespeed - giftSpeedDecrease
+
         if (this.protect > 0) {
             this.protect -= 1
         }
@@ -129,10 +136,14 @@ export abstract class Character {
         if (this.itemDuration.boost > 0) {
             this.itemDuration.boost -= 1
             if (this.itemDuration.boost <= 0) {
-                this.speed -= ITEM.SPEED_UP // 부스터 효과 종료
                 this.itemDuration.boost = 0
             }
         }
+
+        if (this.itemDuration.boost > 0) {
+            calculatedSpeed += ITEM.SPEED_UP
+        }
+        this.speed = Math.max(this.basespeed / 2, calculatedSpeed)
 
         // 쉴드 지속 시간 처리
         if (this.itemDuration.shield > 0) {
@@ -186,7 +197,6 @@ export abstract class Character {
 
     private activateBoost() {
         this.itemDuration.boost = 3 / updateInterval // 3초 지속
-        this.speed += ITEM.SPEED_UP // 부스터로 인한 추가 속도 적용
     }
 
     private activateShield() {

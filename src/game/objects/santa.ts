@@ -13,6 +13,7 @@ export class SantaCharacter extends Character {
             charType: CharacterType.SANTA,
             currentSkillCooldown: 0,
             totalSkillCooldown: 15 / updateInterval,
+            basespeed: CHARACTER.SANTA_BASE_SPEED,
             speed: CHARACTER.SANTA_BASE_SPEED,
         })
     }
