@@ -12,6 +12,7 @@ import { Character } from 'game/objects/player'
 import { CHARACTER_COLOR_PINK } from '../game/objects/player.constant'
 import { BADGES } from './game-summary.util'
 import { ItemType } from 'game/objects/item'
+import { CommonMap } from 'game/maps'
 
 class GameSummaryService {
     private static instance: GameSummaryService
@@ -279,14 +280,16 @@ class GameSummaryService {
         return mostUsedItemUsers
     }
 
-    private getBadges(character: Character, others: Character[]) {
+    private getBadges(character: Character, gameMap: CommonMap) {
+        const characters = gameMap.characters
+
         const badges: BadgeItem[] = []
         if (character.charColor == CHARACTER_COLOR_PINK) {
             badges.push(BADGES['pink-princess'])
         }
 
-        const mostUsedItemUsers = this.getMostUsedItems(others)
-        const mostUsedSkillUser = this.getMostUsedSkillUser(others)
+        const mostUsedItemUsers = this.getMostUsedItems(characters)
+        const mostUsedSkillUser = this.getMostUsedSkillUser(characters)
 
         if (mostUsedItemUsers[ItemType.BOOST].userId === character.id) {
             badges.push(BADGES['item-boost'])
@@ -303,11 +306,16 @@ class GameSummaryService {
         if (mostUsedSkillUser.id === character.id) {
             badges.push(BADGES['skill-lover'])
         }
+        if (gameMap.getLogHighestCharacter().id === character.id) {
+            badges.push(BADGES['the-highest'])
+        }
 
         return badges
     }
 
-    private async getRankGameRecord(roomId: string, characters: Character[]) {
+    private async getRankGameRecord(roomId: string, gameMap: CommonMap) {
+        const characters = gameMap.characters
+
         const promises = characters.map(async (character) => {
             const gifts = character.giftCnt
             const accSteals = await logRepository.getLogAccSteal(
@@ -372,7 +380,7 @@ class GameSummaryService {
             return {
                 rank: index + 1,
                 userId: character.id,
-                badges: this.getBadges(character, characters),
+                badges: this.getBadges(character, gameMap),
                 charcterType: character.charType,
                 nickName: character.nickName,
                 gifts,
@@ -395,10 +403,7 @@ class GameSummaryService {
         const room = roomService.findGameRoomById(roomId)
         if (!room || !room.gameMap) return null
 
-        const result = await this.getRankGameRecord(
-            room.roomId,
-            room.gameMap.characters
-        )
+        const result = await this.getRankGameRecord(room.roomId, room.gameMap)
 
         return result
     }
