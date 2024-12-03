@@ -6,6 +6,7 @@ const logRepository = {
     getLogAccSteal: logStealRepository.getLogAccSteal,
     getDoubleCombos: logComboStealRepository.getDoubleCombos,
     getTripleCombos: logComboStealRepository.getTripleCombos,
+    getMultipleCombos: logComboStealRepository.getMultipleCombos,
 }
 
 export default logRepository

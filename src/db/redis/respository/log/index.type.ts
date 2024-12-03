@@ -5,6 +5,7 @@ export type LogCategory =
     | 'steal'
     | 'combo-steal-double'
     | 'combo-steal-triple'
+    | 'combo-steal-multiple' // 4 이상
     | 'combo-steal-tmp'
 
 export type CommonLogProps = {
