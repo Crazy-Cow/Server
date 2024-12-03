@@ -11,6 +11,7 @@ import { GhostCharacter } from '../objects/ghost'
 import { Item, ItemType } from '../objects/item'
 import scaledObjects from '../utils/mapObjects'
 import ITEM from '../objects/item.const'
+import { CHARACTER_COLORS } from '../../game/objects/player.constant'
 
 const GROUND_POS = {
     x: 0,
@@ -239,15 +240,6 @@ export class CommonMap {
         return dx * dx + dy * dy + dz * dz
     }
 
-    private generateRandomHexColor(): string {
-        const color = Math.floor(Math.random() * 16777215).toString(16)
-        return '#' + color.padStart(6, '0')
-    }
-
-    checkDupColor(color: string) {
-        return this.characters.some((other) => other.charColor == color)
-    }
-
     findCharacter(id: string) {
         return this.characters.find((char) => char.id === id)
     }
@@ -262,14 +254,10 @@ export class CommonMap {
         charType: CharacterType
     }) {
         const position = this.generateRandomPosition()
-        let color = this.generateRandomHexColor()
-
-        while (this.checkDupColor(color)) {
-            color = this.generateRandomHexColor()
-        }
+        const colorIdx = this.characters.length % CHARACTER_COLORS.length
+        const color = CHARACTER_COLORS[colorIdx]
 
         let character: Character
-
         switch (charType) {
             case CharacterType.RABBIT:
                 character = new RabbitCharacter({

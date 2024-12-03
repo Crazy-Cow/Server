@@ -13,3 +13,16 @@ export const CHARACTER = {
     SANTA_SKILL_SPEED,
 }
 export default CHARACTER
+
+export const CHARACTER_COLORS = [
+    'pink',
+    'red',
+    'orange',
+    'yellow',
+    'green',
+    'blue',
+    'purple',
+    'black',
+    'gray',
+    'brown',
+]
