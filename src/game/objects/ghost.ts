@@ -22,6 +22,8 @@ export class GhostCharacter extends Character {
     }
 
     useSkill() {
+        super.useSkill()
+
         if (this.currentSkillCooldown <= 0) {
             this.isSkillActive = true
             this.currentSkillDuration = this.skillDurationTime
