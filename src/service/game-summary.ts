@@ -207,6 +207,7 @@ class GameSummaryService {
                 textAlign: 'center',
             },
             { field: 'nickName', headerName: '닉네임', textAlign: 'left' },
+            { field: 'badges', headerName: '뱃지', textAlign: 'left' },
             { field: 'gifts', headerName: '선물', textAlign: 'center' },
             {
                 field: 'multipleCombos',
@@ -285,6 +286,13 @@ class GameSummaryService {
             return 0
         })
 
+        const mockBadges: RankRowItem['badges'] = [
+            {
+                label: '높이 날기 선수',
+                img: 'https://github.com/user-attachments/assets/e0b0dc8f-8a8d-4618-a83a-25b026608ee1',
+            },
+        ]
+
         const rows: RankRowItem[] = gameRecords.map((record, index) => {
             const {
                 character,
@@ -298,6 +306,7 @@ class GameSummaryService {
             return {
                 rank: index + 1,
                 userId: character.id,
+                badges: mockBadges,
                 charcterType: character.charType,
                 nickName: character.nickName,
                 gifts,

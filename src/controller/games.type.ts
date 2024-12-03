@@ -31,6 +31,7 @@ export type RankColumnItem = {
         | 'rank'
         | 'charcterType'
         | 'nickName'
+        | 'badges'
         | 'gifts'
         | 'multipleCombos'
         | 'tripleCombos'
@@ -43,6 +44,7 @@ export type RankColumnItem = {
 type FieldValues = {
     rank: number
     charcterType: Character['charType']
+    badges: Array<{ label: string; img: string }>
     nickName: string
     gifts: number
     multipleCombos: number
