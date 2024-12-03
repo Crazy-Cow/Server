@@ -52,13 +52,15 @@ export class SantaCharacter extends Character {
             }
         }
 
-        if (this.currentSkillCooldown > 0) {
-            this.currentSkillCooldown -= 1
+        if (this.isSkillInput) {
+            if (this.currentSkillCooldown <= 0) {
+                this.useSkill()
+            }
+            this.isSkillInput = false
         }
 
-        if (this.isSkillInput) {
-            this.useSkill()
-            this.isSkillInput = false
+        if (this.currentSkillCooldown > 0) {
+            this.currentSkillCooldown -= 1
         }
     }
     getClientData() {

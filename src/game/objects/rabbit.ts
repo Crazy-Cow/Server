@@ -74,10 +74,6 @@ export class RabbitCharacter extends Character {
 
     update() {
         super.update()
-        if (this.currentSkillCooldown > 0) {
-            this.currentSkillCooldown -= 1
-        }
-
         if (this.isSkillActive) {
             this.currentSkillPreparationTime -= 1
             if (this.currentSkillPreparationTime === 0) {
@@ -89,8 +85,13 @@ export class RabbitCharacter extends Character {
         }
 
         if (this.isSkillInput) {
-            this.useSkill()
-            this.isSkillInput = false // 입력 처리 후 초기화
+            if (this.currentSkillCooldown <= 0) {
+                this.useSkill()
+            }
+            this.isSkillInput = false
+        }
+        if (this.currentSkillCooldown > 0) {
+            this.currentSkillCooldown -= 1
         }
     }
 

@@ -48,15 +48,18 @@ export class GhostCharacter extends Character {
             }
         }
 
+        if (this.isSkillInput) {
+            if (this.currentSkillCooldown <= 0) {
+                this.useSkill()
+            }
+            this.isSkillInput = false
+        }
+
         if (this.currentSkillCooldown > 0) {
             this.currentSkillCooldown -= 1
         }
-
-        if (this.isSkillInput) {
-            this.useSkill()
-            this.isSkillInput = false
-        }
     }
+
     getClientData() {
         return {
             ...super.getClientData(),
