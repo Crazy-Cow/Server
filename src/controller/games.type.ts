@@ -41,10 +41,12 @@ export type RankColumnItem = {
     textAlign: 'left' | 'center' | 'right'
 }
 
+export type BadgeItem = { label: string; img: string }
+
 type FieldValues = {
     rank: number
     charcterType: Character['charType']
-    badges: Array<{ label: string; img: string }>
+    badges: Array<BadgeItem>
     nickName: string
     gifts: number
     multipleCombos: number

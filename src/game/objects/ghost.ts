@@ -1,4 +1,4 @@
-import { Character, Position } from './player'
+import { Character, CharacterCommonProps } from './player'
 import { CHARACTER } from './player.constant'
 import { CharacterType, updateInterval } from '../maps/common'
 
@@ -6,12 +6,7 @@ export class GhostCharacter extends Character {
     private skillDurationTime: number = 5 / updateInterval // 스킬 지속 시간 (초)
     private currentSkillDuration: number = 0 // 현재 남은 스킬 지속 시간
 
-    constructor(params: {
-        id: string
-        nickName: string
-        position: Position
-        color: string
-    }) {
+    constructor(params: CharacterCommonProps) {
         super({
             ...params,
             charType: CharacterType.GHOST,

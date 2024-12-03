@@ -17,3 +17,17 @@ export const CHARACTER = {
     MAX_YSPEED,
 }
 export default CHARACTER
+
+export const CHARACTER_COLOR_PINK = 'pink'
+export const CHARACTER_COLORS = [
+    CHARACTER_COLOR_PINK,
+    'red',
+    'orange',
+    'yellow',
+    'green',
+    'blue',
+    'purple',
+    'black',
+    'gray',
+    'brown',
+]

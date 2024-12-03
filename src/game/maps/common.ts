@@ -3,7 +3,7 @@ import {
     SocketEmitEvtDataGameOver,
     SocketEmitEvtDataGameState,
 } from 'socket/types/emit'
-import { Character, Position } from '../objects/player'
+import { Character, CharacterCommonProps, Position } from '../objects/player'
 import { RabbitCharacter } from '../objects/rabbit'
 import { SantaCharacter } from '../objects/santa'
 import { Socket } from 'socket.io'
@@ -11,6 +11,7 @@ import { GhostCharacter } from '../objects/ghost'
 import { Item, ItemType } from '../objects/item'
 import scaledObjects from '../utils/mapObjects'
 import ITEM from '../objects/item.const'
+import { CHARACTER_COLORS } from '../../game/objects/player.constant'
 import mapPositon from '../utils/positionUtils'
 
 export enum CharacterType {
@@ -216,15 +217,6 @@ export class CommonMap {
         return dx * dx + dy * dy + dz * dz
     }
 
-    private generateRandomHexColor(): string {
-        const color = Math.floor(Math.random() * 16777215).toString(16)
-        return '#' + color.padStart(6, '0')
-    }
-
-    checkDupColor(color: string) {
-        return this.characters.some((other) => other.charColor == color)
-    }
-
     findCharacter(id: string) {
         return this.characters.find((char) => char.id === id)
     }
@@ -239,40 +231,26 @@ export class CommonMap {
         charType: CharacterType
     }) {
         const position = this.generateRandomPosition()
-        let color = this.generateRandomHexColor()
-
-        while (this.checkDupColor(color)) {
-            color = this.generateRandomHexColor()
-        }
+        const colorIdx = this.characters.length % CHARACTER_COLORS.length
+        const color = CHARACTER_COLORS[colorIdx]
 
         let character: Character
-
+        const initialProps: CharacterCommonProps = {
+            id,
+            nickName,
+            position,
+            color,
+        }
         switch (charType) {
             case CharacterType.RABBIT:
-                character = new RabbitCharacter({
-                    id,
-                    nickName,
-                    position,
-                    color,
-                })
+                character = new RabbitCharacter(initialProps)
                 break
             case CharacterType.SANTA:
-                character = new SantaCharacter({
-                    id,
-                    nickName,
-                    position,
-                    color,
-                })
+                character = new SantaCharacter(initialProps)
                 break
             case CharacterType.GHOST:
-                character = new GhostCharacter({
-                    id,
-                    nickName,
-                    position,
-                    color,
-                })
+                character = new GhostCharacter(initialProps)
                 break
-            // 추가 캐릭터 타입 처리...
             default:
                 throw new Error('Unknown character type')
         }

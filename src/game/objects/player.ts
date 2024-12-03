@@ -3,6 +3,21 @@ import { updateInterval } from '../maps/common'
 import { ITEM } from './item.const'
 import CHARACTER from './player.constant'
 
+export type CharacterCommonProps = {
+    id: string
+    nickName: string
+    position: Position
+    color: string
+}
+
+type CharacterExtraProps = {
+    charType: number
+    currentSkillCooldown: number
+    totalSkillCooldown: number
+    speed: number
+    basespeed: number
+}
+
 export type Position = { x: number; y: number; z: number }
 
 export type Directions = {
@@ -44,17 +59,7 @@ export abstract class Character {
         totalSkillCooldown,
         speed,
         basespeed,
-    }: {
-        id: string
-        nickName: string
-        charType: number
-        position: Position
-        color: string
-        currentSkillCooldown: number
-        totalSkillCooldown: number
-        speed: number
-        basespeed: number
-    }) {
+    }: CharacterCommonProps & CharacterExtraProps) {
         this.id = id
         this.nickName = nickName
         this.charType = charType
