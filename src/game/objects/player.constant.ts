@@ -14,8 +14,9 @@ export const CHARACTER = {
 }
 export default CHARACTER
 
+export const CHARACTER_COLOR_PINK = 'pink'
 export const CHARACTER_COLORS = [
-    'pink',
+    CHARACTER_COLOR_PINK,
     'red',
     'orange',
     'yellow',

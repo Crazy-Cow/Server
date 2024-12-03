@@ -1,4 +1,5 @@
 import {
+    BadgeItem,
     GetGamePersonalSummaryResponse,
     GetGameTotalRankSummaryResponse,
     GetGameTotalSummaryResponse,
@@ -8,6 +9,8 @@ import {
 import logRepository from '../db/redis/respository/log'
 import roomService from './rooms'
 import { Character } from 'game/objects/player'
+import { CHARACTER_COLOR_PINK } from 'game/objects/player.constant'
+import { BADGES } from './game-summary.util'
 
 class GameSummaryService {
     private static instance: GameSummaryService
@@ -234,6 +237,17 @@ class GameSummaryService {
         return columns
     }
 
+    private getBadges(character: Character) {
+        const badges: BadgeItem[] = []
+        if (character.charColor == CHARACTER_COLOR_PINK) {
+            badges.push(BADGES['pink-princess'])
+        }
+
+        // TODO
+
+        return badges
+    }
+
     private async getRankGameRecord(roomId: string, characters: Character[]) {
         const promises = characters.map(async (character) => {
             const gifts = character.giftCnt
@@ -286,13 +300,6 @@ class GameSummaryService {
             return 0
         })
 
-        const mockBadges: RankRowItem['badges'] = [
-            {
-                label: '높이 날기 선수',
-                img: 'https://github.com/user-attachments/assets/e0b0dc8f-8a8d-4618-a83a-25b026608ee1',
-            },
-        ]
-
         const rows: RankRowItem[] = gameRecords.map((record, index) => {
             const {
                 character,
@@ -306,7 +313,7 @@ class GameSummaryService {
             return {
                 rank: index + 1,
                 userId: character.id,
-                badges: mockBadges,
+                badges: this.getBadges(character),
                 charcterType: character.charType,
                 nickName: character.nickName,
                 gifts,
