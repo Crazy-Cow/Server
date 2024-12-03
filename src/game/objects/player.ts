@@ -1,6 +1,7 @@
 import { ItemType } from './item'
 import { updateInterval } from '../maps/common'
 import { ITEM } from './item.const'
+import CHARACTER from './player.constant'
 
 export type CharacterCommonProps = {
     id: string
@@ -110,7 +111,11 @@ export abstract class Character {
     isValidVelocity(velocity: Position): boolean {
         const maxSpeed = this.getMaxSpeed() + 1
         const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
-        return speed <= maxSpeed && velocity.y <= 10 && velocity.y >= -40
+        return (
+            speed <= maxSpeed &&
+            velocity.y <= CHARACTER.MAX_YSPEED &&
+            velocity.y >= CHARACTER.MIN_YSPEED
+        )
     }
 
     getMovementDirection(velocity: Position): Position {
@@ -124,7 +129,7 @@ export abstract class Character {
 
     update() {
         const giftSpeedDecrease = this.giftCnt * ITEM.SPEED_DECREASE_FACTOR
-        let calculatedSpeed = this.basespeed - giftSpeedDecrease
+        const calculatedSpeed = this.basespeed - giftSpeedDecrease
 
         if (this.protect > 0) {
             this.protect -= 1
@@ -135,15 +140,16 @@ export abstract class Character {
         // 부스터 지속 시간 처리
         if (this.itemDuration.boost > 0) {
             this.itemDuration.boost -= 1
-            if (this.itemDuration.boost <= 0) {
-                this.itemDuration.boost = 0
-            }
         }
 
         if (this.itemDuration.boost > 0) {
-            calculatedSpeed += ITEM.SPEED_UP
+            this.speed = Math.max(
+                this.basespeed / 2 + ITEM.SPEED_UP,
+                calculatedSpeed + ITEM.SPEED_UP
+            )
+        } else {
+            this.speed = Math.max(this.basespeed / 2, calculatedSpeed)
         }
-        this.speed = Math.max(this.basespeed / 2, calculatedSpeed)
 
         // 쉴드 지속 시간 처리
         if (this.itemDuration.shield > 0) {
