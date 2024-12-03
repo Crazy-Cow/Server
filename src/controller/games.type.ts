@@ -11,6 +11,7 @@ export type GetGamePersonalSummaryResponse = {
     summary: Array<{ label: string; value: number }>
 }
 
+// (시작) deprecated
 export type GetGameTotalSummaryRequest = {
     roomId: string
 }
@@ -18,4 +19,43 @@ export type GetGameTotalSummaryRequest = {
 export type GetGameTotalSummaryResponse = {
     character: Pick<Character, 'id' | 'charType' | 'charColor' | 'nickName'>
     summary: Array<{ label: string; value: number }>
+}
+// (끝) deprecated
+
+export type GetGameTotalRankSummaryRequest = {
+    roomId: string
+}
+
+export type RankColumnItem = {
+    field:
+        | 'rank'
+        | 'charcterType'
+        | 'nickName'
+        | 'gifts'
+        | 'multipleCombos'
+        | 'tripleCombos'
+        | 'doubleCombos'
+        | 'accSteals'
+    headerName: string
+    textAlign: 'left' | 'center' | 'right'
+}
+
+type FieldValues = {
+    rank: number
+    charcterType: Character['charType']
+    nickName: string
+    gifts: number
+    multipleCombos: number
+    tripleCombos: number
+    doubleCombos: number
+    accSteals: number
+}
+
+export type RankRowItem = { userId: string } & {
+    [K in RankColumnItem['field']]: FieldValues[K]
+}
+
+export type GetGameTotalRankSummaryResponse = {
+    columns: RankColumnItem[]
+    rows: RankRowItem[]
 }

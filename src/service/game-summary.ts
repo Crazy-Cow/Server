@@ -1,6 +1,9 @@
 import {
     GetGamePersonalSummaryResponse,
+    GetGameTotalRankSummaryResponse,
     GetGameTotalSummaryResponse,
+    RankColumnItem,
+    RankRowItem,
 } from 'controller/games.type'
 import logRepository from '../db/redis/respository/log'
 import roomService from './rooms'
@@ -77,6 +80,7 @@ class GameSummaryService {
         ]
     }
 
+    // (시작) deprecated
     private async getWinnerGameRecord(roomId: string, characters: Character[]) {
         // Step 1: giftCnt를 기준으로 캐릭터들을 그룹화
         const groupedByGiftCnt: { [giftCnt: number]: Character[] } = {}
@@ -191,6 +195,138 @@ class GameSummaryService {
         )
 
         return this.convertTotalSummary(winnerRecord)
+    }
+    // (끝) deprecated
+
+    private getRankColumns() {
+        // Step 8: columns 정의
+        const columns: RankColumnItem[] = [
+            { field: 'rank', headerName: 'Rank', textAlign: 'center' },
+            {
+                field: 'charcterType',
+                headerName: 'Character Type',
+                textAlign: 'center',
+            },
+            { field: 'nickName', headerName: 'Nickname', textAlign: 'center' },
+            { field: 'gifts', headerName: 'Gifts', textAlign: 'center' },
+            {
+                field: 'multipleCombos',
+                headerName: 'Multiple Combos',
+                textAlign: 'center',
+            },
+            {
+                field: 'tripleCombos',
+                headerName: 'Triple Combos',
+                textAlign: 'center',
+            },
+            {
+                field: 'doubleCombos',
+                headerName: 'Double Combos',
+                textAlign: 'center',
+            },
+            {
+                field: 'accSteals',
+                headerName: 'Acc Steals',
+                textAlign: 'center',
+            },
+        ]
+
+        return columns
+    }
+
+    private async getRankGameRecord(roomId: string, characters: Character[]) {
+        const promises = characters.map(async (character) => {
+            const gifts = character.giftCnt
+            const accSteals = await logRepository.getLogAccSteal(
+                roomId,
+                character.id
+            )
+            const doubleCombos = await logRepository.getDoubleCombos(
+                roomId,
+                character.id
+            )
+            const tripleCombos = await logRepository.getTripleCombos(
+                roomId,
+                character.id
+            )
+            const multipleCombos = await logRepository.getMultipleCombos(
+                roomId,
+                character.id
+            )
+
+            return {
+                character,
+                gifts,
+                accSteals,
+                doubleCombos,
+                tripleCombos,
+                multipleCombos,
+            }
+        })
+
+        // Step 5: 각 후보들의 비교를 비동기적으로 처리
+        const gameRecords = await Promise.all(promises)
+
+        // Step 6: 순위 매기기
+        const compareFields: (keyof RankRowItem)[] = [
+            'gifts',
+            'multipleCombos',
+            'tripleCombos',
+            'doubleCombos',
+            'accSteals',
+        ]
+
+        gameRecords.sort((a, b) => {
+            for (const field of compareFields) {
+                if (b[field] !== a[field]) {
+                    return b[field] - a[field]
+                }
+            }
+
+            return 0
+        })
+
+        const rows: RankRowItem[] = gameRecords.map((record, index) => {
+            const {
+                character,
+                gifts,
+                accSteals,
+                doubleCombos,
+                tripleCombos,
+                multipleCombos,
+            } = record
+
+            return {
+                rank: index + 1,
+                userId: character.id,
+                charcterType: character.charType,
+                nickName: character.nickName,
+                gifts,
+                multipleCombos,
+                tripleCombos,
+                doubleCombos,
+                accSteals,
+            }
+        })
+
+        return {
+            columns: this.getRankColumns(),
+            rows,
+        }
+    }
+
+    async getTotalRankSummary(
+        roomId: string
+    ): Promise<GetGameTotalRankSummaryResponse> {
+        const room = roomService.findGameRoomById(roomId)
+        if (!room || !room.gameMap) return null
+
+        const result = await this.getRankGameRecord(
+            room.roomId,
+            room.gameMap.characters
+        )
+
+        return result
     }
 }
 
