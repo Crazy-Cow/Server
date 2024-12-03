@@ -37,6 +37,9 @@ export class CommonMap {
     private availablePositions: Position[] = [
         ...mapPositon.PREDEFINED_POSITIONS,
     ]
+    private log: {
+        highest: { character: Character | null; maxPosY: number }
+    }
 
     characters: Character[] = []
     items: Item[] = []
@@ -44,6 +47,7 @@ export class CommonMap {
     constructor({ roomId, remainRunningTime }: MapInitialType) {
         this.roomId = roomId
         this.remainRunningTime = remainRunningTime
+        this.log.highest = { character: null, maxPosY: 0 }
     }
 
     init() {
@@ -281,6 +285,7 @@ export class CommonMap {
             mapPositon.repositionInMapBoundary(character)
         })
         this.checkItemPickup()
+        this.updateLog()
         // console.timeEnd('updateGameState 실행 시간')
     }
 
@@ -328,5 +333,16 @@ export class CommonMap {
         const cond1 = this.remainRunningTime <= 0
         const cond2 = this.characters.length == 1
         return cond1 || cond2
+    }
+
+    private updateLog() {
+        this.characters.forEach((character) => {
+            const posY = character.position.y
+
+            if (this.log.highest.maxPosY < posY) {
+                this.log.highest.character = character
+                this.log.highest.maxPosY = posY
+            }
+        })
     }
 }
