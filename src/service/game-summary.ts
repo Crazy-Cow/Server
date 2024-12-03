@@ -238,6 +238,20 @@ class GameSummaryService {
         return columns
     }
 
+    getMostUsedSkillUser(characters: Character[]) {
+        let character = characters[0]
+        let maxSkillCount = character.log.usedSkill
+
+        for (const other of characters) {
+            if (other.log.usedSkill > maxSkillCount) {
+                character = other
+                maxSkillCount = other.log.usedSkill
+            }
+        }
+
+        return character
+    }
+
     getMostUsedItems(characters: Character[]) {
         const mostUsedItemUsers: Record<
             ItemType,
@@ -272,6 +286,7 @@ class GameSummaryService {
         }
 
         const mostUsedItemUsers = this.getMostUsedItems(others)
+        const mostUsedSkillUser = this.getMostUsedSkillUser(others)
 
         if (mostUsedItemUsers[ItemType.BOOST].userId === character.id) {
             badges.push(BADGES['item-boost'])
@@ -284,6 +299,9 @@ class GameSummaryService {
         }
         if (mostUsedItemUsers[ItemType.GIFT].userId === character.id) {
             badges.push(BADGES['item-gift'])
+        }
+        if (mostUsedSkillUser.id === character.id) {
+            badges.push(BADGES['skill-lover'])
         }
 
         return badges

@@ -49,9 +49,7 @@ export abstract class Character {
     items: ItemType[] // character가 보유한 아이템
     itemDuration: { boost: number; shield: number } // 아이템 효과 남은 지속 시간
     thunderEffect: number[] // 번개 시전 시간 목록
-    log: {
-        usedItems: Record<ItemType, number>
-    }
+    log: { usedSkill: number; usedItems: Record<ItemType, number> }
 
     constructor({
         id,
@@ -86,6 +84,7 @@ export abstract class Character {
         this.itemDuration = { boost: 0, shield: 0 }
         this.thunderEffect = []
         this.log = {
+            usedSkill: 0,
             usedItems: {
                 [ItemType.BOOST]: 0,
                 [ItemType.SHIELD]: 0,
@@ -187,6 +186,10 @@ export abstract class Character {
         }
     }
 
+    useSkill() {
+        this.logUsedSkill()
+    }
+
     useItem() {
         if (this.items.length === 0) {
             return
@@ -226,5 +229,9 @@ export abstract class Character {
 
     private logUsedItem(item: ItemType) {
         this.log[item] += 1
+    }
+
+    private logUsedSkill() {
+        this.log.usedSkill += 1
     }
 }

@@ -23,6 +23,8 @@ export class SantaCharacter extends Character {
     }
 
     useSkill() {
+        super.useSkill()
+
         if (this.currentSkillCooldown <= 0) {
             this.speed += CHARACTER.SANTA_SKILL_SPEED
             this.isSkillActive = true
