@@ -1,6 +1,7 @@
 import { ItemType } from './item'
 import { updateInterval } from '../maps/common'
 import { ITEM } from './item.const'
+import CHARACTER from './player.constant'
 
 export type Position = { x: number; y: number; z: number }
 
@@ -105,7 +106,11 @@ export abstract class Character {
     isValidVelocity(velocity: Position): boolean {
         const maxSpeed = this.getMaxSpeed() + 1
         const speed = Math.sqrt(velocity.x ** 2 + velocity.z ** 2)
-        return speed <= maxSpeed && velocity.y <= 10 && velocity.y >= -40
+        return (
+            speed <= maxSpeed &&
+            velocity.y <= CHARACTER.MAX_YSPEED &&
+            velocity.y >= CHARACTER.MIN_YSPEED
+        )
     }
 
     getMovementDirection(velocity: Position): Position {

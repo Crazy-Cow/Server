@@ -24,7 +24,7 @@ const GROUND_POS = {
     z: 0,
 }
 
-const MAX_GROUND = 85
+const MAX_GROUND = 90
 const MAX_HEIGHT = 35
 const MIN_HEIGHT = -10
 
@@ -59,6 +59,7 @@ export const mapPositon = {
     MAX_HEIGHT,
     MIN_HEIGHT,
     validPosition,
+    isValidXZPosition,
 }
 
 export default mapPositon

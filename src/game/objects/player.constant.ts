@@ -4,6 +4,8 @@ const GHOST_BASE_SPEED = 10
 const ITEM_EVENT_BLOCK = 6
 const TELEPORT_DISTANCE = 30
 const SANTA_SKILL_SPEED = 6
+const MIN_YSPEED = -40
+const MAX_YSPEED = 10
 export const CHARACTER = {
     RABBIT_BASE_SPEED,
     SANTA_BASE_SPEED,
@@ -11,5 +13,7 @@ export const CHARACTER = {
     ITEM_EVENT_BLOCK,
     TELEPORT_DISTANCE,
     SANTA_SKILL_SPEED,
+    MIN_YSPEED,
+    MAX_YSPEED,
 }
 export default CHARACTER

@@ -44,7 +44,9 @@ export class RabbitCharacter extends Character {
             y: this.position.y,
             z: this.position.z + this.direction.z * distance,
         }
-        this.position = this.modifyValidPosition(newPosition)
+        if (mapPositon.isValidXZPosition(newPosition)) {
+            this.position = this.modifyValidPosition(newPosition)
+        }
     }
 
     private modifyValidPosition(position: Position): Position {
