@@ -325,6 +325,7 @@ export class CommonMap {
     }
 
     updateGameState() {
+        // console.time('updateGameState 실행 시간')
         this.characters.forEach((character) => {
             character.update()
             // Todo: 밑의 코드가 맵 유효영역체크인데 함수로 만들면 좋을거같기도
@@ -342,6 +343,7 @@ export class CommonMap {
             }
         })
         this.checkItemPickup()
+        // console.timeEnd('updateGameState 실행 시간')
     }
 
     private resetEventkey(): void {
