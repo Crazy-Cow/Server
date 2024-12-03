@@ -8,11 +8,11 @@ import {
 } from 'controller/games.type'
 import logRepository from '../db/redis/respository/log'
 import roomService from './rooms'
-import { Character } from 'game/objects/player'
+import { Character } from '../game/objects/player'
 import { CHARACTER_COLOR_PINK } from '../game/objects/player.constant'
 import { BADGES } from './game-summary.util'
-import { ItemType } from 'game/objects/item'
-import { CommonMap } from 'game/maps'
+import { ItemType } from '../game/objects/item'
+import { CommonMap } from '../game/maps'
 
 class GameSummaryService {
     private static instance: GameSummaryService
