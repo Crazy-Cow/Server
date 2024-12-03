@@ -2,6 +2,7 @@ import { Character, Position } from './player'
 import { CHARACTER } from './player.constant'
 import { CharacterType, updateInterval } from '../maps/common'
 import scaledObjects from '../utils/mapObjects'
+import mapPositon from '../utils/positionUtils'
 
 export class RabbitCharacter extends Character {
     private skillPreparationTime: number = 1 // 스킬 시전시간
@@ -47,6 +48,7 @@ export class RabbitCharacter extends Character {
     }
 
     private modifyValidPosition(position: Position): Position {
+        let calculatedPosition = position
         for (const obj of scaledObjects) {
             const min = obj.boundingBox.min
             const max = obj.boundingBox.max
@@ -65,10 +67,10 @@ export class RabbitCharacter extends Character {
                     y: max.y + 3, // max.y보다 3만큼 위로 이동
                     z: position.z,
                 }
-                return adjustedPosition
+                calculatedPosition = adjustedPosition
             }
         }
-        return position
+        return calculatedPosition
     }
 
     update() {
@@ -78,17 +80,12 @@ export class RabbitCharacter extends Character {
         }
 
         if (this.isSkillActive) {
-            this.eventBlock = this.skillPreparationTime
-            // 스턴 걸리면 스킬 시전 취소 (선물뺏기 제외)
-            if (this.eventBlock > CHARACTER.ITEM_EVENT_BLOCK) {
+            this.currentSkillPreparationTime -= 1
+            if (this.currentSkillPreparationTime === 0) {
+                this.teleportForward(CHARACTER.TELEPORT_DISTANCE)
+                mapPositon.validPosition(this)
+            } else if (this.currentSkillPreparationTime <= -1) {
                 this.isSkillActive = false
-            } else {
-                this.currentSkillPreparationTime -= 1
-                if (this.currentSkillPreparationTime === 0) {
-                    this.teleportForward(CHARACTER.TELEPORT_DISTANCE)
-                } else if (this.currentSkillPreparationTime <= -1) {
-                    this.isSkillActive = false
-                }
             }
         }
 
