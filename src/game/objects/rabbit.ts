@@ -18,6 +18,7 @@ export class RabbitCharacter extends Character {
             charType: CharacterType.RABBIT,
             currentSkillCooldown: 0,
             totalSkillCooldown: 10 / updateInterval,
+            basespeed: CHARACTER.RABBIT_BASE_SPEED,
             speed: CHARACTER.RABBIT_BASE_SPEED,
         })
     }

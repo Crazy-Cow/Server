@@ -17,6 +17,7 @@ export class GhostCharacter extends Character {
             charType: CharacterType.GHOST,
             currentSkillCooldown: 0,
             totalSkillCooldown: 15 / updateInterval,
+            basespeed: CHARACTER.GHOST_BASE_SPEED,
             speed: CHARACTER.GHOST_BASE_SPEED,
         })
     }
