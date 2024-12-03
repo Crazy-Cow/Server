@@ -21,12 +21,14 @@ class GameSummaryService {
         accSteals: number
         doubleCombos: number
         tripleCombos: number
+        multipleCombos: number
     }): GetGamePersonalSummaryResponse['summary'] {
         return [
             { label: '선물 보유 수', value: props.gifts },
             { label: '스틸 누적 수', value: props.accSteals },
             { label: '더블 콤보 수', value: props.doubleCombos },
             { label: '트리플 콤보 수', value: props.tripleCombos },
+            { label: '멀티플 콤보 수', value: props.multipleCombos },
         ]
     }
 
@@ -46,8 +48,18 @@ class GameSummaryService {
         const accSteals = await logRepository.getLogAccSteal(roomId, userId)
         const doubleCombos = await logRepository.getDoubleCombos(roomId, userId)
         const tripleCombos = await logRepository.getTripleCombos(roomId, userId)
+        const multipleCombos = await logRepository.getMultipleCombos(
+            roomId,
+            userId
+        )
 
-        const data = { gifts, accSteals, doubleCombos, tripleCombos }
+        const data = {
+            gifts,
+            accSteals,
+            doubleCombos,
+            tripleCombos,
+            multipleCombos,
+        }
 
         return this.convertPersonalSummary(data)
     }
@@ -101,8 +113,19 @@ class GameSummaryService {
                 roomId,
                 character.id
             )
+            const multipleCombos = await logRepository.getMultipleCombos(
+                roomId,
+                character.id
+            )
 
-            return { character, gifts, accSteals, doubleCombos, tripleCombos }
+            return {
+                character,
+                gifts,
+                accSteals,
+                doubleCombos,
+                tripleCombos,
+                multipleCombos,
+            }
         })
 
         // Step 5: 각 후보들의 비교를 비동기적으로 처리
@@ -113,16 +136,21 @@ class GameSummaryService {
 
         // Step 7: 이후 후보들끼리 비교
         for (const record of gameRecords) {
-            const { accSteals, doubleCombos, tripleCombos } = record
+            const { accSteals, doubleCombos, tripleCombos, multipleCombos } =
+                record
 
-            if (tripleCombos > winnerRecord.tripleCombos) {
+            if (multipleCombos > winnerRecord.multipleCombos) {
                 winnerRecord = record
-            } else if (tripleCombos === winnerRecord.tripleCombos) {
-                if (doubleCombos > winnerRecord.doubleCombos) {
+            } else if (multipleCombos === winnerRecord.multipleCombos) {
+                if (tripleCombos > winnerRecord.tripleCombos) {
                     winnerRecord = record
-                } else if (doubleCombos === winnerRecord.doubleCombos) {
-                    if (accSteals > winnerRecord.accSteals) {
+                } else if (tripleCombos === winnerRecord.tripleCombos) {
+                    if (doubleCombos > winnerRecord.doubleCombos) {
                         winnerRecord = record
+                    } else if (doubleCombos === winnerRecord.doubleCombos) {
+                        if (accSteals > winnerRecord.accSteals) {
+                            winnerRecord = record
+                        }
                     }
                 }
             }
@@ -140,6 +168,7 @@ class GameSummaryService {
         accSteals: number
         doubleCombos: number
         tripleCombos: number
+        multipleCombos: number
     }): GetGameTotalSummaryResponse {
         return {
             character: {

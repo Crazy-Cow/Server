@@ -13,15 +13,24 @@ async function saveCombo(props: {
         category: 'combo-steal-double',
     })
 
-    if (comboCnt == 3) {
-        await redisClient.hIncrBy(doubleKey, userId, -1)
-        const tripleKey = getLogGRCUKey({
-            ...props,
-            category: 'combo-steal-triple',
-        })
-        await redisClient.hIncrBy(tripleKey, userId, 1)
-    } else if (comboCnt == 2) {
+    const tripleKey = getLogGRCUKey({
+        ...props,
+        category: 'combo-steal-triple',
+    })
+
+    const multipleKey = getLogGRCUKey({
+        ...props,
+        category: 'combo-steal-multiple',
+    })
+
+    if (comboCnt == 2) {
         await redisClient.hIncrBy(doubleKey, userId, 1)
+    } else if (comboCnt == 3) {
+        await redisClient.hIncrBy(doubleKey, userId, -1)
+        await redisClient.hIncrBy(tripleKey, userId, 1)
+    } else if (comboCnt >= 4) {
+        await redisClient.hIncrBy(tripleKey, userId, -1)
+        await redisClient.hIncrBy(multipleKey, userId, 1)
     }
 }
 
@@ -39,6 +48,17 @@ async function getDoubleCombos(roomId: string, userId: string) {
 async function getTripleCombos(roomId: string, userId: string) {
     const cntStr = await redisClient.hGet(
         getLogGRCUKey({ roomId, userId, category: 'combo-steal-triple' }),
+        userId
+    )
+
+    const cnt = Number(cntStr)
+    if (isNaN(cnt)) return 0
+    return cnt
+}
+
+async function getMultipleCombos(roomId: string, userId: string) {
+    const cntStr = await redisClient.hGet(
+        getLogGRCUKey({ roomId, userId, category: 'combo-steal-multiple' }),
         userId
     )
 
@@ -82,6 +102,7 @@ const logComboStealRepository = {
     resetCombo,
     getDoubleCombos,
     getTripleCombos,
+    getMultipleCombos,
 }
 
 export default logComboStealRepository
