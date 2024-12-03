@@ -39,7 +39,7 @@ export class CommonMap {
     ]
     private log: {
         highest: { character: Character | null; maxPosY: number }
-    }
+    } = { highest: { character: null, maxPosY: 0 } }
 
     characters: Character[] = []
     items: Item[] = []
@@ -47,7 +47,6 @@ export class CommonMap {
     constructor({ roomId, remainRunningTime }: MapInitialType) {
         this.roomId = roomId
         this.remainRunningTime = remainRunningTime
-        this.log.highest = { character: null, maxPosY: 0 }
     }
 
     init() {
