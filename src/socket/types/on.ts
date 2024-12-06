@@ -21,6 +21,7 @@ type OnEventDataMap = {
         steal: boolean
         skill: boolean
         item: boolean
+        teleportAck: boolean
         character: {
             id: string
             position: Position

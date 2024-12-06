@@ -50,7 +50,7 @@ export abstract class Character {
     itemDuration: { boost: number; shield: number } // 아이템 효과 남은 지속 시간
     thunderEffect: number[] // 번개 시전 시간 목록
     log: { usedSkill: number; usedItems: Record<ItemType, number> }
-
+    isAwaitingTeleportAck: boolean
     constructor({
         id,
         nickName,
@@ -92,6 +92,7 @@ export abstract class Character {
                 [ItemType.GIFT]: 0,
             },
         }
+        this.isAwaitingTeleportAck = false
     }
 
     getClientData() {
@@ -114,6 +115,7 @@ export abstract class Character {
             items: this.items,
             itemDuration: this.itemDuration,
             thunderEffect: this.thunderEffect,
+            isAwaitingTeleportAck: this.isAwaitingTeleportAck,
         }
     }
 
@@ -180,7 +182,7 @@ export abstract class Character {
             for (let i = 0; i < this.thunderEffect.length; i++) {
                 this.thunderEffect[i] -= 1
                 if (this.thunderEffect[i] <= 0) {
-                    if (this.protect <= 0) {
+                    if (this.itemDuration.shield <= 0) {
                         this.eventBlock = 2 / updateInterval
                     }
                     this.thunderEffect.splice(i, 1)
@@ -228,7 +230,6 @@ export abstract class Character {
 
     private activateShield() {
         this.itemDuration.shield = 3 / updateInterval // 3초 지속
-        this.protect = 3 / updateInterval // 보호 상태 적용
     }
 
     private logUsedItem(item: ItemType) {

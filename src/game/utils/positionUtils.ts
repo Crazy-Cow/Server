@@ -24,7 +24,7 @@ const GROUND_POS = {
     z: 0,
 }
 
-const MAX_GROUND = 90
+const MAX_GROUND = 88
 const MAX_HEIGHT = 35
 const MIN_HEIGHT = -10
 
