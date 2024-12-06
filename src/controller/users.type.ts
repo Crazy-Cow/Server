@@ -2,7 +2,7 @@ export type GetRandomNickNameResponse = {
     nickName: string
 }
 
-// (시작) will be deprecated ============
+// (시작) userId -> token 모드로 바뀌면 삭제 예정 ============
 export type CreateUserRequest = {
     nickName: string
 }

@@ -5,7 +5,7 @@ const router = express.Router()
 
 router.get('/random-nickname', ctrl.getRandomNicknameController)
 
-// (시작) will be deprecated ============
+// (시작) userId -> token 모드로 바뀌면 삭제 예정 ============
 router.post('/enter', ctrl.createUserController)
 // (끝) will be deprecated ============
 
