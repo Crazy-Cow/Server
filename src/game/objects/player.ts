@@ -143,6 +143,9 @@ export abstract class Character {
     setGiftCnt(giftCnt: number) {
         this.giftCnt = giftCnt
     }
+    getSkillSpeedBonus(): number {
+        return 0
+    }
 
     update() {
         const giftSpeedDecrease = this.giftCnt * ITEM.SPEED_DECREASE_FACTOR
@@ -159,14 +162,20 @@ export abstract class Character {
             this.itemDuration.boost -= 1
         }
 
+        let finalSpeed: number
         if (this.itemDuration.boost > 0) {
-            this.speed = Math.max(
+            finalSpeed = Math.max(
                 this.basespeed / 2 + ITEM.SPEED_UP,
                 calculatedSpeed + ITEM.SPEED_UP
             )
         } else {
-            this.speed = Math.max(this.basespeed / 2, calculatedSpeed)
+            finalSpeed = Math.max(this.basespeed / 2, calculatedSpeed)
         }
+
+        // 스킬 보너스 반영
+        finalSpeed += this.getSkillSpeedBonus()
+
+        this.speed = finalSpeed
 
         // 쉴드 지속 시간 처리
         if (this.itemDuration.shield > 0) {
