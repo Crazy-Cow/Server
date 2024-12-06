@@ -339,7 +339,10 @@ class GameSummaryService {
         return maxAccStealsUser.character
     }
 
-    private async getRankGameRecord(roomId: string, gameMap: CommonMap) {
+    private async getRankGameRecord(
+        roomId: string,
+        gameMap: CommonMap
+    ): Promise<GetGameTotalRankSummaryResponse> {
         const characters = gameMap.characters
 
         const promises = characters.map(async (character) => {
@@ -416,6 +419,7 @@ class GameSummaryService {
                 userId: character.id,
                 badges,
                 charcterType: character.charType,
+                charcterColor: character.charColor,
                 nickName: character.nickName,
                 gifts,
                 multipleCombos,
