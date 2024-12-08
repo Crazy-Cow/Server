@@ -180,7 +180,7 @@ export abstract class Character {
             for (let i = 0; i < this.thunderEffect.length; i++) {
                 this.thunderEffect[i] -= 1
                 if (this.thunderEffect[i] <= 0) {
-                    if (this.protect <= 0) {
+                    if (this.itemDuration.shield <= 0) {
                         this.eventBlock = 2 / updateInterval
                     }
                     this.thunderEffect.splice(i, 1)
@@ -228,7 +228,6 @@ export abstract class Character {
 
     private activateShield() {
         this.itemDuration.shield = 3 / updateInterval // 3초 지속
-        this.protect = 3 / updateInterval // 보호 상태 적용
     }
 
     private logUsedItem(item: ItemType) {
