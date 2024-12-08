@@ -49,13 +49,11 @@ export class SantaCharacter extends Character {
             if (this.eventBlock > CHARACTER.ITEM_EVENT_BLOCK) {
                 this.isSkillActive = false
                 this.currentSkillDuration = 0
-                console.log('eventblock', this.eventBlock)
             }
             this.currentSkillDuration -= 1
             if (this.currentSkillDuration <= 0) {
                 this.isSkillActive = false
                 this.currentSkillDuration = 0
-                console.log('skillduration', this.currentSkillDuration)
             }
         }
 
@@ -68,9 +66,6 @@ export class SantaCharacter extends Character {
 
         if (this.currentSkillCooldown > 0) {
             this.currentSkillCooldown -= 1
-        }
-        if (this.currentSkillDuration > 0) {
-            console.log(this.skillDurationTime, this.speed)
         }
     }
     getClientData() {
