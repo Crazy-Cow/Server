@@ -2,7 +2,7 @@ import util from './rooms.util'
 import gameRoomRepository from '../db/redis/respository/game-room'
 import { TailTagMap } from '../game/maps'
 import { CharacterType, MapStartLoopType } from '../game/maps/common'
-
+import { getIO } from '../socket'
 type PlayerProps = {
     userId: string
     nickName: string
@@ -36,6 +36,8 @@ export class Room {
     maxPlayerCnt: number
     maxWaitingTime: number
     gameMap: TailTagMap
+    waitingTimeout: NodeJS.Timeout | null = null
+    waitingTimeLimit = 5 * 1000
 
     constructor({ maxPlayerCnt = 10 }: { maxPlayerCnt?: number }) {
         const roomId = util.generateRoomId()
@@ -137,7 +139,6 @@ class RoomPool {
         }
     }
 }
-
 class RoomService {
     roomPool: RoomPool
 
@@ -154,16 +155,70 @@ class RoomService {
         return this.instance
     }
 
-    async getGameRoomIdByUserId(userId: string) {
-        return gameRoomRepository.getGameRoomId(userId)
-    }
-
     findGameRoomById(roomId: string): Room {
         return this.roomPool.findGameRoomById(roomId)
     }
 
+    // 기존 joinRoom에서 정원이 꽉 차면 OutgameController가 아닌 자신이 직접 startGame 호출
     joinRoom(player: Player): Room {
-        return this.roomPool.joinRoom(player)
+        const prevWaitingRoom = this.roomPool.waitingRoom
+        this.roomPool.waitingRoom.addPlayer(player)
+
+        if (this.roomPool.waitingRoom.canStartGame()) {
+            // 정원 찼을 때 즉각 시작
+            this.startGame(this.roomPool.waitingRoom)
+        } else {
+            // 정원이 꽉 차지 않았다면 타이머 설정 (이미 이전 답변에서 제안한 로직)
+            const waitingRoom = this.roomPool.waitingRoom
+            if (!waitingRoom.waitingTimeout) {
+                waitingRoom.waitingTimeout = setTimeout(() => {
+                    if (waitingRoom.state === 'waiting') {
+                        const playerCount = waitingRoom.getPlayerCnt()
+                        if (playerCount >= 2) {
+                            // 2명 이상이면 강제 시작
+                            this.startGame(waitingRoom)
+                        }
+                    }
+                    waitingRoom.waitingTimeout = null
+                }, waitingRoom.waitingTimeLimit)
+            }
+        }
+
+        return prevWaitingRoom
+    }
+
+    async startGame(room: Room) {
+        room.state = 'playing'
+        this.roomPool.gameRooms.push(room)
+        if (room.waitingTimeout) {
+            clearTimeout(room.waitingTimeout)
+            room.waitingTimeout = null
+        }
+        this.roomPool.waitingRoom = new Room({})
+
+        const io = getIO()
+
+        // 게임 준비 신호 보내고 로드
+        io.to(room.roomId).emit('game.ready')
+        await room.loadGame()
+
+        // 3초 후 실제 시작
+        setTimeout(() => {
+            io.to(room.roomId).emit('game.start', {
+                players: room.players,
+            })
+            // IngameController.handleStartGame(room) 대신 여기서 바로 게임 루프 시작
+            room.startGameLoop({
+                handleGameState: (data) => {
+                    io.to(room.roomId).emit('game.state', data)
+                },
+                handleGameOver: (data) => {
+                    io.to(room.roomId).emit('game.over', data)
+                    // 게임 종료 후 정리 로직
+                    this.endGame(room)
+                },
+            })
+        }, 3000)
     }
 
     leaveRoom(userId: string) {
@@ -172,6 +227,10 @@ class RoomService {
 
     endGame(room: Room) {
         this.roomPool.deleteGameRoom(room)
+    }
+
+    async getGameRoomIdByUserId(userId: string) {
+        return gameRoomRepository.getGameRoomId(userId)
     }
 }
 

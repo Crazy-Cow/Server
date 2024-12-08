@@ -55,17 +55,6 @@ class OutgameController extends BaseController {
         this.ingameCtrl.updateRoomId(room.roomId)
         this.broadcastRoomState(room)
 
-        if (room.state === 'playing') {
-            console.log('게임 시작!')
-            this.broadcast(room.roomId, 'game.ready', undefined)
-            await room.loadGame() // TODO: 딜레이 있으면 3초 기다림 없어도 됨
-            setTimeout(() => {
-                this.broadcast(room.roomId, 'game.start', {
-                    players: room.players,
-                })
-                this.ingameCtrl.handleStartGame(room)
-            }, 3000)
-        }
         return room
     }
 
