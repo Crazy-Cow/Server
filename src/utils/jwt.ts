@@ -12,7 +12,7 @@ export const generateAccessToken = ({
     isGuest: boolean
 }) => {
     return jwt.sign({ userId, nickName, isGuest }, JWT_SECRET, {
-        expiresIn: '24h',
+        expiresIn: '2h',
     })
 }
 
