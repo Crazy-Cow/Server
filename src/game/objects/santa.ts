@@ -22,11 +22,18 @@ export class SantaCharacter extends Character {
         return this.speed
     }
 
+    getSkillSpeedBonus(): number {
+        // 산타 스킬이 활성화되고 스킬 지속 시간이 남아있으면 보너스 속도 반환
+        if (this.isSkillActive && this.currentSkillDuration > 0) {
+            return CHARACTER.SANTA_SKILL_SPEED
+        }
+        return 0
+    }
+
     useSkill() {
         super.useSkill()
 
         if (this.currentSkillCooldown <= 0) {
-            this.speed += CHARACTER.SANTA_SKILL_SPEED
             this.isSkillActive = true
             this.currentSkillDuration = this.skillDurationTime
             this.currentSkillCooldown = this.totalSkillCooldown
@@ -42,13 +49,13 @@ export class SantaCharacter extends Character {
             if (this.eventBlock > CHARACTER.ITEM_EVENT_BLOCK) {
                 this.isSkillActive = false
                 this.currentSkillDuration = 0
-                this.speed -= CHARACTER.SANTA_SKILL_SPEED
+                console.log('eventblock', this.eventBlock)
             }
             this.currentSkillDuration -= 1
             if (this.currentSkillDuration <= 0) {
                 this.isSkillActive = false
                 this.currentSkillDuration = 0
-                this.speed -= CHARACTER.SANTA_SKILL_SPEED
+                console.log('skillduration', this.currentSkillDuration)
             }
         }
 
@@ -61,6 +68,9 @@ export class SantaCharacter extends Character {
 
         if (this.currentSkillCooldown > 0) {
             this.currentSkillCooldown -= 1
+        }
+        if (this.currentSkillDuration > 0) {
+            console.log(this.skillDurationTime, this.speed)
         }
     }
     getClientData() {
