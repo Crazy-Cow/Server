@@ -42,7 +42,7 @@ class SocketImplement {
 
 export function initSocket(io: Server) {
     io.use((socket, next) => {
-        // (시작) will be deprecated ============
+        // (시작) userId -> token 모드로 바뀌면 삭제 예정 ============
         socket.data.clientId = socket.handshake.auth.clientId
         socket.data.nickName = socket.handshake.auth.clientId
         socket.data.isGuest = true

@@ -25,7 +25,7 @@ export const getRandomNicknameController = (
     })
 }
 
-// (시작) will be deprecated ============
+// (시작) userId -> token 모드로 바뀌면 삭제 예정 ============
 export const createUserController = async (
     req: Request<object, object, CreateUserRequest>,
     res: Response<CreateUserResponse | ErrorResponse>
