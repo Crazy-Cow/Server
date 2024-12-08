@@ -30,6 +30,7 @@ export type RankColumnItem = {
     field:
         | 'rank'
         | 'charcterType'
+        | 'charcterColor'
         | 'nickName'
         | 'badges'
         | 'gifts'
@@ -37,6 +38,7 @@ export type RankColumnItem = {
         | 'tripleCombos'
         | 'doubleCombos'
         | 'accSteals'
+        | 'userId'
     headerName: string
     textAlign: 'left' | 'center' | 'right'
 }
@@ -44,8 +46,10 @@ export type RankColumnItem = {
 export type BadgeItem = { label: string; img: string }
 
 type FieldValues = {
+    userId: string
     rank: number
     charcterType: Character['charType']
+    charcterColor: Character['charColor']
     badges: Array<BadgeItem>
     nickName: string
     gifts: number
