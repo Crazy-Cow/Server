@@ -56,6 +56,7 @@ export type SocketEmitEvtDataGameState = {
         items: ItemType[] // 캐릭터가 보유한 아이템
         itemDuration: { boost: number; shield: number } // 본인에게 적용되는 아이템 유지시간
         thunderEffect: number[] // 번개 맞기전 시전시간
+        isAwaitingTeleportAck: boolean
     }[]
     mapItems: ItemData[]
 }

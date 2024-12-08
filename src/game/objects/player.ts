@@ -50,7 +50,7 @@ export abstract class Character {
     itemDuration: { boost: number; shield: number } // 아이템 효과 남은 지속 시간
     thunderEffect: number[] // 번개 시전 시간 목록
     log: { usedSkill: number; usedItems: Record<ItemType, number> }
-
+    isAwaitingTeleportAck: boolean
     constructor({
         id,
         nickName,
@@ -92,6 +92,7 @@ export abstract class Character {
                 [ItemType.GIFT]: 0,
             },
         }
+        this.isAwaitingTeleportAck = false
     }
 
     getClientData() {
@@ -114,6 +115,7 @@ export abstract class Character {
             items: this.items,
             itemDuration: this.itemDuration,
             thunderEffect: this.thunderEffect,
+            isAwaitingTeleportAck: this.isAwaitingTeleportAck,
         }
     }
 

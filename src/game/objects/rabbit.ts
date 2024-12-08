@@ -13,7 +13,7 @@ export class RabbitCharacter extends Character {
             ...params,
             charType: CharacterType.RABBIT,
             currentSkillCooldown: 0,
-            totalSkillCooldown: 10 / updateInterval,
+            totalSkillCooldown: 2 / updateInterval,
             basespeed: CHARACTER.RABBIT_BASE_SPEED,
             speed: CHARACTER.RABBIT_BASE_SPEED,
         })
@@ -41,8 +41,11 @@ export class RabbitCharacter extends Character {
             y: this.position.y,
             z: this.position.z + this.direction.z * distance,
         }
+        // console.log('newPosition', newPosition)
         if (mapPositon.isValidXZPosition(newPosition)) {
             this.position = this.repositionNearObjects(newPosition)
+            this.isAwaitingTeleportAck = true
+            // console.log('repositionNearObject', this.position)
         }
     }
 
@@ -53,12 +56,12 @@ export class RabbitCharacter extends Character {
             const max = obj.boundingBox.max
 
             if (
-                position.x >= min.x &&
-                position.x <= max.x &&
-                position.y >= min.y &&
-                position.y <= max.y &&
-                position.z >= min.z &&
-                position.z <= max.z
+                position.x >= min.x - 1 &&
+                position.x <= max.x + 1 &&
+                position.y >= min.y - 1 &&
+                position.y <= max.y + 1 &&
+                position.z >= min.z - 1 &&
+                position.z <= max.z + 1
             ) {
                 // 겹치는 오브젝트가 있으면 위치를 조정
                 const adjustedPosition: Position = {
@@ -86,6 +89,7 @@ export class RabbitCharacter extends Character {
 
         if (this.isSkillInput) {
             if (this.currentSkillCooldown <= 0) {
+                // console.log('skill_before', this.position)
                 this.useSkill()
             }
             this.isSkillInput = false

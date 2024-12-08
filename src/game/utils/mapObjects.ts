@@ -25,7 +25,10 @@ const relevantObjects = mapObjects.filter((obj: RawMapObject) => {
     return (
         obj.name.includes('house') ||
         obj.name.includes('tree') ||
-        obj.name.includes('pPlane')
+        obj.name.includes('pPlane') ||
+        obj.name.includes('segway') //||
+        // obj.name.includes('railway') ||
+        // obj.name.includes('train')
     )
 })
 

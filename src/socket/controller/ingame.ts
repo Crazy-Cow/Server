@@ -1,7 +1,6 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
 import roomService, { Room } from '../../service/rooms'
-import { updateInterval } from '../../game/maps/common'
 import { TailTagMap } from '../../game/maps'
 import { ItemType } from '../../game/objects/item'
 
@@ -24,17 +23,31 @@ function handleMove(
     }
     const character = gameMap.findCharacter(characterId)
 
+    if (data.teleportAck) {
+        character.isAwaitingTeleportAck = false
+    }
+
+    if (character.isAwaitingTeleportAck) {
+        return
+    }
+
     if (data.steal) {
         gameMap.addStealQueue(characterId)
     }
 
     if (!character.isValidVelocity(data.character.velocity)) {
-        character.position = {
-            x: character.position.x + character.velocity.x * 1 * updateInterval,
-            y: character.position.y + character.velocity.y * 1 * updateInterval,
-            z: character.position.z + character.velocity.z * 1 * updateInterval,
+        const dataSpeed = Math.sqrt(
+            data.character.velocity.x ** 2 + data.character.velocity.z ** 2
+        )
+        data.character.velocity = {
+            x:
+                (data.character.velocity.x / dataSpeed) *
+                character.getMaxSpeed(),
+            y: data.character.velocity.y,
+            z:
+                (data.character.velocity.z / dataSpeed) *
+                character.getMaxSpeed(),
         }
-        return
     }
     character.steal = data.steal
     character.position = data.character.position
