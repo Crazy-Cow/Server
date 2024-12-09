@@ -207,7 +207,6 @@ class RoomService {
             io.to(room.roomId).emit('game.start', {
                 players: room.players,
             })
-            // IngameController.handleStartGame(room) 대신 여기서 바로 게임 루프 시작
             room.startGameLoop({
                 handleGameState: (data) => {
                     io.to(room.roomId).emit('game.state', data)
