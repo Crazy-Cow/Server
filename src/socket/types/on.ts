@@ -6,16 +6,16 @@ export type OnEventName =
     | 'connection' // 연결
     | 'disconnect' // 끊김
     | 'room.enter' // 빠른 시작
+    | 'room.state' // 방 정보 조회
     | 'room.leave' // 대기실 나가기
     | 'move'
-// | 'steal'
-// | 'skill'
 
 type OnEventDataMap = {
     reconnect: undefined
     connection: undefined
     disconnect: string // reason
     'room.enter': SocketOnEvtDataRoomEnter
+    'room.state': undefined
     'room.leave': undefined
     move: {
         steal: boolean
@@ -28,8 +28,6 @@ type OnEventDataMap = {
             velocity: Position
         }
     }
-    // steal: { character: { steal: boolean } }
-    // skill: { character: { skill: boolean } }
 }
 
 export type SocketOnEvtDataRoomEnter = {

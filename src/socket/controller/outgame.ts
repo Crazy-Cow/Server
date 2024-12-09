@@ -24,7 +24,8 @@ class OutgameController extends BaseController {
     }
     register() {
         this.socket.on<OnEventName>('room.enter', this.handleRoomEnter)
-        this.getSocket().on<OnEventName>('room.leave', this.handleRoomLeave)
+        this.socket.on<OnEventName>('room.leave', this.handleRoomLeave)
+        this.socket.on<OnEventName>('room.state', this.handleRoomState)
     }
 
     disconnect() {
@@ -40,6 +41,11 @@ class OutgameController extends BaseController {
     private broadcastRoomState = (room: Room) => {
         const data = getRoomStateDto(room)
         this.broadcast(room.roomId, 'room.changeState', data)
+    }
+
+    private handleRoomState = async () => {
+        const room = roomService.getWaitingRoom()
+        this.broadcastRoomState(room)
     }
 
     private handleRoomEnter = async ({

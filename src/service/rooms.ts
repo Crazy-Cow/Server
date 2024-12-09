@@ -154,6 +154,10 @@ class RoomService {
         return this.instance
     }
 
+    getWaitingRoom() {
+        return this.roomPool.waitingRoom
+    }
+
     async getGameRoomIdByUserId(userId: string) {
         return gameRoomRepository.getGameRoomId(userId)
     }
