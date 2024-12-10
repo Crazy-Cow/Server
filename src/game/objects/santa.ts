@@ -4,7 +4,7 @@ import { CHARACTER } from './player.constant'
 import { CharacterType, updateInterval } from '../maps/common'
 
 export class SantaCharacter extends Character {
-    private skillDurationTime: number = 5 / updateInterval // 스킬 지속 시간 (초)
+    private skillDurationTime: number = 6 / updateInterval // 스킬 지속 시간 (초)
     private currentSkillDuration: number = 0 // 현재 남은 스킬 지속 시간
 
     constructor(params: CharacterCommonProps) {
@@ -12,7 +12,7 @@ export class SantaCharacter extends Character {
             ...params,
             charType: CharacterType.SANTA,
             currentSkillCooldown: 0,
-            totalSkillCooldown: 15 / updateInterval,
+            totalSkillCooldown: 12 / updateInterval,
             basespeed: CHARACTER.SANTA_BASE_SPEED,
             speed: CHARACTER.SANTA_BASE_SPEED,
         })
