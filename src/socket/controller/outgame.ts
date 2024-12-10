@@ -28,7 +28,7 @@ class OutgameController extends BaseController {
     }
 
     disconnect() {
-        console.log('[disconnect] outgame')
+        // console.log('[disconnect] outgame')
 
         const userId = this.getUserId()
         const room = roomService.leaveRoom(userId)
@@ -56,7 +56,7 @@ class OutgameController extends BaseController {
         this.broadcastRoomState(room)
 
         if (room.state === 'playing') {
-            console.log('게임 시작!')
+            // console.log('게임 시작!')
             this.broadcast(room.roomId, 'game.ready', undefined)
             await room.loadGame() // TODO: 딜레이 있으면 3초 기다림 없어도 됨
             setTimeout(() => {
