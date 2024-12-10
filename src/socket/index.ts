@@ -6,6 +6,8 @@ import roomService from '../service/rooms'
 
 type SocketAccessToken = string
 
+let globalIO: Server | null = null
+
 class SocketImplement {
     socket: Socket
     outgameCtrl: OutgameController
@@ -40,14 +42,15 @@ class SocketImplement {
     }
 }
 
+// 전역 io 접근을 위한 함수 추가
 export function initSocket(io: Server) {
+    globalIO = io // 전달받은 io를 전역 변수에 할당
+
     io.use((socket, next) => {
-        // (시작) userId -> token 모드로 바뀌면 삭제 예정 ============
         socket.data.clientId = socket.handshake.auth.clientId
         socket.data.nickName = socket.handshake.auth.clientId
         socket.data.isGuest = true
         socket.data.roomId = undefined
-        // (끝) will be deprecated ============
 
         const accessToken: SocketAccessToken = socket.handshake.auth.accessToken
         if (accessToken) {
@@ -62,7 +65,6 @@ export function initSocket(io: Server) {
         if (!socket.data.clientId) {
             return next(new Error('[clientId] required'))
         }
-        // console.log('[connect]', socket.data.clientId) // load test
         next()
     })
 
@@ -81,4 +83,11 @@ export function initSocket(io: Server) {
         /*const instance =*/ new SocketImplement(socket)
         // instance.logger('complete connection')
     })
+}
+
+export function getIO(): Server {
+    if (!globalIO) {
+        throw new Error('IO not initialized')
+    }
+    return globalIO
 }
