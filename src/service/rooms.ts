@@ -37,7 +37,7 @@ export class Room {
     maxWaitingTime: number
     gameMap: TailTagMap
     waitingTimeout: NodeJS.Timeout | null = null
-    waitingTimeLimit = 5 * 1000
+    waitingTimeLimit = 15 * 1000
 
     constructor({ maxPlayerCnt = 10 }: { maxPlayerCnt?: number }) {
         const roomId = util.generateRoomId()
