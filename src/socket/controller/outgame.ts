@@ -28,7 +28,7 @@ class OutgameController extends BaseController {
     }
 
     disconnect() {
-        console.log('[disconnect] outgame')
+        // console.log('[disconnect] outgame')
 
         const userId = this.getUserId()
         const room = roomService.leaveRoom(userId)
@@ -54,7 +54,6 @@ class OutgameController extends BaseController {
         this.updateRoomId(room.roomId)
         this.ingameCtrl.updateRoomId(room.roomId)
         this.broadcastRoomState(room)
-
         return room
     }
 

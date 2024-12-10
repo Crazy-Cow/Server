@@ -40,10 +40,10 @@ const handleSteal = async (
 
         await logEventRepository.addEvent(category, props)
 
-        let comboMessage
+        let comboMessage: ComboStealLogProps['combo']
         if (comboCnt == 2) comboMessage = 'double'
         else if (comboCnt == 3) comboMessage = 'triple'
-        else if (comboCnt >= 4) comboMessage = 'mutliple'
+        else if (comboCnt >= 4) comboMessage = 'multiple'
 
         if (comboMessage) {
             const data: ComboStealLogProps = {

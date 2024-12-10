@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io'
-import { OnEventData, OnEventName } from './types/on'
+import { /*OnEventData,*/ OnEventName } from './types/on'
 import { IngameController, OutgameController } from './controller'
 import { verifyToken } from '../utils/jwt'
 import roomService from '../service/rooms'
@@ -29,16 +29,16 @@ class SocketImplement {
         this.ingameCtrl.register()
     }
 
-    private handleDisconnect = (reason: OnEventData['disconnect']) => {
-        console.log(`[${this.socket.id}] disconnect (${reason})`)
+    private handleDisconnect = (/*reason: OnEventData['disconnect']*/) => {
+        // console.log(`[${this.socket.id}] disconnect (${reason})`)
         this.outgameCtrl.disconnect()
         this.ingameCtrl.disconnect()
     }
 
-    public logger = (msg: string, args?: OnEventData) => {
-        console.log(
-            `[${this.socket.id}] ${msg} ${args ? JSON.stringify(args) : ''}`
-        )
+    public logger = (/*msg: string, args?: OnEventData*/) => {
+        // console.log(
+        //     `[${this.socket.id}] ${msg} ${args ? JSON.stringify(args) : ''}`
+        // )
     }
 }
 
@@ -72,7 +72,7 @@ export function initSocket(io: Server) {
         const userId = socket.data.clientId
         const roomId = await roomService.getGameRoomIdByUserId(userId)
         if (roomId) {
-            console.log('게임중 - reconnect')
+            // console.log('게임중 - reconnect')
             socket.join(roomId)
             socket.data.roomId = roomId
         }
@@ -80,8 +80,8 @@ export function initSocket(io: Server) {
     })
 
     io.on<OnEventName>('connection', (socket: Socket) => {
-        const instance = new SocketImplement(socket)
-        instance.logger('complete connection')
+        /*const instance =*/ new SocketImplement(socket)
+        // instance.logger('complete connection')
     })
 }
 

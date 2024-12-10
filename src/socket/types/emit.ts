@@ -72,7 +72,7 @@ export type SocketEmitEvtDataGameLogSteal = {
     victim: { id: string; nickName: string }
 }
 
-export type StealComboType = 'double' | 'triple'
+export type StealComboType = 'double' | 'triple' | 'multiple'
 export type SocketEmitEvtDataGameLogStealCombo = {
     actor: { id: string; nickName: string; combo: StealComboType }
 }

@@ -74,7 +74,7 @@ class IngameController extends BaseController {
     }
 
     disconnect() {
-        console.log('[disconnect] ingame - 세션 유지')
+        // console.log('[disconnect] ingame - 세션 유지')
     }
 
     private handleMove = (data: OnEventData['move']) => {
@@ -96,7 +96,7 @@ class IngameController extends BaseController {
                 this.broadcast(room.roomId, 'game.state', data)
             },
             handleGameOver: (data) => {
-                console.log('게임 끝!')
+                // console.log('게임 끝!')
                 this.broadcast(room.roomId, 'game.over', data)
             },
         })
