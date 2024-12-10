@@ -28,7 +28,7 @@ export class TailTagMap extends CommonMap {
         const victim: Character = this.findCharacter(props.victimId)
         const timeStamp = Date.now()
 
-        console.log('[start] steal', Date.now())
+        // console.log('[start] steal', Date.now())
         await this.logRepository // FYI. 비동기
             .handleSteal({ ...props, roomId: this.getRoomId(), timeStamp })
             .then(({ comboMessage }) => {
@@ -48,7 +48,7 @@ export class TailTagMap extends CommonMap {
             actor: { id: props.actorId, nickName: actor.nickName },
             victim: { id: props.victimId, nickName: victim.nickName },
         }
-        console.log('[end] steal', Date.now())
+        // console.log('[end] steal', Date.now())
         this.broadcast('game.log.steal', data)
     }
 
