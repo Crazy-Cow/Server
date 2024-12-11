@@ -23,13 +23,20 @@ async function saveCombo(props: {
         category: 'combo-steal-multiple',
     })
 
+    const currentDoubleValue = await redisClient.hGet(doubleKey, userId)
+    const currentTripleValue = await redisClient.hGet(tripleKey, userId)
+
     if (comboCnt == 2) {
         await redisClient.hIncrBy(doubleKey, userId, 1)
     } else if (comboCnt == 3) {
-        await redisClient.hIncrBy(doubleKey, userId, -1)
+        if (parseInt(currentDoubleValue || '0') > 0) {
+            await redisClient.hIncrBy(doubleKey, userId, -1)
+        }
         await redisClient.hIncrBy(tripleKey, userId, 1)
     } else if (comboCnt >= 4) {
-        await redisClient.hIncrBy(tripleKey, userId, -1)
+        if (parseInt(currentTripleValue || '0') > 0) {
+            await redisClient.hIncrBy(tripleKey, userId, -1)
+        }
         await redisClient.hIncrBy(multipleKey, userId, 1)
     }
 }
