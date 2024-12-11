@@ -1,4 +1,5 @@
-import roomService, { Player } from '../../service/rooms'
+import { getIO } from '../../socket'
+import { Player } from '../../service/rooms'
 import { Socket } from 'socket.io'
 import { EmitEventName } from 'socket/types/emit'
 import { OnEventData } from 'socket/types/on'
@@ -15,14 +16,6 @@ export abstract class BaseController {
         const isGuest = socket.data.isGuest
         this.player = new Player({ userId, nickName, isGuest })
         this.roomId = socket.data.roomId
-
-        if (this.roomId) {
-            // 재접속 시 재연결
-            const room = roomService.findGameRoomById(this.roomId)
-            if (room) {
-                room.gameMap.registerSocket(this.getSocket())
-            }
-        }
     }
     abstract register(): void
     abstract disconnect(): void
@@ -52,10 +45,8 @@ export abstract class BaseController {
     }
 
     broadcast(roomId: string, emitMessage: EmitEventName, data: unknown) {
-        // self
-        this.socket.emit<EmitEventName>(emitMessage, data)
-        // the other
-        this.socket.to(roomId).emit<EmitEventName>(emitMessage, data)
+        const io = getIO()
+        io.to(roomId).emit<EmitEventName>(emitMessage, data)
     }
     logger = (msg: string, args?: OnEventData) => {
         console.log(

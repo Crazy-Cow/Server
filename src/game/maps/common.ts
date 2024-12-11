@@ -6,13 +6,13 @@ import {
 import { Character, CharacterCommonProps, Position } from '../objects/player'
 import { RabbitCharacter } from '../objects/rabbit'
 import { SantaCharacter } from '../objects/santa'
-import { Socket } from 'socket.io'
 import { GhostCharacter } from '../objects/ghost'
 import { Item, ItemType } from '../objects/item'
 import scaledObjects from '../utils/mapObjects'
 import ITEM from '../objects/item.const'
 import { CHARACTER_COLORS } from '../../game/objects/player.constant'
 import mapPositon from '../utils/positionUtils'
+import { getIO } from '../../socket'
 
 export enum CharacterType {
     RABBIT = 1,
@@ -30,7 +30,6 @@ export type MapStartLoopType = {
 
 export class CommonMap {
     private roomId = ''
-    private socket: Socket
     private remainRunningTime = 0
     private loopIdToReduceTime?: NodeJS.Timeout
     private loopIdToUpdateGameState?: NodeJS.Timeout
@@ -57,16 +56,10 @@ export class CommonMap {
         return this.roomId
     }
 
-    registerSocket(socket: Socket) {
-        this.socket = socket
-    }
-
     broadcast(emitMessage: EmitEventName, data: unknown) {
-        // self
-        this.socket.emit<EmitEventName>(emitMessage, data)
-        // the other
+        const io = getIO()
         const roomId = this.getRoomId()
-        this.socket.to(roomId).emit<EmitEventName>(emitMessage, data)
+        io.to(roomId).emit<EmitEventName>(emitMessage, data)
     }
 
     private spawnInitialItems() {

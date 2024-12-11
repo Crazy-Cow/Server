@@ -1,16 +1,8 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
-import roomService, { Room } from '../../service/rooms'
+import roomService from '../../service/rooms'
 import { TailTagMap } from '../../game/maps'
 import { ItemType } from '../../game/objects/item'
-
-// function handleSteal(character: Character, data: OnEventData['steal']) {
-//     character.steal = data.character.steal
-// }
-
-// function handleSkill(character: Character, data: OnEventData['skill']) {
-//     character.skill = data.character.skill
-// }
 
 function handleMove(
     characterId: string,
@@ -87,19 +79,6 @@ class IngameController extends BaseController {
         } else {
             console.error('palyer가 게임 실행중이 아니에요')
         }
-    }
-
-    handleStartGame = (room: Room) => {
-        room.gameMap.registerSocket(this.getSocket())
-        room.startGameLoop({
-            handleGameState: (data) => {
-                this.broadcast(room.roomId, 'game.state', data)
-            },
-            handleGameOver: (data) => {
-                // console.log('게임 끝!')
-                this.broadcast(room.roomId, 'game.over', data)
-            },
-        })
     }
 }
 

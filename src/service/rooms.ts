@@ -213,8 +213,6 @@ class RoomService {
                 },
                 handleGameOver: (data) => {
                     io.to(room.roomId).emit('game.over', data)
-                    // 게임 종료 후 정리 로직
-                    this.endGame(room)
                 },
             })
         }, 3000)
