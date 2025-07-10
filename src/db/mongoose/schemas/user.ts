@@ -5,9 +5,21 @@ const userScheme = new Schema({
         type: String,
         required: true,
     },
-    hashedPassword: {
+    token: {
         type: String,
-        required: true,
+        required: false,
+    },
+    challengermodeId: {
+        type: String,
+        required: false,
+    },
+    pictureUrl: {
+        type: String,
+        required: false,
+    },
+    isTournament: {
+        type: Boolean,
+        default: false,
     },
     createdAt: { type: Date, default: Date.now },
 })

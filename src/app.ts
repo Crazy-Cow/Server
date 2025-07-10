@@ -19,6 +19,10 @@ app.use(cookieParser())
 app.use(express.json())
 app.use('/user', routes.user)
 app.use('/game', routes.game)
+app.post(
+    '/webhook/challengermode/get-game-account',
+    routes.challengermodeGameAccountWebhook
+)
 
 async function startServer() {
     try {
