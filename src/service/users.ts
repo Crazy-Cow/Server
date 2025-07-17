@@ -43,6 +43,10 @@ class UserService {
     async getUserByChallengermodeId(challengermodeId: string) {
         return userRepository.getUserByChallengermodeId({ challengermodeId })
     }
+
+    async getUserByNickName(nickName: string) {
+        return userRepository.getUserByNickName({ nickName })
+    }
 }
 
 const userService = UserService.getInstance()

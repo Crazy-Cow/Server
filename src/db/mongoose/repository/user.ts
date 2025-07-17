@@ -32,16 +32,25 @@ const getUserByChallengermodeId = async (props: {
     return user
 }
 
+const getUserByNickName = async (props: { nickName: string }) => {
+    const user = await UserModel.findOne({
+        nickName: props.nickName,
+    })
+    return user
+}
+
 export type UserRepository = {
     checkDupNick: typeof checkDupNick
     createTournamentUser: typeof createTournamentUser
     getUserByChallengermodeId: typeof getUserByChallengermodeId
+    getUserByNickName: typeof getUserByNickName
 }
 
 const userRepository: UserRepository = {
     checkDupNick,
     createTournamentUser,
     getUserByChallengermodeId,
+    getUserByNickName,
 }
 
 export default userRepository

@@ -6,6 +6,8 @@ export type OnEventName =
     | 'connection' // 연결
     | 'disconnect' // 끊김
     | 'room.enter' // 빠른 시작
+    | 'room.launchGame' // KEM 게임 세션 시작
+    | 'room.confirm' // 캐릭터 선택 완료
     | 'room.leave' // 대기실 나가기
     | 'move'
 // | 'steal'
@@ -16,6 +18,8 @@ type OnEventDataMap = {
     connection: undefined
     disconnect: string // reason
     'room.enter': SocketOnEvtDataRoomEnter
+    'room.launchGame': SocketOnEvtDataRoomLaunchGame
+    'room.confirm': SocketOnEvtDataRoomConfirm
     'room.leave': undefined
     move: {
         steal: boolean
@@ -34,6 +38,20 @@ type OnEventDataMap = {
 
 export type SocketOnEvtDataRoomEnter = {
     charType: CharacterType
+    isKEM?: boolean // KEM 게임 여부
+}
+
+export type SocketOnEvtDataRoomLaunchGame = {
+    charType: CharacterType
+    gameSessionId: string // KEM 게임 세션 ID
+    challengermodeId?: string // Challengermode 계정 ID
+    challengermodeNickname?: string // Challengermode 닉네임
+}
+
+export type SocketOnEvtDataRoomConfirm = {
+    userId: string // 클라이언트에서 받은 userId
+    charType: CharacterType
+    gameSessionId: string // KEM 게임 세션 ID
 }
 
 export type OnEventData = {

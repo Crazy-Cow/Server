@@ -6,6 +6,7 @@ import {
 } from 'controller/games.type'
 import logRepository from '../db/redis/respository/log'
 import roomService from './rooms'
+import userService from './users'
 import { Character } from '../game/objects/player'
 import { CHARACTER_COLOR_PINK } from '../game/objects/player.constant'
 import { BADGES } from './game-summary.util'
@@ -263,6 +264,97 @@ class GameSummaryService {
         const result = await this.getRankGameRecord(room.roomId, room.gameMap)
 
         return result
+    }
+
+    // Challengermode API용 게임 결과 생성
+    async getChallengermodeGameResult(roomId: string) {
+        const room = roomService.findGameRoomById(roomId)
+        if (!room || !room.gameMap) return null
+
+        console.log('=== Challengermode 게임 결과 생성 ===')
+        console.log(
+            'room.players:',
+            room.players.map((p) => ({
+                userId: p.userId,
+                nickName: p.nickName,
+                teamNumber: p.teamNumber,
+            }))
+        )
+        console.log(
+            'gameMap.characters:',
+            room.gameMap.characters.map((c) => ({
+                id: c.id,
+                nickName: c.nickName,
+            }))
+        )
+
+        const gameRecords = await this.getRankGameRecord(
+            room.roomId,
+            room.gameMap
+        )
+
+        // 각 플레이어의 결과 생성 (Challengermode 스키마에 맞춤)
+        const competitorResults = await Promise.all(
+            gameRecords.rows.map(async (row) => {
+                // 플레이어 정보에서 teamNumber 가져오기 (userId로 정확히 매칭)
+                const player = room.players.find((p) => p.userId === row.userId)
+
+                console.log(
+                    `게임 결과 생성 - userId: ${row.userId}, nickName: ${row.nickName}, 찾은 player:`,
+                    player
+                )
+
+                // 콤보 수 계산 (더블 + 트리플 + 멀티플)
+                const comboCount =
+                    row.doubleCombos + row.tripleCombos + row.multipleCombos
+
+                const teamNumber = player?.teamNumber || 1 // 저장된 teamNumber 사용 (기본값 1)
+
+                console.log(
+                    `최종 teamNumber 할당 - userId: ${row.userId}, teamNumber: ${teamNumber}`
+                )
+
+                // accountId 결정 (challengermodeId 우선, 없으면 userId 사용)
+                let accountId = row.userId
+
+                // player.accountId가 있으면 사용
+                if (player?.accountId) {
+                    accountId = player.accountId
+                } else {
+                    // accountId가 없으면 유저의 challengermodeId를 찾아서 사용
+                    try {
+                        const user = await userService.getUserByNickName(
+                            row.nickName
+                        )
+                        if (user && user.challengermodeId) {
+                            accountId = user.challengermodeId
+                            console.log(
+                                `유저 ${row.nickName}의 challengermodeId: ${accountId}`
+                            )
+                        }
+                    } catch (error) {
+                        console.warn(
+                            `유저 ${row.nickName}의 challengermodeId를 찾을 수 없습니다:`,
+                            error
+                        )
+                    }
+                }
+
+                return {
+                    gameAccountReference: {
+                        accountId: accountId,
+                    },
+                    result: {
+                        GiftCount: row.gifts,
+                        ComboCount: comboCount,
+                    },
+                }
+            })
+        )
+
+        return {
+            competitorResults,
+        }
     }
 }
 

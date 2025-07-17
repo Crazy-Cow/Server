@@ -23,6 +23,14 @@ app.post(
     '/webhook/challengermode/get-game-account',
     routes.challengermodeGameAccountWebhook
 )
+app.post(
+    '/webhook/challengermode/create-game-session',
+    routes.challengermodeCreateGameSessionWebhook
+)
+app.post(
+    '/webhook/challengermode/get-game-session',
+    routes.challengermodeGetGameSessionWebhook
+)
 
 async function startServer() {
     try {

@@ -34,3 +34,9 @@ export type SignUpRequest = {
     password: string
     passwordConfirm: string
 }
+
+export type TournamentInResponse = {
+    userId: string
+    linked: boolean
+    accountId?: string
+}

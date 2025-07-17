@@ -5,12 +5,14 @@ import {
     GetRandomNickNameResponse,
     GuestInRequest,
     GuestInResponse,
+    TournamentInResponse,
 } from './users.type'
 import StatusCode from '../constants/statusCode'
 import { createError as createErrorRes, ErrorResponse } from '../utils/error'
 import util from '../service/users.util'
 import { generateAccessToken } from '../utils/jwt'
 import userService from '../service/users'
+import { getBotAccessToken } from '../utils/challengermodeBotToken'
 
 export const getRandomNicknameController = (
     _,
@@ -165,7 +167,7 @@ export const tournamentInUserController = async (
             redirectUri: string
         }
     >,
-    res: Response<{ userId: string } | ErrorResponse>
+    res: Response<TournamentInResponse | ErrorResponse>
 ) => {
     const { nickName, authorizationCode, codeVerifier, redirectUri } = req.body
 
@@ -214,8 +216,58 @@ export const tournamentInUserController = async (
             userInfo.picture
         )
 
+        // 5. Challengermode 계정 연동(verification) API 호출
+        // 1) Verification Token 생성
+        const verificationTokenRes = await fetch(
+            `https://publicapi.challengermode.com/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/generate_verification_token`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${tokenResponse.access_token}`,
+                    'Content-Type': 'application/json',
+                },
+            }
+        )
+        if (!verificationTokenRes.ok) {
+            const errorText = await verificationTokenRes.text()
+            console.error('Verification token 생성 실패:', errorText)
+            res.status(500).json(
+                createErrorRes({ msg: 'Verification token 생성 실패' })
+            )
+            return
+        }
+        const { oneTimeToken } = await verificationTokenRes.json()
+
+        // 2) Verify Game Account
+        const botAccessKey = await getBotAccessToken()
+        const verifyRes = await fetch(
+            `https://publicapi.challengermode.com/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/verify`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${botAccessKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameAccountReference: { accountId: userInfo.sub },
+                    accountLinkingToken: oneTimeToken,
+                    overrideExisting: true,
+                }),
+            }
+        )
+        if (!verifyRes.ok) {
+            const errorText = await verifyRes.text()
+            console.error('계정 연동(verify) 실패:', errorText)
+            res.status(500).json(
+                createErrorRes({ msg: '계정 연동(verify) 실패' })
+            )
+            return
+        }
+
         res.status(200).json({
             userId: userInfo.nickname,
+            accountId: userInfo.sub, // Challengermode accountId 추가
+            linked: true,
         })
     } catch (error) {
         console.error('토너먼트 인증 에러:', error)
