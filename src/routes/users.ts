@@ -13,5 +13,6 @@ router.post('/enter', ctrl.createUserController)
 router.post('/enter/tournament', ctrl.tournamentInUserController)
 router.post('/guest-in', ctrl.guestInUserController)
 router.post('/sign-out', ctrl.signOutUserController)
+router.post('/verify-game-account', ctrl.verifyGameAccountController)
 
 export default router

@@ -6,11 +6,13 @@ import {
     GuestInRequest,
     GuestInResponse,
     TournamentInResponse,
+    VerifyGameAccountRequest,
+    VerifyGameAccountResponse,
 } from './users.type'
 import StatusCode from '../constants/statusCode'
 import { createError as createErrorRes, ErrorResponse } from '../utils/error'
 import util from '../service/users.util'
-import { generateAccessToken } from '../utils/jwt'
+import { generateAccessToken, verifyToken } from '../utils/jwt'
 import userService from '../service/users'
 import { getBotAccessToken } from '../utils/challengermodeBotToken'
 
@@ -290,3 +292,89 @@ export const tournamentInUserController = async (
 }
 
 export const signOutUserController = () => {}
+
+// Intent game account linking을 위한 컨트롤러
+export const verifyGameAccountController = async (
+    req: Request<object, object, VerifyGameAccountRequest>,
+    res: Response<VerifyGameAccountResponse | ErrorResponse>
+) => {
+    const { accountLinkingToken } = req.body
+
+    if (!accountLinkingToken) {
+        res.status(400).json(
+            createErrorRes({ msg: '[accountLinkingToken] 필드 확인' })
+        )
+        return
+    }
+
+    try {
+        // 1. JWT 토큰에서 사용자 정보 추출
+        const authHeader = req.headers.authorization
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            res.status(401).json(
+                createErrorRes({ msg: '인증 토큰이 필요합니다' })
+            )
+            return
+        }
+
+        const token = authHeader.split(' ')[1]
+        const user = verifyToken(token)
+
+        if (!user || !user.userId) {
+            res.status(401).json(
+                createErrorRes({ msg: '유효하지 않은 토큰입니다' })
+            )
+            return
+        }
+
+        // 2. Challengermode Bot Access Token 획득
+        const botAccessToken = await getBotAccessToken()
+
+        // 3. Challengermode verify-game-account 엔드포인트 호출
+        const verifyResponse = await fetch(
+            `https://publicapi.challengermode.com/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/verify`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${botAccessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameAccountReference: { accountId: user.userId },
+                    accountLinkingToken: accountLinkingToken,
+                    overrideExisting: true,
+                }),
+            }
+        )
+
+        if (!verifyResponse.ok) {
+            const errorText = await verifyResponse.text()
+            console.error('Challengermode 계정 연동 실패:', errorText)
+            res.status(500).json(
+                createErrorRes({
+                    msg: 'Challengermode 계정 연동에 실패했습니다',
+                })
+            )
+            return
+        }
+
+        const verifyResult = await verifyResponse.json()
+        console.log('Challengermode 계정 연동 성공:', verifyResult)
+
+        // 사용자 정보 조회 (challengermodeId로)
+        const userInfo = await userService.getUserByChallengermodeId(
+            user.userId
+        )
+
+        res.status(200).json({
+            success: true,
+            userId: userInfo?.nickName || user.nickName,
+            accountId: userInfo?.challengermodeId || user.userId,
+        })
+    } catch (error) {
+        console.error('게임 계정 인증 에러:', error)
+        res.status(500).json(
+            createErrorRes({ msg: '게임 계정 인증에 실패했습니다' })
+        )
+    }
+}

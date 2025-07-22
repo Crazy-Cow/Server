@@ -17,6 +17,7 @@ const app: Express = express()
 app.use(cors(corsOption))
 app.use(cookieParser())
 app.use(express.json())
+
 app.use('/user', routes.user)
 app.use('/game', routes.game)
 app.post('/webhook/challengermode/get-game-account', (req, res, next) => {
