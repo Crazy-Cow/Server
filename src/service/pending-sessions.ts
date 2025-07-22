@@ -10,19 +10,13 @@ class PendingSessionService {
     > = new Map()
 
     // 세션을 대기 목록에 추가
-    addPendingSession(
-        sessionId: string,
-        gameSessionId: string,
-        roomId?: string
-    ) {
+    addPendingSession(sessionId: string, roomId?: string) {
         this.pendingSessions.set(sessionId, {
-            gameSessionId,
+            gameSessionId: sessionId,
             createdAt: new Date(),
             roomId,
         })
-        console.log(
-            `대기 세션 추가: sessionId=${sessionId}, gameSessionId=${gameSessionId}`
-        )
+        console.log(`대기 세션 추가: sessionId=${sessionId}`)
     }
 
     // 세션을 대기 목록에서 제거

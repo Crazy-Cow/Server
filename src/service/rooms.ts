@@ -6,6 +6,7 @@ import { getIO } from '../socket'
 import challengermodeService from './challengermode'
 import gameSummaryService from './game-summary'
 import userService from './users'
+import { SocketEmitEvtDataGameOver } from '../socket/types/emit'
 type PlayerProps = {
     userId: string
     nickName: string
@@ -63,7 +64,7 @@ export class Room {
         this.createdAt = new Date()
         this.state = 'waiting'
         this.maxPlayerCnt = maxPlayerCnt
-        this.gameMap = new TailTagMap({ roomId, remainRunningTime: 2 * 60 })
+        this.gameMap = new TailTagMap({ roomId, remainRunningTime: 30 })
     }
 
     getPlayerCnt = () => {
@@ -337,21 +338,26 @@ class RoomService {
             }
         }
 
-        // 4. 중복 입장 방지: 이미 해당 대기실에 있는 플레이어인지 확인
-        const existingPlayer = waitingRoom.players.find(
-            (p) => p.userId === player.userId
+        // 4. accountId로 기존 임시 플레이어 찾기
+        const existingTempPlayer = waitingRoom.players.find(
+            (p) => p.accountId === player.accountId
         )
-        if (existingPlayer) {
+
+        if (existingTempPlayer) {
+            // 기존 임시 플레이어를 클라이언트 정보로 업데이트
+            existingTempPlayer.userId = player.userId
+            existingTempPlayer.nickName = player.nickName
+            existingTempPlayer.updateCharType(player.charType)
             console.log(
-                `플레이어 ${player.nickName}이 이미 KEM 대기실에 있음: gameSessionId=${gameSessionId}`
+                `기존 임시 플레이어 업데이트: ${player.nickName} (accountId=${player.accountId})`
             )
             return waitingRoom
         }
 
-        // 5. 플레이어를 대기실에 추가
+        // 5. 새로운 플레이어를 대기실에 추가 (임시 플레이어가 없는 경우)
         waitingRoom.addPlayer(player)
         console.log(
-            `플레이어 ${player.nickName}이 KEM 대기실에 입장: gameSessionId=${gameSessionId}`
+            `새로운 플레이어 ${player.nickName}이 KEM 대기실에 입장: gameSessionId=${gameSessionId}`
         )
 
         // 6. 첫 번째 플레이어가 입장할 때 Creating 상태 보고
@@ -367,113 +373,157 @@ class RoomService {
         const prevWaitingRoom = this.roomPool.waitingRoom
         this.roomPool.waitingRoom.addPlayer(player)
 
-        // 첫 번째 플레이어가 입장할 때 Creating 상태 보고 (KEM 게임인 경우에만)
-        if (
-            this.roomPool.waitingRoom.getPlayerCnt() === 1 &&
-            this.roomPool.waitingRoom.isChallengermodeGame
-        ) {
-            await this.roomPool.waitingRoom.reportToChallengermode('creating')
-        }
-
-        // 일반 게임: 정원이 찰 때 자동 시작
-        if (!this.roomPool.waitingRoom.isChallengermodeGame) {
-            if (this.roomPool.waitingRoom.canStartGame()) {
-                // 정원 찼을 때 즉각 시작
-                await this.startGame(this.roomPool.waitingRoom)
-            } else {
-                // 정원이 꽉 차지 않았다면 타이머 설정
-                const waitingRoom = this.roomPool.waitingRoom
-                if (!waitingRoom.waitingTimeout) {
-                    waitingRoom.waitingTimeout = setTimeout(async () => {
-                        if (waitingRoom.state === 'waiting') {
-                            const playerCount = waitingRoom.getPlayerCnt()
-                            if (playerCount >= 2) {
-                                // 2명 이상이면 강제 시작
-                                await this.startGame(waitingRoom)
-                            }
-                        }
-                        waitingRoom.waitingTimeout = null
-                    }, waitingRoom.waitingTimeLimit)
-                }
-            }
-        } else {
-            // KEM 게임: 2명 이상이어도 webhook 대기 (타이머만 설정)
-            const waitingRoom = this.roomPool.waitingRoom
-            if (!waitingRoom.waitingTimeout) {
-                waitingRoom.waitingTimeout = setTimeout(async () => {
-                    if (waitingRoom.state === 'waiting') {
-                        const playerCount = waitingRoom.getPlayerCnt()
-                        if (playerCount >= 2) {
-                            // 2명 이상이지만 webhook 대기 (게임 시작 안함)
-                            console.log(
-                                'KEM 게임: 2명 이상 대기 중, webhook 대기...'
-                            )
-                        }
-                    }
-                    waitingRoom.waitingTimeout = null
-                }, waitingRoom.waitingTimeLimit)
-            }
-        }
+        await this.handleFirstPlayerJoining()
+        await this.handleGameStartLogic()
 
         return prevWaitingRoom
     }
 
+    private async handleFirstPlayerJoining() {
+        const waitingRoom = this.roomPool.waitingRoom
+        if (
+            waitingRoom.getPlayerCnt() === 1 &&
+            waitingRoom.isChallengermodeGame
+        ) {
+            await waitingRoom.reportToChallengermode('creating')
+        }
+    }
+
+    private async handleGameStartLogic() {
+        const waitingRoom = this.roomPool.waitingRoom
+
+        if (waitingRoom.isChallengermodeGame) {
+            this.setupKemGameTimer(waitingRoom)
+        } else {
+            await this.handleRegularGameStart(waitingRoom)
+        }
+    }
+
+    private async handleRegularGameStart(waitingRoom: Room) {
+        if (waitingRoom.canStartGame()) {
+            await this.startGame(waitingRoom)
+        } else {
+            this.setupRegularGameTimer(waitingRoom)
+        }
+    }
+
+    private setupRegularGameTimer(waitingRoom: Room) {
+        if (waitingRoom.waitingTimeout) return
+
+        waitingRoom.waitingTimeout = setTimeout(async () => {
+            if (
+                waitingRoom.state === 'waiting' &&
+                waitingRoom.getPlayerCnt() >= 2
+            ) {
+                await this.startGame(waitingRoom)
+            }
+            waitingRoom.waitingTimeout = null
+        }, waitingRoom.waitingTimeLimit)
+    }
+
+    private setupKemGameTimer(waitingRoom: Room) {
+        if (waitingRoom.waitingTimeout) return
+
+        waitingRoom.waitingTimeout = setTimeout(async () => {
+            if (
+                waitingRoom.state === 'waiting' &&
+                waitingRoom.getPlayerCnt() >= 2
+            ) {
+                console.log('KEM 게임: 2명 이상 대기 중, webhook 대기...')
+            }
+            waitingRoom.waitingTimeout = null
+        }, waitingRoom.waitingTimeLimit)
+    }
+
     async startGame(room: Room) {
+        this.prepareRoomForGame(room)
+        await this.handleChallengermodeReporting(room)
+        await this.initializeGame(room)
+        this.scheduleGameStart(room)
+    }
+
+    private prepareRoomForGame(room: Room) {
         room.state = 'playing'
         this.roomPool.gameRooms.push(room)
+        this.clearWaitingTimeout(room)
+        this.handleWaitingRoomReplacement(room)
+    }
+
+    private clearWaitingTimeout(room: Room) {
         if (room.waitingTimeout) {
             clearTimeout(room.waitingTimeout)
             room.waitingTimeout = null
         }
+    }
 
-        // 일반 게임인 경우에만 대기실 새로 생성
+    private handleWaitingRoomReplacement(room: Room) {
         if (!room.isChallengermodeGame) {
             this.roomPool.waitingRoom = new Room({})
         }
         // KEM 게임인 경우 대기실 유지 (webhook으로 시작된 게임이므로)
+    }
 
+    private async handleChallengermodeReporting(room: Room) {
+        if (!room.isChallengermodeGame) return
+
+        await room.reportToChallengermode('created')
+        await room.reportToChallengermode('starting')
+    }
+
+    private async initializeGame(room: Room) {
         const io = getIO()
-
-        // Challengermode 게임인 경우에만 상태 보고
-        if (room.isChallengermodeGame) {
-            // Created 상태 보고 (대기실에서 게임 시작 준비 완료)
-            await room.reportToChallengermode('created')
-
-            // Starting 상태 보고 (게임 시작 준비)
-            await room.reportToChallengermode('starting')
-        }
-
-        // 게임 준비 신호 보내고 로드
         io.to(room.roomId).emit('game.ready')
         await room.loadGame()
+    }
 
-        // 3초 후 실제 시작
+    private scheduleGameStart(room: Room) {
         setTimeout(async () => {
-            // Challengermode 게임인 경우에만 Started 상태 보고
-            if (room.isChallengermodeGame) {
-                await room.reportToChallengermode('started')
-            }
-
-            io.to(room.roomId).emit('game.start', {
-                players: room.players,
-            })
-            room.startGameLoop({
-                handleGameState: (data) => {
-                    io.to(room.roomId).emit('game.state', data)
-                },
-                handleGameOver: async (data) => {
-                    console.log(
-                        `게임 종료 - KEM: ${room.isChallengermodeGame}, Room: ${room.roomId}`
-                    )
-
-                    // Challengermode 게임인 경우에만 Finished 상태 보고
-                    if (room.isChallengermodeGame) {
-                        await room.reportToChallengermode('finished')
-                    }
-                    io.to(room.roomId).emit('game.over', data)
-                },
-            })
+            await this.startGameExecution(room)
         }, 3000)
+    }
+
+    private async startGameExecution(room: Room) {
+        await this.reportGameStarted(room)
+        this.emitGameStart(room)
+        this.startGameLoop(room)
+    }
+
+    private async reportGameStarted(room: Room) {
+        if (room.isChallengermodeGame) {
+            await room.reportToChallengermode('started')
+        }
+    }
+
+    private emitGameStart(room: Room) {
+        const io = getIO()
+        io.to(room.roomId).emit('game.start', {
+            players: room.players,
+        })
+    }
+
+    private startGameLoop(room: Room) {
+        room.startGameLoop({
+            handleGameState: (data) => {
+                const io = getIO()
+                io.to(room.roomId).emit('game.state', data)
+            },
+            handleGameOver: async (data) => {
+                await this.handleGameOver(room, data)
+            },
+        })
+    }
+
+    private async handleGameOver(room: Room, data: SocketEmitEvtDataGameOver) {
+        console.log(
+            `게임 종료 - KEM: ${room.isChallengermodeGame}, Room: ${room.roomId}`
+        )
+
+        if (room.isChallengermodeGame) {
+            await room.reportToChallengermode('finished')
+        }
+
+        const io = getIO()
+        io.to(room.roomId).emit('game.over', data)
     }
 
     leaveRoom(userId: string) {

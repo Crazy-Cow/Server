@@ -39,4 +39,5 @@ export type TournamentInResponse = {
     userId: string
     linked: boolean
     accountId?: string
+    sessionId?: string // 추가: 게임 세션 ID (sessionId가 제공된 경우)
 }

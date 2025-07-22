@@ -1,6 +1,6 @@
 import { BaseController } from './base'
 import { OnEventData, OnEventName } from '../types/on'
-import roomService from '../../service/rooms'
+import roomService, { Player } from '../../service/rooms'
 import { TailTagMap } from '../../game/maps'
 import { ItemType } from '../../game/objects/item'
 
@@ -70,7 +70,11 @@ class IngameController extends BaseController {
     }
 
     // 이미 시작된 게임에 참여하는 플레이어를 처리
-    joinStartedGame(gameSessionId: string, charType?: number) {
+    joinStartedGame(
+        gameSessionId: string,
+        charType?: number,
+        incomingPlayer?: Player
+    ) {
         const userId = this.getUserId()
         const roomId = this.getRoomId()
         const room = roomService.findGameRoomById(roomId)
@@ -87,8 +91,80 @@ class IngameController extends BaseController {
                 `플레이어 ${userId}를 이미 시작된 게임에 추가: gameSessionId=${gameSessionId}`
             )
 
-            // 플레이어를 게임에 추가
-            const player = this.getPlayer()
+            // 플레이어를 게임에 추가 (incomingPlayer가 있으면 사용, 없으면 this.getPlayer() 사용)
+            const player = incomingPlayer || this.getPlayer()
+            console.log(`🔍 사용할 플레이어 정보:`, {
+                userId: player.userId,
+                nickName: player.nickName,
+                accountId: player.accountId,
+                isIncomingPlayer: !!incomingPlayer,
+            })
+
+            // accountId로 기존 플레이어 찾기 (매핑)
+            console.log(
+                `🔍 accountId 매핑 시도: player.accountId=${player.accountId}`
+            )
+            console.log(
+                `🔍 현재 게임방 플레이어들:`,
+                room.players.map((p) => ({
+                    userId: p.userId,
+                    nickName: p.nickName,
+                    accountId: p.accountId,
+                    teamNumber: p.teamNumber,
+                }))
+            )
+
+            if (player.accountId) {
+                const existingTempPlayer = room.players.find(
+                    (p) => p.accountId === player.accountId
+                )
+
+                if (existingTempPlayer) {
+                    console.log(`✅ 기존 임시 플레이어 발견:`, {
+                        userId: existingTempPlayer.userId,
+                        nickName: existingTempPlayer.nickName,
+                        accountId: existingTempPlayer.accountId,
+                        teamNumber: existingTempPlayer.teamNumber,
+                    })
+
+                    // 기존 임시 플레이어를 클라이언트 정보로 업데이트 (accountId는 유지)
+                    existingTempPlayer.userId = player.userId
+                    existingTempPlayer.nickName = player.nickName
+                    existingTempPlayer.updateCharType(charType || 1)
+                    // accountId는 원래 값 유지 (덮어쓰지 않음)
+
+                    // gameMap의 캐릭터 정보도 업데이트
+                    // 기존 임시 플레이어의 원래 userId로 gameMap에서 찾기
+                    const originalUserId = existingTempPlayer.accountId
+                        ? `User_${existingTempPlayer.accountId.slice(-8)}`
+                        : existingTempPlayer.userId
+                    const existingCharacter =
+                        room.gameMap.findCharacter(originalUserId)
+
+                    if (existingCharacter) {
+                        existingCharacter.id = player.userId
+                        existingCharacter.nickName = player.nickName
+                        console.log(
+                            `✅ gameMap 캐릭터 업데이트: ${originalUserId} -> ${player.userId}`
+                        )
+                    } else {
+                        console.log(
+                            `❌ gameMap에서 캐릭터를 찾을 수 없음: ${originalUserId}`
+                        )
+                    }
+
+                    console.log(
+                        `✅ 기존 임시 플레이어 매핑 완료: ${player.userId} (accountId=${player.accountId})`
+                    )
+                    return // 새로운 플레이어 추가하지 않음
+                } else {
+                    console.log(
+                        `❌ accountId로 기존 플레이어를 찾을 수 없음: ${player.accountId}`
+                    )
+                }
+            } else {
+                console.log(`❌ player.accountId가 없음`)
+            }
 
             // charType이 전달되었으면 설정, 아니면 기본값 사용
             if (charType !== undefined) {

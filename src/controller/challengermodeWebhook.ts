@@ -5,6 +5,18 @@ import roomService, { Room, Player } from '../service/rooms'
 import gameSummaryService from '../service/game-summary'
 import pendingSessionService from '../service/pending-sessions'
 
+type Competitor = {
+    gameAccountReference?: {
+        accountId: string
+    }
+    teamNumber?: number | string
+}
+
+type ChallengermodeInfo = {
+    accountId: string
+    teamNumber: number
+}
+
 // HMAC 인증 함수
 function verifyHMAC(req: Request): boolean {
     try {
@@ -110,6 +122,22 @@ async function getGameAccountInfo(accountId: string) {
     }
 }
 
+// Challengermode API에서 사용자 정보 조회 (Bot access token 사용)
+async function getChallengermodeUserInfo(accountId: string) {
+    try {
+        // Bot access token으로는 특정 사용자 정보를 조회할 수 없으므로
+        // accountId를 nickname으로 사용하고, 나중에 OAuth 로그인 시 실제 정보로 업데이트
+        return {
+            accountId: accountId,
+            nickname: `User_${accountId.slice(-8)}`, // accountId의 마지막 8자리 사용
+            profileImageUrl: null,
+        }
+    } catch (error) {
+        console.error('Challengermode 사용자 정보 조회 실패:', error)
+        return null
+    }
+}
+
 // Challengermode get-game-account webhook 핸들러
 export async function challengermodeGameAccountWebhook(
     req: Request,
@@ -153,202 +181,250 @@ export async function challengermodeGameAccountWebhook(
     }
 }
 
-const getWaitingRoom = (challengermodeGameSessionId: string) => {
-    let waitingRoom = roomService.findWaitingRoomByGameSessionId(
+// Helper functions for challengermodeCreateGameSessionWebhook
+function getWaitingRoom(challengermodeGameSessionId: string) {
+    return roomService.findWaitingRoomByGameSessionId(
         challengermodeGameSessionId
     )
-
-    // NOTE: 이 로직의 필요성에 대해 나중에 다시 생각해봐야함
-    if (!waitingRoom) {
-        // 2. gameSessionId가 없는 기존 대기실이 있는지 확인
-        const existingWaitingRoom = roomService.roomPool.waitingRoom
-        if (existingWaitingRoom.players.length > 0) {
-            // 기존 대기실에 플레이어들이 있으면 그 대기실 사용
-            waitingRoom = existingWaitingRoom
-            waitingRoom.gameSessionId = challengermodeGameSessionId
-            waitingRoom.isChallengermodeGame = true // KEM 게임 표시
-            console.log(
-                `기존 대기실을 KEM 게임으로 설정: gameSessionId=${challengermodeGameSessionId}, 기존 플레이어 수=${waitingRoom.players.length}`
-            )
-        } else {
-            // 대기실이 없으면 새로 생성
-            waitingRoom = new Room({})
-            waitingRoom.gameSessionId = challengermodeGameSessionId
-            waitingRoom.isChallengermodeGame = true // KEM 게임 표시
-            roomService.roomPool.waitingRoom = waitingRoom
-            console.log(
-                `새로운 KEM 대기실 생성: gameSessionId=${challengermodeGameSessionId}`
-            )
-        }
-    }
-    return waitingRoom
 }
 
-// Challengermode create-game-session webhook 핸들러
+function parseTeamNumber(
+    teamNumber: number | string | undefined,
+    index: number
+): number {
+    if (typeof teamNumber === 'string') {
+        return parseInt(teamNumber, 10)
+    }
+    return teamNumber !== undefined ? teamNumber : index
+}
+
+function createChallengermodePlayerMap(
+    competitors: Competitor[]
+): Map<string, ChallengermodeInfo> {
+    const challengermodePlayerMap = new Map()
+
+    competitors.forEach((competitor, index) => {
+        const accountId = competitor.gameAccountReference?.accountId
+        const teamNumber = competitor.teamNumber
+
+        if (accountId) {
+            challengermodePlayerMap.set(accountId, {
+                accountId,
+                teamNumber: parseTeamNumber(teamNumber, index),
+            })
+        }
+    })
+
+    return challengermodePlayerMap
+}
+
+function findChallengermodeInfo(
+    existingPlayer: Player,
+    challengermodePlayerMap: Map<string, ChallengermodeInfo>
+): ChallengermodeInfo | null {
+    // 1. accountId로 직접 매칭
+    if (existingPlayer.accountId) {
+        const info = challengermodePlayerMap.get(existingPlayer.accountId)
+        if (info) return info
+    }
+
+    // 2. userId로 매칭
+    return challengermodePlayerMap.get(existingPlayer.userId) || null
+}
+
+function assignChallengermodeInfo(
+    existingPlayer: Player,
+    challengermodeInfo: ChallengermodeInfo
+) {
+    existingPlayer.teamNumber = challengermodeInfo.teamNumber
+    existingPlayer.accountId = challengermodeInfo.accountId
+    console.log(
+        `✅ 기존 플레이어 ${existingPlayer.nickName}에게 매핑: teamNumber=${challengermodeInfo.teamNumber}, accountId=${challengermodeInfo.accountId}`
+    )
+}
+
+function assignDefaultTeamNumber(existingPlayer: Player, index: number) {
+    existingPlayer.teamNumber = index
+    console.log(
+        `⚠️ 기존 플레이어 ${existingPlayer.nickName}에게 기본값 할당: teamNumber=${index}`
+    )
+}
+
+async function createTempPlayer(
+    accountId: string,
+    teamNumber: number | string | undefined,
+    index: number
+): Promise<Player> {
+    const userInfo = await getChallengermodeUserInfo(accountId)
+    const tempPlayer = new Player({
+        userId: userInfo?.nickname || `Player_${index + 1}`,
+        nickName: userInfo?.nickname || `Player_${index + 1}`,
+        isGuest: false,
+        teamNumber: parseTeamNumber(teamNumber, index),
+        accountId: accountId,
+    })
+    // NOTE: 임시로 RABBIT 캐릭터로 설정
+    tempPlayer.updateCharType(1) // RABBIT
+    return tempPlayer
+}
+
+function logExistingPlayers(waitingRoom: Room) {
+    console.log(
+        '기존 대기실 플레이어들:',
+        waitingRoom.players.map((p) => ({
+            userId: p.userId,
+            nickName: p.nickName,
+            teamNumber: p.teamNumber,
+        }))
+    )
+}
+
+function logMappedPlayers(waitingRoom: Room) {
+    console.log(
+        '매핑 후 플레이어들:',
+        waitingRoom.players.map((p) => ({
+            userId: p.userId,
+            nickName: p.nickName,
+            teamNumber: p.teamNumber,
+            accountId: p.accountId,
+        }))
+    )
+}
+
+async function createNewPlayersFromCompetitors(
+    waitingRoom: Room,
+    competitors: Competitor[]
+) {
+    for (const [index, competitor] of competitors.entries()) {
+        const accountId = competitor.gameAccountReference?.accountId
+        const teamNumber = competitor.teamNumber
+
+        if (accountId) {
+            const tempPlayer = await createTempPlayer(
+                accountId,
+                teamNumber,
+                index
+            )
+            waitingRoom.addPlayer(tempPlayer)
+        }
+    }
+}
+
+async function mapExistingPlayers(
+    waitingRoom: Room,
+    competitors: Competitor[]
+) {
+    const challengermodePlayerMap = createChallengermodePlayerMap(competitors)
+    const existingPlayers = waitingRoom.players
+
+    existingPlayers.forEach((existingPlayer, index) => {
+        const challengermodeInfo = findChallengermodeInfo(
+            existingPlayer,
+            challengermodePlayerMap
+        )
+
+        if (challengermodeInfo) {
+            assignChallengermodeInfo(existingPlayer, challengermodeInfo)
+        } else {
+            assignDefaultTeamNumber(existingPlayer, index)
+        }
+    })
+}
+
+async function handleCompetitorsMapping(
+    waitingRoom: Room,
+    competitors: Competitor[]
+) {
+    if (!competitors || competitors.length === 0) return
+
+    logExistingPlayers(waitingRoom)
+
+    if (waitingRoom.players.length > 0) {
+        // 대기실에 기존 플레이어가 있는 경우 - KEM 버튼으로 들어갔을 시
+        await mapExistingPlayers(waitingRoom, competitors)
+    } else {
+        // LaunchGame으로 호출 시 - 대기실에 기존 플레이어가 없음
+        await createNewPlayersFromCompetitors(waitingRoom, competitors)
+    }
+
+    logMappedPlayers(waitingRoom)
+}
+
+async function setupPendingSession(
+    challengermodeGameSessionId: string,
+    waitingRoom: Room
+) {
+    pendingSessionService.addPendingSession(
+        challengermodeGameSessionId,
+        waitingRoom.roomId
+    )
+}
+
+function createGameSessionResponse(
+    waitingRoom: Room,
+    challengermodeGameSessionId: string
+) {
+    return {
+        state: 2, // Created (게임 세션 생성 완료)
+        gameTag: {
+            gameSessionId: challengermodeGameSessionId,
+        },
+        competitors: waitingRoom.players.map((player) => ({
+            gameAccountReference: {
+                accountId: player.accountId || player.userId,
+            },
+            teamNumber: player.teamNumber,
+        })),
+        dateStarted: new Date().toISOString(),
+    }
+}
+
 export async function challengermodeCreateGameSessionWebhook(
     req: Request,
     res: Response
 ) {
     try {
-        // HMAC 인증 확인
         if (!verifyHMAC(req)) {
             console.log('HMAC 인증 실패')
-            res.status(401).json({
+            return res.status(401).json({
                 title: 'Unauthorized',
                 status: 401,
                 detail: 'Invalid HMAC signature',
             })
-            return
         }
+
         console.log('=== Challengermode Create Game Session Webhook 요청 ===')
 
         const { data } = req.body
-
         const { challengermodeGameSessionId, competitors } = data
 
-        // 게임 세션 생성 로직
-        // 1. gameSessionId로 대기실 찾기
-        const waitingRoom = getWaitingRoom(challengermodeGameSessionId)
+        let waitingRoom = getWaitingRoom(challengermodeGameSessionId)
 
-        // 3. 기존 플레이어들과 Challengermode 정보 매핑
-        console.log(
-            '기존 대기실 플레이어들:',
-            waitingRoom.players.map((p) => ({
-                userId: p.userId,
-                nickName: p.nickName,
-                teamNumber: p.teamNumber,
-            }))
-        )
-
-        if (competitors && competitors.length > 0) {
-            // 기존 플레이어가 있으면 매핑, 없으면 새로 생성
-            if (waitingRoom.players.length > 0) {
-                // 기존 플레이어들에게 Challengermode 정보 매핑
-                const challengermodePlayerMap = new Map()
-                competitors.forEach((competitor, index) => {
-                    const accountId = competitor.gameAccountReference?.accountId
-                    const teamNumber = competitor.teamNumber
-
-                    if (accountId) {
-                        challengermodePlayerMap.set(accountId, {
-                            accountId,
-                            teamNumber:
-                                typeof teamNumber === 'string'
-                                    ? parseInt(teamNumber, 10)
-                                    : teamNumber !== undefined
-                                      ? teamNumber
-                                      : index,
-                        })
-                    }
-                })
-
-                const existingPlayers = waitingRoom.players
-                existingPlayers.forEach((existingPlayer, index) => {
-                    let challengermodeInfo = null
-
-                    // 1. accountId로 직접 매칭
-                    if (existingPlayer.accountId) {
-                        challengermodeInfo = challengermodePlayerMap.get(
-                            existingPlayer.accountId
-                        )
-                    }
-
-                    // 2. userId로 매칭
-                    if (
-                        !challengermodeInfo &&
-                        challengermodePlayerMap.has(existingPlayer.userId)
-                    ) {
-                        challengermodeInfo = challengermodePlayerMap.get(
-                            existingPlayer.userId
-                        )
-                    }
-
-                    if (challengermodeInfo) {
-                        existingPlayer.teamNumber =
-                            challengermodeInfo.teamNumber
-                        existingPlayer.accountId = challengermodeInfo.accountId
-                        console.log(
-                            `✅ 기존 플레이어 ${existingPlayer.nickName}에게 매핑: teamNumber=${challengermodeInfo.teamNumber}, accountId=${challengermodeInfo.accountId}`
-                        )
-                    } else {
-                        existingPlayer.teamNumber = index
-                        console.log(
-                            `⚠️ 기존 플레이어 ${existingPlayer.nickName}에게 기본값 할당: teamNumber=${index}`
-                        )
-                    }
-                })
-            } else {
-                // 기존 플레이어가 없으면 competitors 정보로 새로 생성
-                console.log(
-                    '기존 플레이어가 없어서 competitors 정보로 새로 생성'
-                )
-
-                competitors.forEach((competitor, index) => {
-                    const accountId = competitor.gameAccountReference?.accountId
-                    const teamNumber = competitor.teamNumber
-
-                    if (accountId) {
-                        // 임시 플레이어 생성 (나중에 클라이언트 연결 시 실제 플레이어로 교체)
-                        const tempPlayer = new Player({
-                            userId: `Player_${index + 1}`, // nickName과 같게 설정 (웹훅용)
-                            nickName: `Player_${index + 1}`, // 임시 닉네임
-                            isGuest: false,
-                            teamNumber:
-                                typeof teamNumber === 'string'
-                                    ? parseInt(teamNumber, 10)
-                                    : teamNumber !== undefined
-                                      ? teamNumber
-                                      : index,
-                            accountId: accountId,
-                        })
-
-                        // 기본 캐릭터 타입 설정 (Unknown character type 에러 방지)
-                        tempPlayer.updateCharType(1) // RABBIT
-
-                        waitingRoom.addPlayer(tempPlayer)
-                        console.log(
-                            `✅ 임시 플레이어 생성: accountId=${accountId}, teamNumber=${tempPlayer.teamNumber}, nickName=${tempPlayer.nickName}`
-                        )
-                    }
-                })
-            }
-
+        // waitingRoom이 null이면 새로운 대기실 생성
+        if (!waitingRoom) {
             console.log(
-                '매핑 후 플레이어들:',
-                waitingRoom.players.map((p) => ({
-                    userId: p.userId,
-                    nickName: p.nickName,
-                    teamNumber: p.teamNumber,
-                    accountId: p.accountId,
-                }))
+                `새로운 대기실 생성: gameSessionId=${challengermodeGameSessionId}`
             )
+            waitingRoom = new Room({})
+            waitingRoom.gameSessionId = challengermodeGameSessionId
+            waitingRoom.isChallengermodeGame = true
+            roomService.roomPool.waitingRoom = waitingRoom
+        } else {
+            // 기존 대기실이 있으면 플레이어 목록 초기화 (중복 방지)
+            console.log(
+                `기존 대기실 사용: gameSessionId=${challengermodeGameSessionId}, 기존 플레이어 수=${waitingRoom.players.length}`
+            )
+            waitingRoom.players = [] // 플레이어 목록 초기화
         }
 
-        // 4. sessionId를 대기 목록에 추가 (클라이언트 연결 대기)
-        pendingSessionService.addPendingSession(
-            challengermodeGameSessionId,
-            challengermodeGameSessionId,
-            waitingRoom.roomId
-        )
-
-        // 5. 기존 startGame 로직과 동일하게 게임 시작
+        await handleCompetitorsMapping(waitingRoom, competitors)
+        await setupPendingSession(challengermodeGameSessionId, waitingRoom)
         await roomService.startGame(waitingRoom)
 
-        // 6. 응답 생성 (GameSession 형태)
-        const response = {
-            state: 2, // Created (게임 세션 생성 완료)
-            gameTag: {
-                gameSessionId: challengermodeGameSessionId,
-            },
-            competitors: waitingRoom.players.map((player) => ({
-                gameAccountReference: {
-                    accountId: player.accountId || player.userId, // accountId가 있으면 사용, 없으면 userId 사용
-                },
-                teamNumber: player.teamNumber, // 할당된 teamNumber 사용
-            })),
-            dateStarted: new Date().toISOString(),
-        }
-
+        const response = createGameSessionResponse(
+            waitingRoom,
+            challengermodeGameSessionId
+        )
         console.log('게임 세션 생성 응답:', response)
         res.json(response)
     } catch (error) {

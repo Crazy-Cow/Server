@@ -165,20 +165,18 @@ export const tournamentInUserController = async (
             authorizationCode: string
             codeVerifier: string
             redirectUri: string
+            sessionId?: string // 추가: 게임 세션 ID (선택적)
         }
     >,
     res: Response<TournamentInResponse | ErrorResponse>
 ) => {
-    const { nickName, authorizationCode, codeVerifier, redirectUri } = req.body
-
-    if (!nickName || !authorizationCode || !codeVerifier || !redirectUri) {
-        res.status(400).json(
-            createErrorRes({
-                msg: '[nickName|authorizationCode|codeVerifier|redirectUri] 필드 확인',
-            })
-        )
-        return
-    }
+    const {
+        nickName,
+        authorizationCode,
+        codeVerifier,
+        redirectUri,
+        sessionId,
+    } = req.body
 
     try {
         // 1. Challengermode OAuth 토큰 교환
@@ -193,6 +191,22 @@ export const tournamentInUserController = async (
             tokenResponse.access_token
         )
 
+        // sessionId가 있으면 기존 게임 세션에 참여하는 경우
+        if (sessionId) {
+            console.log(
+                `기존 게임 세션 참여: sessionId=${sessionId}, accountId=${userInfo.sub}`
+            )
+
+            res.status(200).json({
+                userId: userInfo.nickname,
+                accountId: userInfo.sub,
+                linked: true,
+                sessionId: sessionId,
+            })
+            return
+        }
+
+        // sessionId가 없으면 새 토너먼트 사용자 등록
         // 3. 닉네임 중복 체크
         const duplicated = await userService.checkDupNick(nickName)
         if (duplicated) {
