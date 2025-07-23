@@ -5,8 +5,10 @@ import { ItemType } from '../../game/objects/item'
 
 export type EmitEventName =
     | 'room.changeState' // 대기실 상태 변경
+    | 'room.launchGame.response' // room.launchGame 응답
     | 'game.ready' // 게임 곧 시작
     | 'game.start' // 게임 시작
+    | 'game.join' // 이미 시작된 게임에 참여
     | 'game.state' // v2 게임 상태
     | 'game.log.steal' // 로그 - 스틸
     | 'game.log.steal-combo' // 로그 - 스틸 콤보
@@ -19,8 +21,17 @@ type EmitEventDataMap = {
         playerCnt: number
         maxPlayerCnt: number
     }
+    'room.launchGame.response': {
+        userId: string
+        nickName: string
+        isGuest: boolean
+    }
     'game.ready': undefined
     'game.start': undefined
+    'game.join': {
+        roomId: string
+        gameSessionId: string
+    }
     'game.state': SocketEmitEvtDataGameState
     'game.log.steal': SocketEmitEvtDataGameLogSteal
     'game.log.steal-combo': SocketEmitEvtDataGameLogStealCombo

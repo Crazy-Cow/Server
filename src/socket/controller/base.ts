@@ -14,6 +14,7 @@ export abstract class BaseController {
         const userId = socket.data.clientId
         const nickName = socket.data.nickName
         const isGuest = socket.data.isGuest
+
         this.player = new Player({ userId, nickName, isGuest })
         this.roomId = socket.data.roomId
     }

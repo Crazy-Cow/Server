@@ -11,14 +11,6 @@ class UserService {
         return this.instance
     }
 
-    findUser(nickName: string, password: string) {
-        return userRepository.findOne({ nickName, password })
-    }
-
-    addUser(nickName: string, password: string) {
-        return userRepository.create({ nickName, password })
-    }
-
     addGuestNick(token: string) {
         return guestRepository.addNick(token)
     }
@@ -31,6 +23,29 @@ class UserService {
         if (duplicatedInUser) return true
 
         return false
+    }
+
+    addTournamentUser(
+        token: string,
+        challengermodeId: string,
+        nickName: string,
+        pictureUrl?: string
+    ) {
+        return userRepository.createTournamentUser({
+            token,
+            challengermodeId,
+            isTournament: true,
+            nickName,
+            pictureUrl,
+        })
+    }
+
+    async getUserByChallengermodeId(challengermodeId: string) {
+        return userRepository.getUserByChallengermodeId({ challengermodeId })
+    }
+
+    async getUserByNickName(nickName: string) {
+        return userRepository.getUserByNickName({ nickName })
     }
 }
 

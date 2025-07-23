@@ -1,39 +1,56 @@
 import UserModel from '../schemas/user'
-import { comparePassword, encryptPassword } from '../../../utils/encrypt'
-
-const create = async (props: { nickName: string; password: string }) => {
-    const encrypted = await encryptPassword(props.password)
-    const user = new UserModel({
-        nickName: props.nickName,
-        hashedPassword: encrypted,
-    })
-
-    await user.save()
-}
 
 const checkDupNick = async (props: { nickName: string }) => {
     const user = await UserModel.findOne({ nickName: props.nickName })
     return Boolean(user)
 }
 
-const findOne = async (props: { nickName: string; password: string }) => {
-    const user = await UserModel.findOne({ nickName: props.nickName })
-    const valid = await comparePassword(props.password, user.hashedPassword)
+const createTournamentUser = async (props: {
+    token: string
+    challengermodeId: string
+    isTournament: boolean
+    nickName: string
+    pictureUrl?: string
+}) => {
+    const user = new UserModel({
+        token: props.token,
+        challengermodeId: props.challengermodeId,
+        isTournament: props.isTournament,
+        nickName: props.nickName,
+        pictureUrl: props.pictureUrl,
+    })
 
-    if (valid) return user
-    else return null
+    await user.save()
+}
+
+const getUserByChallengermodeId = async (props: {
+    challengermodeId: string
+}) => {
+    const user = await UserModel.findOne({
+        challengermodeId: props.challengermodeId,
+    })
+    return user
+}
+
+const getUserByNickName = async (props: { nickName: string }) => {
+    const user = await UserModel.findOne({
+        nickName: props.nickName,
+    })
+    return user
 }
 
 export type UserRepository = {
-    create: typeof create
-    findOne: typeof findOne
     checkDupNick: typeof checkDupNick
+    createTournamentUser: typeof createTournamentUser
+    getUserByChallengermodeId: typeof getUserByChallengermodeId
+    getUserByNickName: typeof getUserByNickName
 }
 
 const userRepository: UserRepository = {
-    create,
-    findOne,
     checkDupNick,
+    createTournamentUser,
+    getUserByChallengermodeId,
+    getUserByNickName,
 }
 
 export default userRepository

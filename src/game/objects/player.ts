@@ -8,6 +8,7 @@ export type CharacterCommonProps = {
     nickName: string
     position: Position
     color: string
+    accountId?: string // Optional field for Challengermode account ID
 }
 
 type CharacterExtraProps = {
