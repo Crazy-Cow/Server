@@ -84,8 +84,13 @@ export class Room {
     }
 
     canStartGame = (): boolean => {
-        const cond1 = this.isFull()
+        // KEM 게임이 아닌 경우 2명 이상이면 시작 가능
+        if (!this.isChallengermodeGame) {
+            return this.getPlayerCnt() >= 2
+        }
 
+        // KEM 게임인 경우 maxPlayerCnt에 도달했을 때만 시작
+        const cond1 = this.isFull()
         if (cond1) {
             return true
         }
@@ -436,10 +441,18 @@ class RoomService {
     }
 
     async startGame(room: Room) {
+        // 게임 시작 전 대기실 roomId를 저장
+        const waitingRoomId = room.roomId
+
         this.prepareRoomForGame(room)
         await this.handleChallengermodeReporting(room)
         await this.initializeGame(room)
         this.scheduleGameStart(room)
+
+        // 웹훅으로 시작된 게임인 경우, 대기실에 있던 클라이언트들을 새로운 게임방으로 이동
+        if (room.isChallengermodeGame) {
+            this.moveWaitingClientsToGameRoom(room, waitingRoomId)
+        }
     }
 
     private prepareRoomForGame(room: Room) {
@@ -447,6 +460,21 @@ class RoomService {
         this.roomPool.gameRooms.push(room)
         this.clearWaitingTimeout(room)
         this.handleWaitingRoomReplacement(room)
+    }
+
+    // 대기실에 있던 클라이언트들을 새로운 게임방으로 이동
+    private moveWaitingClientsToGameRoom(
+        gameRoom: Room,
+        waitingRoomId: string
+    ) {
+        const io = getIO()
+
+        // 대기실에 있는 모든 소켓을 새로운 게임방으로 이동
+        io.in(waitingRoomId).socketsJoin(gameRoom.roomId)
+
+        console.log(
+            `✅ 대기실 클라이언트들을 게임방으로 이동: ${waitingRoomId} → ${gameRoom.roomId}`
+        )
     }
 
     private clearWaitingTimeout(room: Room) {
@@ -524,6 +552,11 @@ class RoomService {
 
         const io = getIO()
         io.to(room.roomId).emit('game.over', data)
+
+        // 게임 결과를 보여주는 시간을 주고 나서 세션 정리 (5초 후)
+        setTimeout(() => {
+            this.endGame(room)
+        }, 2000)
     }
 
     leaveRoom(userId: string) {
@@ -531,7 +564,22 @@ class RoomService {
     }
 
     endGame(room: Room) {
+        // 플레이어들의 Redis 캐시 정리
+        room.players.forEach(async (player) => {
+            try {
+                await gameRoomRepository.resetGameRoomId(player.userId)
+            } catch (error) {
+                console.error(
+                    `Redis 캐시 삭제 실패 - userId: ${player.userId}`,
+                    error
+                )
+            }
+        })
+
+        // 게임방 삭제
         this.roomPool.deleteGameRoom(room)
+
+        console.log(`게임방 정리 완료 - Room: ${room.roomId}`)
     }
 
     async getGameRoomIdByUserId(userId: string) {
