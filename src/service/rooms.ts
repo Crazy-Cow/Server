@@ -564,6 +564,8 @@ class RoomService {
     }
 
     endGame(room: Room) {
+        const io = getIO()
+
         // 플레이어들의 Redis 캐시 정리
         room.players.forEach(async (player) => {
             try {
@@ -575,6 +577,9 @@ class RoomService {
                 )
             }
         })
+
+        // 게임방에서 모든 클라이언트 제거
+        io.in(room.roomId).disconnectSockets()
 
         // 게임방 삭제
         this.roomPool.deleteGameRoom(room)
