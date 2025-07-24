@@ -486,9 +486,20 @@ class RoomService {
 
     private handleWaitingRoomReplacement(room: Room) {
         if (!room.isChallengermodeGame) {
+            this.roomPool.waitingRoom.gameMap = new TailTagMap({
+                roomId: this.roomPool.waitingRoom.roomId,
+                remainRunningTime: 30,
+            })
             this.roomPool.waitingRoom = new Room({})
+        } else {
+            // KEM 게임인 경우 대기실은 유지하되 gameMap은 초기화
+            // gameMap을 새로 생성하여 캐릭터 중복 방지
+            this.roomPool.waitingRoom.gameMap = new TailTagMap({
+                roomId: this.roomPool.waitingRoom.roomId,
+                remainRunningTime: 30,
+            })
+            console.log('✅ KEM 게임 시작 후 gameMap 초기화')
         }
-        // KEM 게임인 경우 대기실 유지 (webhook으로 시작된 게임이므로)
     }
 
     private async handleChallengermodeReporting(room: Room) {
@@ -583,6 +594,14 @@ class RoomService {
 
         // 게임방 삭제
         this.roomPool.deleteGameRoom(room)
+
+        // KEM 게임이 종료된 경우 대기실도 정리
+        if (room.isChallengermodeGame) {
+            this.roomPool.waitingRoom.players = []
+            this.roomPool.waitingRoom.gameSessionId = null
+            this.roomPool.waitingRoom.isChallengermodeGame = false
+            console.log('✅ KEM 게임 종료 후 대기실 플레이어 목록 초기화')
+        }
 
         console.log(`게임방 정리 완료 - Room: ${room.roomId}`)
     }
