@@ -122,22 +122,6 @@ async function getGameAccountInfo(accountId: string) {
     }
 }
 
-// Challengermode API에서 사용자 정보 조회 (Bot access token 사용)
-async function getChallengermodeUserInfo(accountId: string) {
-    try {
-        // Bot access token으로는 특정 사용자 정보를 조회할 수 없으므로
-        // accountId를 nickname으로 사용하고, 나중에 OAuth 로그인 시 실제 정보로 업데이트
-        return {
-            accountId: accountId,
-            nickname: `User_${accountId.slice(-8)}`, // accountId의 마지막 8자리 사용
-            profileImageUrl: null,
-        }
-    } catch (error) {
-        console.error('Challengermode 사용자 정보 조회 실패:', error)
-        return null
-    }
-}
-
 // Challengermode get-game-account webhook 핸들러
 export async function challengermodeGameAccountWebhook(
     req: Request,
@@ -255,10 +239,10 @@ async function createTempPlayer(
     teamNumber: number | string | undefined,
     index: number
 ): Promise<Player> {
-    const userInfo = await getChallengermodeUserInfo(accountId)
+    const gameAccount = await getGameAccountInfo(accountId)
     const tempPlayer = new Player({
-        userId: userInfo?.nickname || `Player_${index + 1}`,
-        nickName: userInfo?.nickname || `Player_${index + 1}`,
+        userId: gameAccount?.displayName || `Player_${index + 1}`,
+        nickName: gameAccount?.displayName || `Player_${index + 1}`,
         isGuest: false,
         teamNumber: parseTeamNumber(teamNumber, index),
         accountId: accountId,
@@ -405,10 +389,12 @@ export async function challengermodeCreateGameSessionWebhook(
             console.log(
                 `새로운 대기실 생성: gameSessionId=${challengermodeGameSessionId}`
             )
-            waitingRoom = new Room({})
-            waitingRoom.gameSessionId = challengermodeGameSessionId
-            waitingRoom.isChallengermodeGame = true
-            roomService.roomPool.waitingRoom = waitingRoom
+            // 기존 대기실의 roomId를 보존하기 위해 새로운 Room 객체를 생성하지 않고 기존 것을 재사용
+            const existingWaitingRoom = roomService.roomPool.waitingRoom
+            existingWaitingRoom.gameSessionId = challengermodeGameSessionId
+            existingWaitingRoom.isChallengermodeGame = true
+            existingWaitingRoom.players = [] // 플레이어 목록 초기화
+            waitingRoom = existingWaitingRoom
         } else {
             // 기존 대기실이 있으면 플레이어 목록 초기화 (중복 방지)
             console.log(
