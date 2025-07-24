@@ -485,20 +485,12 @@ class RoomService {
     }
 
     private handleWaitingRoomReplacement(room: Room) {
+        this.roomPool.waitingRoom.gameMap = new TailTagMap({
+            roomId: this.roomPool.waitingRoom.roomId,
+            remainRunningTime: 30,
+        })
         if (!room.isChallengermodeGame) {
-            this.roomPool.waitingRoom.gameMap = new TailTagMap({
-                roomId: this.roomPool.waitingRoom.roomId,
-                remainRunningTime: 30,
-            })
             this.roomPool.waitingRoom = new Room({})
-        } else {
-            // KEM 게임인 경우 대기실은 유지하되 gameMap은 초기화
-            // gameMap을 새로 생성하여 캐릭터 중복 방지
-            this.roomPool.waitingRoom.gameMap = new TailTagMap({
-                roomId: this.roomPool.waitingRoom.roomId,
-                remainRunningTime: 30,
-            })
-            console.log('✅ KEM 게임 시작 후 gameMap 초기화')
         }
     }
 
