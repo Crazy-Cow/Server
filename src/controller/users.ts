@@ -135,7 +135,7 @@ async function exchangeChallengermodeToken(
 async function getChallengermodeUserInfo(accessToken: string) {
     // Public API 사용 - 올바른 엔드포인트
     const response = await fetch(
-        'https://publicapi.challengermode.com/mk1/v1/me/userinfo',
+        'https://cm-stage-g.challengermode.com:2083/mk1/v1/me/userinfo',
         {
             method: 'GET',
             headers: {
@@ -235,7 +235,7 @@ export const tournamentInUserController = async (
         // 5. Challengermode 계정 연동(verification) API 호출
         // 1) Verification Token 생성
         const verificationTokenRes = await fetch(
-            `https://publicapi.challengermode.com/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/generate_verification_token`,
+            `https://cm-stage-g.challengermode.com:2083/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/generate_verification_token`,
             {
                 method: 'POST',
                 headers: {
@@ -257,7 +257,7 @@ export const tournamentInUserController = async (
         // 2) Verify Game Account
         const botAccessKey = await getBotAccessToken()
         const verifyRes = await fetch(
-            `https://publicapi.challengermode.com/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/verify`,
+            `https://cm-stage-g.challengermode.com:2083/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/verify`,
             {
                 method: 'POST',
                 headers: {
@@ -332,7 +332,7 @@ export const verifyGameAccountController = async (
 
         // 3. Challengermode verify-game-account 엔드포인트 호출
         const verifyResponse = await fetch(
-            `https://publicapi.challengermode.com/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/verify`,
+            `https://cm-stage-g.challengermode.com:2083/mk1/v1/game_integrations/${process.env.CHALLENGERMODE_GAME_INTEGRATION_ID}/link_account/verify`,
             {
                 method: 'POST',
                 headers: {

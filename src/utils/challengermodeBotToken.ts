@@ -1,6 +1,6 @@
 const REFRESH_KEY = process.env.CHALLENGERMODE_BOT_REFRESH_KEY
 const ACCESS_KEY_ENDPOINT =
-    'https://publicapi.challengermode.com/mk1/v1/auth/access_keys'
+    'https://cm-stage-g.challengermode.com:2083/mk1/v1/auth/access_keys'
 
 let cachedToken: string | null = null
 let expiresAt: number | null = null
