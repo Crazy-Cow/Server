@@ -70,7 +70,7 @@ class ChallengermodeService {
 
         try {
             const accessToken = await getBotAccessToken()
-            const url = `https://publicapi.challengermode.com/mk1/v1/game_integrations/${this.gameIntegrationId}/game_sessions/${this.gameSessionId}`
+            const url = `https://cm-stage-g.challengermode.com:2083/mk1/v1/game_integrations/${this.gameIntegrationId}/game_sessions/${this.gameSessionId}`
 
             const response = await fetch(url, {
                 method: 'POST',
