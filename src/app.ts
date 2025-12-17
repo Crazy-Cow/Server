@@ -18,22 +18,22 @@ app.use(cors(corsOption))
 app.use(cookieParser())
 app.use(express.json())
 
-app.use('/dev/user', routes.user)
-app.use('/dev/game', routes.game)
+app.use('/user', routes.user)
+app.use('/game', routes.game)
 app.post(
-    '/dev/webhook/challengermode/env-dev/get-game-account',
+    '/webhook/challengermode/env-dev/get-game-account',
     (req, res, next) => {
         routes.challengermodeGameAccountWebhook(req, res).catch(next)
     }
 )
 app.post(
-    '/dev/webhook/challengermode/env-dev/create-game-session',
+    '/webhook/challengermode/env-dev/create-game-session',
     (req, res, next) => {
         routes.challengermodeCreateGameSessionWebhook(req, res).catch(next)
     }
 )
 app.post(
-    '/dev/webhook/challengermode/env-dev/get-game-session',
+    '/webhook/challengermode/env-dev/get-game-session',
     (req, res, next) => {
         routes.challengermodeGetGameSessionWebhook(req, res).catch(next)
     }
