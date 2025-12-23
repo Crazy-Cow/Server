@@ -103,20 +103,23 @@ async function exchangeChallengermodeToken(
         throw new Error('Challengermode 환경변수가 설정되지 않았습니다')
     }
 
-    const response = await fetch('https://challengermode.com/oauth/token', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-            grant_type: 'authorization_code',
-            code_verifier: codeVerifier,
-            code: code,
-            client_id: CHALLENGERMODE_CLIENT_ID,
-            client_secret: CHALLENGERMODE_CLIENT_SECRET,
-            redirect_uri: redirectUri,
-        }),
-    })
+    const response = await fetch(
+        'https://dev-esports.krafton.com/oauth/token',
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                grant_type: 'authorization_code',
+                code_verifier: codeVerifier,
+                code: code,
+                client_id: CHALLENGERMODE_CLIENT_ID,
+                client_secret: CHALLENGERMODE_CLIENT_SECRET,
+                redirect_uri: redirectUri,
+            }),
+        }
+    )
 
     if (!response.ok) {
         const errorText = await response.text()
