@@ -123,11 +123,15 @@ async function exchangeChallengermodeToken(
 
     if (!response.ok) {
         const errorText = await response.text()
-        console.error(
-            'Challengermode 토큰 교환 실패:',
-            response.status,
-            errorText
-        )
+        console.error('=== OAuth Token Exchange Error ===')
+        console.error('Status:', response.status)
+        console.error('Response:', errorText)
+        console.error('Request details:', {
+            endpoint: 'https://dev-esports.krafton.com/oauth/token',
+            client_id: CHALLENGERMODE_CLIENT_ID,
+            redirect_uri: redirectUri,
+            code_length: code.length,
+        })
         throw new Error(`토큰 교환 실패: ${response.status}`)
     }
 
